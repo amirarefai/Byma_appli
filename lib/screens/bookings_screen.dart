@@ -171,7 +171,26 @@ class _BookingsScreenState extends State<BookingsScreen> {
         onTabSelected: (tab) {
           if (tab == BymaBottomNavTab.home) {
             Navigator.maybePop(context);
+            return;
           }
+
+          if (tab == BymaBottomNavTab.chat) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const BymaChatScreen()),
+            );
+            return;
+          }
+
+          if (tab == BymaBottomNavTab.profile) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SettingsRefinedScreen()),
+            );
+            return;
+          }
+
+          // tab == bookings: stay on this screen
         },
       ),
 

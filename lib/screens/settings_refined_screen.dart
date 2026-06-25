@@ -1,5 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+import 'bookings_screen.dart';
+import 'messages_final_navigation.dart';
+import 'main_layout_screen.dart';
 import 'profile_security_updated.dart';
+import 'wallet_rewards_screen.dart';
+import 'favorites_screen.dart';
+import '../widgets/byma_bottom_nav.dart';
 
 class SettingsRefinedScreen extends StatefulWidget {
   const SettingsRefinedScreen({super.key});
@@ -10,6 +20,18 @@ class SettingsRefinedScreen extends StatefulWidget {
 
 class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
   bool _themeOn = false;
+  XFile? _avatarXFile;
+
+  Future<void> _pickAvatar(ImageSource source) async {
+    final picker = ImagePicker();
+    final xfile = await picker.pickImage(source: source);
+    if (!mounted) return;
+    if (xfile == null) return;
+
+    setState(() {
+      _avatarXFile = xfile;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,9 +39,40 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
 
     return Scaffold(
       backgroundColor: bg,
+      // موجود دائماً "آخر الواجهة" حتى لو فتحت SettingsRefinedScreen من أي مكان
+      bottomNavigationBar: BymaBottomNav(
+        activeTab: BymaBottomNavTab.profile,
+        onTabSelected: (tab) {
+          if (tab == BymaBottomNavTab.bookings) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const BookingsScreen()),
+            );
+            return;
+          }
+          if (tab == BymaBottomNavTab.chat) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const BymaChatScreen()),
+            );
+            return;
+          }
+          if (tab == BymaBottomNavTab.profile) {
+            return; // نفس الصفحة
+          }
+          if (tab == BymaBottomNavTab.home) {
+            // Home بتنقلك للـ layout اللي فيه الـ BottomNav ويدير الـ tabs
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const MainLayoutScreen()),
+            );
+            return;
+          }
+        },
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -80,51 +133,91 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(18),
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Color(0xFF0B2B3A),
-                                Color(0xFF0D3A4E),
-                              ],
-                            ),
-                          ),
-                          child: const Center(
-                            child: SizedBox(
-                              width: 54,
-                              height: 70,
-                            ),
-                          ),
-                        ),
+                        child: _avatarXFile == null
+                            ? Container(
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Color(0xFF0B2B3A),
+                                      Color(0xFF0D3A4E),
+                                    ],
+                                  ),
+                                ),
+                                child: const Center(
+                                  child: SizedBox(
+                                    width: 54,
+                                    height: 70,
+                                  ),
+                                ),
+                              )
+                            : ClipRRect(
+                                borderRadius: BorderRadius.circular(18),
+                                child: Image.file(
+                                  File(_avatarXFile!.path),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                       ),
                     ),
                     Positioned(
                       right: -6,
                       bottom: 26,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFF4FC3C9),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF4FC3C9).withOpacity(0.35),
-                              blurRadius: 14,
-                              offset: const Offset(0, 6),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(999),
+                        onTap: () {
+                          showDialog<void>(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Change photo'),
+                              content: const Text('Select from Camera or Gallery'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () async {
+                                    Navigator.of(ctx).pop();
+                                    await _pickAvatar(ImageSource.camera);
+                                  },
+                                  child: const Text('Camera'),
+                                ),
+                                TextButton(
+                                  onPressed: () async {
+                                    Navigator.of(ctx).pop();
+                                    await _pickAvatar(ImageSource.gallery);
+                                  },
+                                  child: const Text('Gallery'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.of(ctx).pop(),
+                                  child: const Text('Cancel'),
+                                ),
+                              ],
                             ),
-                          ],
-                          border: Border.all(
-                            width: 3,
-                            color: bg,
+                          );
+                        },
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0xFF4FC3C9),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF4FC3C9).withOpacity(0.35),
+                                blurRadius: 14,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                            border: Border.all(
+                              width: 3,
+                              color: bg,
+                            ),
                           ),
-                        ),
-                        child: const Icon(
-                          Icons.edit,
-                          size: 18,
-                          color: Color(0xFF08313F),
+                          child: const Icon(
+                            Icons.edit,
+                            size: 18,
+                            color: Color(0xFF08313F),
+                          ),
                         ),
                       ),
                     ),
@@ -198,7 +291,7 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
               _SectionTitle(title: 'Manage Experience'),
               const SizedBox(height: 10),
 
-              _ActionGroup(
+                  _ActionGroup(
                 items: [
                   _SettingRow(
                     leading: _CircleIcon(
@@ -208,7 +301,13 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                     ),
                     title: 'Favorites',
                     trailingIcon: Icons.chevron_right,
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const FavoritesScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const _SettingDivider(),
                   _SettingRow(
@@ -220,7 +319,13 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                     title: 'Payment & Wallet',
                     subtitle: 'VISA •• 42',
                     trailingIcon: Icons.chevron_right,
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const WalletRewardsScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -406,7 +511,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 82,
+      height: 90,
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.55),
         borderRadius: BorderRadius.circular(18),

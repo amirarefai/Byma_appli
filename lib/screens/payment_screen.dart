@@ -74,7 +74,7 @@ class _FinalizeReservationScreenState extends State<FinalizeReservationScreen> {
 
                   _PaymentOption(
                     index: 0,
-                    selected: _selectedPayment == 0,
+                    selectedIndex: _selectedPayment,
                     title: 'PAY AT ARRIVAL',
                     subtitle: 'NO PREPAYMENT NEEDED',
                     iconBackground: teal,
@@ -84,7 +84,7 @@ class _FinalizeReservationScreenState extends State<FinalizeReservationScreen> {
                   const SizedBox(height: 14),
                   _PaymentOption(
                     index: 1,
-                    selected: _selectedPayment == 1,
+                    selectedIndex: _selectedPayment,
                     title: 'BANK TRANSFER',
                     subtitle: '1–2 BUSINESS DAYS',
                     iconBackground: const Color(0xFF0E6F63),
@@ -94,7 +94,7 @@ class _FinalizeReservationScreenState extends State<FinalizeReservationScreen> {
                   const SizedBox(height: 14),
                   _PaymentOption(
                     index: 2,
-                    selected: _selectedPayment == 2,
+                    selectedIndex: _selectedPayment,
                     title: 'SHAM CASH',
                     subtitle: 'INSTANT WALLET TRANSFER',
                     iconBackground: const Color(0xFF2A3D4B),
@@ -104,7 +104,7 @@ class _FinalizeReservationScreenState extends State<FinalizeReservationScreen> {
                   const SizedBox(height: 14),
                   _PaymentOption(
                     index: 3,
-                    selected: _selectedPayment == 3,
+                    selectedIndex: _selectedPayment,
                     title: 'MONEY TRANSFER\nCOMPANIES',
                     subtitle: 'GLOBAL REACH',
                     iconBackground: const Color(0xFF71D3FF),
@@ -114,7 +114,7 @@ class _FinalizeReservationScreenState extends State<FinalizeReservationScreen> {
                   const SizedBox(height: 14),
                   _PaymentOption(
                     index: 4,
-                    selected: _selectedPayment == 4,
+                    selectedIndex: _selectedPayment,
                     title: 'MY WALLET',
                     subtitle: 'USE YOUR AVAILABLE BALANCE',
                     iconBackground: teal,
@@ -142,20 +142,9 @@ class _FinalizeReservationScreenState extends State<FinalizeReservationScreen> {
                         activeColor: teal2,
                       ),
                       Expanded(
-                        child: Wrap(
-                          children: [
-                            const Text('I agree to the '),
-                            TextButton(
-                              onPressed: () {},
-                              child: const Text('Booking Policies', style: TextStyle(color: Color(0xFF2F8BFF))),
-                            ),
-                            const Text(' and '),
-                            TextButton(
-                              onPressed: () {},
-                              child: const Text('Cancellation Terms', style: TextStyle(color: Color(0xFF2F8BFF))),
-                            ),
-                            const Text('.'),
-                          ],
+                        child: const Text(
+                          'I agree to the Booking Policies and Cancellation Terms.',
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     ],
@@ -202,7 +191,7 @@ class _FinalizeReservationScreenState extends State<FinalizeReservationScreen> {
 
 class _PaymentOption extends StatelessWidget {
   final int index;
-  final bool selected;
+  final int selectedIndex;
   final String title;
   final String subtitle;
   final Color iconBackground;
@@ -211,7 +200,7 @@ class _PaymentOption extends StatelessWidget {
 
   const _PaymentOption({
     required this.index,
-    required this.selected,
+    required this.selectedIndex,
     required this.title,
     required this.subtitle,
     required this.iconBackground,
@@ -270,8 +259,13 @@ class _PaymentOption extends StatelessWidget {
             ),
             Radio<int>(
               value: index,
-              groupValue: selected ? index : -1,
-              onChanged: (_) {},
+              groupValue: selectedIndex,
+              onChanged: (_) {
+                final state = context.findAncestorStateOfType<_FinalizeReservationScreenState>();
+                if (state != null) {
+                  state.setState(() => state._selectedPayment = index);
+                }
+              },
               activeColor: const Color(0xFF0FA37A),
             ),
           ],

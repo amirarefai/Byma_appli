@@ -165,54 +165,66 @@ class _ReserveYourStayScreenState extends State<ReserveYourStayScreen> {
 
             const SizedBox(height: 16),
 
-            // Available windows row
-            Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Available Windows',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 18,
-                      color: Color(0xFF0E6F63),
-                    ),
+            // Available windows (framed)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: cardBorder),
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: Column(
+                children: [
+                  // Available windows row
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'Available Windows',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 18,
+                            color: Color(0xFF0E6F63),
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {},
+                        child: const Text(
+                          'View Calendar',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 12.5,
+                            color: Color(0xFF0E6F63),
+                          ),
+                        ),
+                      )
+                    ],
                   ),
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    'View Calendar',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12.5,
-                      color: Color(0xFF0E6F63),
-                    ),
-                  ),
-                )
-              ],
-            ),
+                  const SizedBox(height: 10),
 
-            const SizedBox(height: 10),
-
-            // Two date windows (static UI)
-            Row(
-              children: [
-                Expanded(
-                  child: _DateWindow(
-                    month: 'AUG',
-                    day: '12',
-                    selected: false,
+                  // Two date windows (static UI)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _DateWindow(
+                          month: 'AUG',
+                          day: '12',
+                          selected: false,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: _DateWindow(
+                          month: 'AUG',
+                          day: '15',
+                          selected: true,
+                        ),
+                      )
+                    ],
                   ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: _DateWindow(
-                    month: 'AUG',
-                    day: '15',
-                    selected: true,
-                  ),
-                )
-              ],
+                ],
+              ),
             ),
 
             const SizedBox(height: 10),
@@ -261,7 +273,7 @@ class _ReserveYourStayScreenState extends State<ReserveYourStayScreen> {
 
             // Recommended card
             _PerfectMatchCard(
-              title: 'Family Executive\nSuite',
+              title: 'Family Executive Suite',
               subtitle: 'Optimized for your selections with elevator access and child-proof amenities.',
             ),
           ],
@@ -717,7 +729,7 @@ class _PerfectMatchCard extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (_) => RoomDetailsScreen(
                           roomTitle: title.replaceAll('\n', ' '),
-                          pricePerNight: '450',
+                          pricePerNight: '\$450',
                         ),
                       ),
                     );

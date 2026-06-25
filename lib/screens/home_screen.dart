@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../constance/app_colors.dart';
+import '../state/favorites_scope.dart';
+import '../state/favorites_store.dart';
 import '../widgets/byma_bottom_nav.dart';
 import 'bookings_screen.dart';
 import 'messages_final_navigation.dart';
@@ -173,6 +175,7 @@ class HomeScreen extends StatelessWidget {
 
                     // 🚗 الكرت الأول المفرغ: Classic '67 Rental
                     _buildVerticalProductCard(
+                      context,
                       title: "Classic '67 Rental",
                       subtitle: "Pristine condition vintage experience",
                       price: "\$650",
@@ -185,6 +188,7 @@ class HomeScreen extends StatelessWidget {
 
                     // 🍳 الكرت الثاني المفرغ: Oslo Penthouse
                     _buildVerticalProductCard(
+                      context,
                       title: "Oslo Penthouse",
                       subtitle: "Sleek nordic design with harbor view",
                       price: "\$450",
@@ -197,6 +201,7 @@ class HomeScreen extends StatelessWidget {
 
                     // 🛥️ الكرت الثالث المفرغ: Azure Explorer
                     _buildVerticalProductCard(
+                      context,
                       title: "Azure Explorer",
                       subtitle: "Full crewed day charter in Ibiza",
                       price: "\$1,800",
@@ -385,16 +390,63 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
+                SizedBox(
                   height: 125,
                   width: 170,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEFF3F6),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: const Color(0xFFD9E2E8), width: 1.2),
-                  ),
-                  child: const Center(
-                    child: Icon(Icons.image_outlined, size: 30, color: Color(0xFFB7C3CB)),
+                  child: Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEFF3F6),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: const Color(0xFFD9E2E8), width: 1.2),
+                        ),
+                        child: const Center(
+                          child: Icon(Icons.image_outlined, size: 30, color: Color(0xFFB7C3CB)),
+                        ),
+                      ),
+                      Positioned(
+                        right: 10,
+                        top: 10,
+                        child: AnimatedBuilder(
+                          animation: FavoritesScope.of(context),
+                          builder: (context, _) {
+                            final id = item['title'] as String;
+                            final isFav = FavoritesScope.of(context).isFavorite(id);
+                            return InkWell(
+                              borderRadius: BorderRadius.circular(999),
+                              onTap: () {
+                                FavoritesScope.of(context).toggleFavorite(
+                                  FavoriteItem(
+                                    id: id,
+                                    title: id,
+                                    subtitle: id,
+                                    rating: '4.9',
+                                    fromText: '',
+                                    price: item['price'] as String,
+                                    ctaText: '',
+                                    imageAsset: '',
+                                    compactBadge: null,
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.75),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  isFav ? Icons.favorite_rounded : Icons.favorite_border,
+                                  color: isFav ? const Color(0xFF0FA37A) : const Color(0xFF0F4A42),
+                                  size: 20,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -510,7 +562,8 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildVerticalProductCard({
+  Widget _buildVerticalProductCard(
+    BuildContext context, {
     required String title,
     required String subtitle,
     required String price,
@@ -547,13 +600,41 @@ class HomeScreen extends StatelessWidget {
               Positioned(
                 top: 15,
                 right: 15,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.75),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.favorite_border, color: Color(0xFF0F4A42), size: 20),
+                child: AnimatedBuilder(
+                  animation: FavoritesScope.of(context),
+                  builder: (context, _) {
+                    final isFav = FavoritesScope.of(context).isFavorite(title);
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(999),
+                      onTap: () {
+                        FavoritesScope.of(context).toggleFavorite(
+                          FavoriteItem(
+                            id: title,
+                            title: title,
+                            subtitle: subtitle,
+                            rating: rating,
+                            fromText: '',
+                            price: price,
+                            ctaText: '',
+                            imageAsset: '',
+                            compactBadge: null,
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.75),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isFav ? Icons.favorite_rounded : Icons.favorite_border,
+                          color: isFav ? const Color(0xFF0FA37A) : const Color(0xFF0F4A42),
+                          size: 20,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'payment_screen.dart';
 
+import '../state/favorites_scope.dart';
+import '../state/favorites_store.dart';
+
 class RoomDetailsScreen extends StatelessWidget {
   final String roomTitle;
   final String pricePerNight;
@@ -65,6 +68,48 @@ class RoomDetailsScreen extends StatelessWidget {
                       top: 90,
                       child: _CircleArrow(icon: Icons.chevron_right),
                     ),
+
+                    // heart button inside photo
+                    Positioned(
+                      right: 14,
+                      top: 14,
+                      child: AnimatedBuilder(
+                        animation: FavoritesScope.of(context),
+                        builder: (context, _) {
+                          final store = FavoritesScope.of(context);
+                          final isFav = store.isFavorite(roomTitle);
+                          return GestureDetector(
+                            onTap: () {
+                              final item = FavoriteItem(
+                                id: roomTitle,
+                                title: roomTitle,
+                                subtitle: 'Room Details',
+                                rating: '4.9',
+                                fromText: '',
+                                price: '\$${pricePerNight.replaceAll(RegExp(r'[^0-9.]'), '')}/night',
+                                ctaText: '',
+                                imageAsset: '',
+                                compactBadge: null,
+                              );
+                              store.toggleFavorite(item);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.75),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                isFav ? Icons.favorite_rounded : Icons.favorite_border,
+                                color: teal,
+                                size: 20,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+
                     Positioned(
                       right: 14,
                       bottom: 14,
@@ -92,17 +137,25 @@ class RoomDetailsScreen extends StatelessWidget {
             const SizedBox(height: 14),
 
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(999),
                 color: const Color(0xFF2FE3CF).withOpacity(0.18),
+                border: Border.all(color: teal.withOpacity(0.18), width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
               child: const Text(
                 'PREMIUM EXPERIENCE',
                 style: TextStyle(
                   color: teal,
                   fontWeight: FontWeight.w900,
-                  fontSize: 10.5,
+                  fontSize: 11,
                   letterSpacing: 0.3,
                 ),
               ),
@@ -142,23 +195,44 @@ class RoomDetailsScreen extends StatelessWidget {
 
             const SizedBox(height: 14),
 
-            // Feature chips
-            Row(
-              children: [
-                _InfoChip(icon: Icons.person, text: '4 Guests'),
-                const SizedBox(width: 10),
-                _InfoChip(icon: Icons.square_foot, text: '85 m²'),
-                const SizedBox(width: 10),
-                _InfoChip(icon: Icons.king_bed, text: 'King Size'),
-              ],
+            // Feature chips (inside framed container)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: teal.withOpacity(0.22), width: 1.2),
+              ),
+              child: Row(
+                children: [
+                  _InfoChip(icon: Icons.person, text: '4 Guests'),
+                  const SizedBox(width: 10),
+                  _InfoChip(icon: Icons.square_foot, text: '85 m²'),
+                  const SizedBox(width: 10),
+                  _InfoChip(icon: Icons.king_bed, text: 'King Size'),
+                ],
+              ),
             ),
 
             const SizedBox(height: 14),
 
-            // Description
-            Text(
-              'Experience a synthesis of fluid architecture and unparalleled luxury. The Executive Suite at Grand Miramar offers curated sanctuary with panoramic ocean views and smart-living integration that adapts to your every mood.',
-              style: TextStyle(color: Colors.black54.withOpacity(0.95), height: 1.55, fontSize: 13.5, fontWeight: FontWeight.w600),
+            // Experience (framed)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: teal.withOpacity(0.35), width: 1.2),
+              ),
+              child: Text(
+                'Experience a synthesis of fluid architecture and unparalleled luxury. The Executive Suite at Grand Miramare offers curated sanctuary with panoramic ocean views and smart-living integration that adapts to your every mood.',
+                style: TextStyle(
+                  color: Colors.black54.withOpacity(0.95),
+                  height: 1.55,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
 
             const SizedBox(height: 20),
@@ -225,10 +299,10 @@ class RoomDetailsScreen extends StatelessWidget {
 
             const SizedBox(height: 18),
 
+            // Special Requests (framed with contact button inside one box)
             _SectionHeader(title: 'Special Requests', teal: teal),
             const SizedBox(height: 12),
 
-            // Special request card
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -236,57 +310,64 @@ class RoomDetailsScreen extends StatelessWidget {
                 border: Border.all(color: teal2.withOpacity(0.5), width: 1.2),
                 color: teal2.withOpacity(0.06),
               ),
-              child: Row(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CircleAvatar(
-                    backgroundColor: teal,
-                    radius: 24,
-                    child: Icon(Icons.info, color: Colors.white),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const CircleAvatar(
+                        backgroundColor: teal,
+                        radius: 24,
+                        child: Icon(Icons.info, color: Colors.white),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Text(
+                          'If you have any illnesses, allergies to certain fabrics, or need extra services, please contact hotel support.',
+                          style: TextStyle(
+                            color: Colors.black54.withOpacity(0.95),
+                            height: 1.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Text(
-                      'If you have any illnesses, allergies to certain fabrics, or need extra services, please contact hotel support.',
-                      style: TextStyle(color: Colors.black54.withOpacity(0.95), height: 1.5, fontWeight: FontWeight.w600),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    height: 52,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => FinalizeReservationScreen(
+                              roomTitle: roomTitle,
+                              pricePerNight: pricePerNight,
+                            ),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: teal,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Contact Hotel Support',
+                            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: Colors.white),
+                          ),
+                          SizedBox(width: 14),
+                          Icon(Icons.chat_bubble_outline_rounded, color: Colors.white),
+                        ],
+                      ),
                     ),
                   ),
                 ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Contact Hotel Support button
-            SizedBox(
-              height: 52,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => FinalizeReservationScreen(
-                        roomTitle: roomTitle,
-                        pricePerNight: pricePerNight,
-                      ),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: teal,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Contact Hotel Support',
-                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: Colors.white),
-                    ),
-                    SizedBox(width: 14),
-                    Icon(Icons.chat_bubble_outline_rounded, color: Colors.white),
-                  ],
-                ),
               ),
             ),
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../state/favorites_scope.dart';
+import '../state/favorites_store.dart';
 import 'reserve_your_stay_screen.dart';
 
 class HotelDetailsScreen extends StatelessWidget {
@@ -35,15 +37,39 @@ class HotelDetailsScreen extends StatelessWidget {
           'Hotel Details',
           style: TextStyle(fontWeight: FontWeight.w900, color: Colors.black87, fontSize: 16.5),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 14),
-            child: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.favorite_border_rounded, size: 22, color: teal2),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 14),
+              child: AnimatedBuilder(
+                animation: FavoritesScope.of(context),
+                builder: (context, _) {
+                  final isFav = FavoritesScope.of(context).isFavorite(title);
+                  return IconButton(
+                    onPressed: () {
+                      FavoritesScope.of(context).toggleFavorite(
+                          FavoriteItem(
+                            id: 'hotel:$imageUrl',
+                            title: 'Hotel',
+                            subtitle: 'Hotel',
+                          rating: '4.9',
+                          fromText: '',
+                          price: '',
+                          ctaText: '',
+                          imageAsset: '',
+                          compactBadge: null,
+                        ),
+                      );
+                    },
+                    icon: Icon(
+                      isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                      size: 22,
+                      color: isFav ? teal2 : Colors.black54,
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
       ),
       body: SafeArea(
         child: Stack(
@@ -258,12 +284,9 @@ class _HeroImage extends StatelessWidget {
         height: 235,
         decoration: BoxDecoration(
           border: Border.all(color: const Color(0xFFD9E2E8), width: 0.8),
-          image: DecorationImage(
-            image: NetworkImage(imageUrl),
-            fit: BoxFit.cover,
-          ),
+          // حذف الصور الفعلية: خلفية رمادية مثل الـ placeholder
           gradient: const LinearGradient(
-            colors: [Color(0xFF0B3E68), Color(0xFF0E7B6F)],
+            colors: [Color(0xFFF1F5F9), Color(0xFFE8EEF2)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -271,21 +294,89 @@ class _HeroImage extends StatelessWidget {
         child: Stack(
           children: [
             Positioned(
-              left: 18,
-              top: 14,
-              child: _PhotoProgressDots(teal2: teal2),
-            ),
-            Positioned(
               left: 16,
               top: 16,
+              child: AnimatedBuilder(
+                animation: FavoritesScope.of(context),
+                builder: (context, _) {
+                  final isFav = FavoritesScope.of(context).isFavorite('hotel:$imageUrl');
+                  return Container(
+                    width: 44,
+                    height: 44,
+                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () {
+                        FavoritesScope.of(context).toggleFavorite(
+                          FavoriteItem(
+                            id: 'hotel:$imageUrl',
+                            title: 'Hotel',
+                            subtitle: 'Hotel',
+                            rating: '4.9',
+                            fromText: '',
+                            price: '',
+                            ctaText: '',
+                            imageAsset: '',
+                            compactBadge: null,
+                          ),
+                        );
+                      },
+                      icon: Icon(
+                        isFav ? Icons.favorite_rounded : Icons.favorite_border,
+                        color: isFav ? teal2 : Colors.black54,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // أزرار جانبية على الصورة (مثل الأسهم/الكونترول الموجود بالصورة)
+            Positioned(
+              left: 16,
+              top: 98,
               child: Container(
-                width: 44,
-                height: 44,
-                decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.82),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   onPressed: () {},
-                  icon: const Icon(Icons.favorite_border, color: Colors.black54),
+                  icon: const Icon(Icons.chevron_left_rounded, color: Colors.black54, size: 22),
+                ),
+              ),
+            ),
+            Positioned(
+              right: 16,
+              top: 98,
+              child: Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.82),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () {},
+                  icon: const Icon(Icons.chevron_right_rounded, color: Colors.black54, size: 22),
                 ),
               ),
             ),
@@ -310,19 +401,7 @@ class _HeroImage extends StatelessWidget {
                 ),
               ),
             ),
-            // simple map pin decoration
-            Positioned(
-              right: 22,
-              top: 112,
-              child: Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: teal2.withOpacity(0.20),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
+            // تم حذف الدائرة الخضراء من واجهة الصور
           ],
         ),
       ),
@@ -411,15 +490,16 @@ class _PriceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(16),
-            ),
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: teal2.withOpacity(0.18), width: 1),
+      ),
+      child: Row(
+        children: [
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
@@ -434,26 +514,26 @@ class _PriceRow extends StatelessWidget {
               ],
             ),
           ),
-        ),
-        const SizedBox(width: 10),
-        SizedBox(
-          width: 130,
-          child: ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: teal2,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-            ),
-            child: const Text(
-              'AVAILABLE NOW',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11.5, color: Colors.white),
+          const SizedBox(width: 14),
+          SizedBox(
+            width: 130,
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: teal2,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+              child: const Text(
+                'AVAILABLE NOW',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11.5, color: Colors.white),
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

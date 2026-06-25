@@ -13,9 +13,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
   int _adults = 2;
   int _children = 0;
 
-  final Set<String> _roomPrefs = {
-    'Sea',
-  };
+ String _roomPrefs = '';
 
   String? _bedType = 'King';
   String? _floorPref = 'Mid';
@@ -206,15 +204,6 @@ class _FiltersScreenState extends State<FiltersScreen> {
     );
   }
 
-  void _toggleRoomPref(String pref) {
-    setState(() {
-      if (_roomPrefs.contains(pref)) {
-        _roomPrefs.remove(pref);
-      } else {
-        _roomPrefs.add(pref);
-      }
-    });
-  }
 
   Widget _guestCard({
     required String title,
@@ -360,9 +349,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
                         _priceRange = const RangeValues(120, 850);
                         _adults = 2;
                         _children = 0;
-                        _roomPrefs
-                          ..clear()
-                          ..add('Sea');
+                        _roomPrefs = 'Sea';
                         _privatePool = true;
                         _balcony = false;
                         _breakfastIncluded = false;
@@ -574,25 +561,31 @@ class _FiltersScreenState extends State<FiltersScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _circlePref(
-                        selected: _roomPrefs.contains('Sea'),
+                        selected: _roomPrefs == 'Sea',
                         label: 'Sea',
                         icon: Icons.waves,
                         selectedColor: const Color(0xFF7FE6D2),
-                        onTap: () => _toggleRoomPref('Sea'),
+                        onTap: () => setState(() {
+                          _roomPrefs = _roomPrefs == 'Sea' ? '' : 'Sea';
+                        }),
                       ),
                       _circlePref(
-                        selected: _roomPrefs.contains('Garden'),
+                        selected: _roomPrefs == 'Garden',
                         label: 'Garden',
                         icon: Icons.eco_outlined,
                         selectedColor: const Color(0xFF7FE6D2),
-                        onTap: () => _toggleRoomPref('Garden'),
+                        onTap: () => setState(() {
+                          _roomPrefs = _roomPrefs == 'Garden' ? '' : 'Garden';
+                        }),
                       ),
                       _circlePref(
-                        selected: _roomPrefs.contains('City'),
+                        selected: _roomPrefs == 'City',
                         label: 'City',
                         icon: Icons.location_city_outlined,
                         selectedColor: const Color(0xFF7FE6D2),
-                        onTap: () => _toggleRoomPref('City'),
+                        onTap: () => setState(() {
+                          _roomPrefs = _roomPrefs == 'City' ? '' : 'City';
+                        }),
                       ),
                     ],
                   ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // لتنسيق عرض التاريخ بشكل احترافي
 
 import '../constance/app_colors.dart';
+import '../state/favorites_scope.dart';
+import '../state/favorites_store.dart';
 import '../widgets/byma_bottom_nav.dart';
 import 'bookings_screen.dart';
 import 'main_layout_screen.dart';
@@ -27,11 +29,20 @@ class _HotelsScreenState extends State<HotelsScreen> {
   // قائمة المدن السورية المتاحة للاختيار
   final List<String> syrianCities = [
     'Damascus',
+    'Rif Dimashq',
     'Aleppo',
     'Lattakia',
     'Tartous',
     'Homs',
     'Hama',
+     'Daraa',
+  'As-Suwayda',
+  'Idlib',
+    'Raqqa',
+  'Deir ez-Zor',
+  'Al-Hasakah',
+  'Quneitra',
+
   ];
 
   // دالة إظهار قائمة المدن كمربع حوار (Dialog)
@@ -557,22 +568,72 @@ class _HotelsScreenState extends State<HotelsScreen> {
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(26), 
-            child: Image.asset(
-              imagePath,
-              height: 210, 
-              width: double.infinity,
-              fit: BoxFit.cover, 
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
+            borderRadius: BorderRadius.circular(26),
+            child: Stack(
+              children: [
+                SizedBox(
                   height: 210,
                   width: double.infinity,
-                  color: Colors.grey[200],
-                  child: const Center(
-                    child: Icon(Icons.image_not_supported_outlined, size: 56, color: Colors.grey),
+                  child: Image.asset(
+                    imagePath,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 210,
+                        width: double.infinity,
+                        color: Colors.grey[200],
+                        child: const Center(
+                          child: Icon(
+                            Icons.image_not_supported_outlined,
+                            size: 56,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+                Positioned(
+                  right: 15,
+                  top: 15,
+                  child: AnimatedBuilder(
+                    animation: FavoritesScope.of(context),
+                    builder: (context, _) {
+                      final isFav = FavoritesScope.of(context).isFavorite(title);
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(999),
+                        onTap: () {
+                          FavoritesScope.of(context).toggleFavorite(
+                            FavoriteItem(
+                              id: title,
+                              title: title,
+                              subtitle: subtitle,
+                              rating: rating,
+                              fromText: '',
+                              price: price,
+                              ctaText: '',
+                              imageAsset: '',
+                              compactBadge: null,
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.75),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            isFav ? Icons.favorite_rounded : Icons.favorite_border,
+                            color: isFav ? const Color(0xFF0FA37A) : const Color(0xFF0F4A42),
+                            size: 20,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         ),

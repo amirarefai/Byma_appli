@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'bookings_screen.dart';
 import 'main_layout_screen.dart';
 import 'settings_refined_screen.dart';
+import 'conversation_screen.dart';
 
 class BymaChatScreen extends StatefulWidget {
   const BymaChatScreen({super.key});
@@ -203,7 +204,12 @@ class _BymaChatScreenState extends State<BymaChatScreen> {
       ),
       child: InkWell(
         onTap: () {
-          // كود الانتقال للمحادثة
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const ConversationScreen(),
+            ),
+          );
         },
         borderRadius: BorderRadius.circular(24),
         child: Padding(

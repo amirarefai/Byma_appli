@@ -47,7 +47,7 @@ class BymaBottomNav extends StatelessWidget {
               inactiveColor: inactiveColor,
             ),
             _NavItem(
-              icon: Icons.calendar_today_outlined,
+              icon: Icons.calendar_month_outlined,
               label: 'BOOKINGS',
               active: activeTab == BymaBottomNavTab.bookings,
               onTap: () => onTabSelected(BymaBottomNavTab.bookings), // يأخذك لواجهة الحجوزات فوراً
