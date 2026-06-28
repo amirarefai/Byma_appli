@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'payment_screen.dart';
 
 import '../state/favorites_scope.dart';
@@ -24,13 +25,14 @@ class RoomDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Room Details',
-          style: TextStyle(fontWeight: FontWeight.w900, color: Colors.black),
+        title: Text(
+          'room_details_title'.tr(),
+          style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.black),
         ),
         centerTitle: false,
         actions: [
@@ -61,12 +63,12 @@ class RoomDetailsScreen extends StatelessWidget {
                     Positioned(
                       left: 10,
                       top: 90,
-                      child: _CircleArrow(icon: Icons.chevron_left),
+                      child: const _CircleArrow(icon: Icons.chevron_left),
                     ),
                     Positioned(
                       right: 10,
                       top: 90,
-                      child: _CircleArrow(icon: Icons.chevron_right),
+                      child: const _CircleArrow(icon: Icons.chevron_right),
                     ),
 
                     // heart button inside photo
@@ -83,10 +85,10 @@ class RoomDetailsScreen extends StatelessWidget {
                               final item = FavoriteItem(
                                 id: roomTitle,
                                 title: roomTitle,
-                                subtitle: 'Room Details',
+                                subtitle: 'room_details_title'.tr(),
                                 rating: '4.9',
                                 fromText: '',
-                                price: '\$${pricePerNight.replaceAll(RegExp(r'[^0-9.]'), '')}/night',
+                                price: '\$${pricePerNight.replaceAll(RegExp(r'[^0-9.]'), '')}/${'per_night_short'.tr()}',
                                 ctaText: '',
                                 imageAsset: '',
                                 compactBadge: null,
@@ -119,9 +121,9 @@ class RoomDetailsScreen extends StatelessWidget {
                           color: Colors.black.withOpacity(0.25),
                           borderRadius: BorderRadius.circular(999),
                         ),
-                        child: const Text(
-                          '1/12 PHOTOS',
-                          style: TextStyle(
+                        child: Text(
+                          'photos_count'.tr(),
+                          style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w900,
                             fontSize: 12,
@@ -136,33 +138,39 @@ class RoomDetailsScreen extends StatelessWidget {
 
             const SizedBox(height: 14),
 
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
-                color: const Color(0xFF2FE3CF).withOpacity(0.18),
-                border: Border.all(color: teal.withOpacity(0.18), width: 1),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 6),
+            // Premium tag
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(999),
+                    color: const Color(0xFF2FE3CF).withOpacity(0.18),
+                    border: Border.all(color: teal.withOpacity(0.18), width: 1),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: const Text(
-                'PREMIUM EXPERIENCE',
-                style: TextStyle(
-                  color: teal,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 11,
-                  letterSpacing: 0.3,
+                  child: Text(
+                    'premium_experience_tag'.tr(),
+                    style: const TextStyle(
+                      color: teal,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 11,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
 
             const SizedBox(height: 10),
 
+            // Room dynamic title
             Text(
               roomTitle,
               style: const TextStyle(
@@ -175,6 +183,7 @@ class RoomDetailsScreen extends StatelessWidget {
 
             const SizedBox(height: 10),
 
+            // Price row
             Row(
               children: [
                 Text(
@@ -186,16 +195,16 @@ class RoomDetailsScreen extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                const Text(
-                  'PER NIGHT',
-                  style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w800, fontSize: 11),
+                Text(
+                  'per_night_label'.tr(),
+                  style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.w800, fontSize: 11),
                 )
               ],
             ),
 
             const SizedBox(height: 14),
 
-            // Feature chips (inside framed container)
+            // Feature chips
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -205,18 +214,18 @@ class RoomDetailsScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  _InfoChip(icon: Icons.person, text: '4 Guests'),
+                  _InfoChip(icon: Icons.person, text: 'guests_count_chip'.tr()),
                   const SizedBox(width: 10),
-                  _InfoChip(icon: Icons.square_foot, text: '85 m²'),
+                  _InfoChip(icon: Icons.square_foot, text: 'room_size_chip'.tr()),
                   const SizedBox(width: 10),
-                  _InfoChip(icon: Icons.king_bed, text: 'King Size'),
+                  _InfoChip(icon: Icons.king_bed, text: 'bed_type_chip'.tr()),
                 ],
               ),
             ),
 
             const SizedBox(height: 14),
 
-            // Experience (framed)
+            // Experience / Description
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -225,7 +234,7 @@ class RoomDetailsScreen extends StatelessWidget {
                 border: Border.all(color: teal.withOpacity(0.35), width: 1.2),
               ),
               child: Text(
-                'Experience a synthesis of fluid architecture and unparalleled luxury. The Executive Suite at Grand Miramare offers curated sanctuary with panoramic ocean views and smart-living integration that adapts to your every mood.',
+                'room_description_text'.tr(),
                 style: TextStyle(
                   color: Colors.black54.withOpacity(0.95),
                   height: 1.55,
@@ -237,8 +246,8 @@ class RoomDetailsScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // Services & Features
-            _SectionHeader(title: 'Services & Features', teal: teal),
+            // Services & Features Header
+            _SectionHeader(title: 'services_features_title'.tr(), teal: teal),
             const SizedBox(height: 12),
 
             // Two cards
@@ -247,16 +256,16 @@ class RoomDetailsScreen extends StatelessWidget {
                 Expanded(
                   child: _ServiceTile(
                     icon: Icons.bathtub_outlined,
-                    title: 'Private Balcony',
-                    subtitle: 'Wraparound glass terrace with 270° views of the coast.',
+                    title: 'service_balcony_title'.tr(),
+                    subtitle: 'service_balcony_sub'.tr(),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: _ServiceTile(
                     icon: Icons.wifi,
-                    title: 'Smart',
-                    subtitle: 'Voice control, smart lighting and more.',
+                    title: 'service_smart_title'.tr(),
+                    subtitle: 'service_smart_sub'.tr(),
                   ),
                 ),
               ],
@@ -283,15 +292,15 @@ class RoomDetailsScreen extends StatelessWidget {
                       const Icon(Icons.star_rounded, color: teal2, size: 18),
                       const SizedBox(width: 10),
                       Text(
-                        '4.9 (120 REVIEWS)',
-                        style: TextStyle(fontWeight: FontWeight.w900, color: teal),
+                        'reviews_score_label'.tr(),
+                        style: const TextStyle(fontWeight: FontWeight.w900, color: teal),
                       ),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    '“An extraordinary experience. The room designer felt alive and the attention to detail was unlike anything I’ve seen in my travels.”',
-                    style: TextStyle(fontStyle: FontStyle.italic, color: Colors.black54, height: 1.5, fontWeight: FontWeight.w700),
+                    'review_quote_text'.tr(),
+                    style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.black54, height: 1.5, fontWeight: FontWeight.w700),
                   ),
                 ],
               ),
@@ -299,8 +308,8 @@ class RoomDetailsScreen extends StatelessWidget {
 
             const SizedBox(height: 18),
 
-            // Special Requests (framed with contact button inside one box)
-            _SectionHeader(title: 'Special Requests', teal: teal),
+            // Special Requests Section
+            _SectionHeader(title: 'special_requests_title'.tr(), teal: teal),
             const SizedBox(height: 12),
 
             Container(
@@ -324,7 +333,7 @@ class RoomDetailsScreen extends StatelessWidget {
                       const SizedBox(width: 14),
                       Expanded(
                         child: Text(
-                          'If you have any illnesses, allergies to certain fabrics, or need extra services, please contact hotel support.',
+                          'special_requests_info'.tr(),
                           style: TextStyle(
                             color: Colors.black54.withOpacity(0.95),
                             height: 1.5,
@@ -354,15 +363,15 @@ class RoomDetailsScreen extends StatelessWidget {
                         backgroundColor: teal,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Contact Hotel Support',
-                            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: Colors.white),
+                            'contact_support_btn'.tr(),
+                            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: Colors.white),
                           ),
-                          SizedBox(width: 14),
-                          Icon(Icons.chat_bubble_outline_rounded, color: Colors.white),
+                          const SizedBox(width: 14),
+                          const Icon(Icons.chat_bubble_outline_rounded, color: Colors.white),
                         ],
                       ),
                     ),
@@ -373,7 +382,7 @@ class RoomDetailsScreen extends StatelessWidget {
 
             const SizedBox(height: 26),
 
-            // Reserve button (bottom-ish, but inside scroll for now)
+            // Reserve button
             SizedBox(
               height: 54,
               child: ElevatedButton(
@@ -392,9 +401,9 @@ class RoomDetailsScreen extends StatelessWidget {
                   backgroundColor: Colors.lightBlueAccent.withOpacity(0.75),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
                 ),
-                child: const Text(
-                  'Reserve This Room',
-                  style: TextStyle(
+                child: Text(
+                  'reserve_room_btn'.tr(),
+                  style: const TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 15,
                     color: Colors.white,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../constance/app_colors.dart';
 import '../state/favorites_scope.dart';
@@ -11,20 +12,23 @@ import 'main_layout_screen.dart';
 import 'settings_refined_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  // أضفنا هذا المتغير لكي تستطيع الواجهة الرئيسية إخبار الـ Layout عند الرغبة بالانتقال
   final ValueChanged<BymaBottomNavTab>? onTabChanged;
 
   const HomeScreen({super.key, this.onTabChanged});
 
   @override
   Widget build(BuildContext context) {
-    // ألوان مركزية حسب AppTheme
-    const primaryColor = AppTheme.kPrimaryColor;
-    const darkGreenColor = AppTheme.kPrimaryColor;
-    const darkTextColor = AppTheme.kTextColor;
-    const bodyTextColor = AppTheme.kTextColor;
-    const secondaryTextColor = AppTheme.kSubTextColor;
-    const backgroundColor = AppTheme.kBackgroundColor;
+    // التحقق مما إذا كان التطبيق في الوضع الداكن حالياً
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // جلب الألوان ديناميكياً بناءً على الثيم
+    final primaryColor = Theme.of(context).primaryColor;
+    final darkGreenColor = isDarkMode ? AppColors.kPrimaryColor : AppColors.kPrimaryColor; 
+    final darkTextColor = Theme.of(context).textTheme.bodyLarge?.color ?? AppColors.kTextColor;
+    final bodyTextColor = Theme.of(context).textTheme.bodyMedium?.color ?? AppColors.kTextColor;
+    final secondaryTextColor = Theme.of(context).textTheme.bodySmall?.color ?? AppColors.kSubTextColor;
+    final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
+    final cardColor = Theme.of(context).cardColor;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -82,11 +86,11 @@ class HomeScreen extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cardColor,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.06),
+                        color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.06),
                         blurRadius: 14,
                         offset: const Offset(0, 6),
                       ),
@@ -97,21 +101,21 @@ class HomeScreen extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
+                        children: [
                           Text(
-                            'BYMA',
+                            'BYMA'.tr(), 
                             style: TextStyle(
-                              color: AppTheme.kPrimaryColor,
+                              color: primaryColor,
                               fontWeight: FontWeight.w900,
                               fontSize: 24,
                               letterSpacing: 1.1,
                             ),
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
-                            'Find your next stay',
+                            'find_your_next_stay'.tr(), 
                             style: TextStyle(
-                              color: AppTheme.kSubTextColor,
+                              color: secondaryTextColor,
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
                             ),
@@ -123,12 +127,12 @@ class HomeScreen extends StatelessWidget {
                         height: 40,
                         width: 40,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF4F8F8),
+                          color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF4F8F8),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.notifications_none_outlined,
-                          color: AppTheme.kTextColor,
+                          color: darkTextColor,
                           size: 20,
                         ),
                       ),
@@ -149,7 +153,7 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 25),
 
                     // شريط البحث
-                    _buildSearchBar(darkGreenColor, secondaryTextColor),
+                    _buildSearchBar(context, darkGreenColor, secondaryTextColor, cardColor),
                     const SizedBox(height: 35),
 
                     // قسم التصنيفات المموجة
@@ -162,56 +166,54 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 35),
 
                     // عنوان قسم "Recently Viewed"
-                    _buildSectionHeader('Recently Viewed', darkTextColor, primaryColor),
+                    _buildSectionHeader('recently_viewed'.tr(), darkTextColor, primaryColor),
                     const SizedBox(height: 16),
 
                     // القائمة الأفقية للعناصر المشاهدة مؤخراً
-                    _buildRecentlyViewedList(primaryColor, bodyTextColor),
+                    _buildRecentlyViewedList(context, primaryColor, bodyTextColor),
                     const SizedBox(height: 35),
 
                     // الكرت الرئيسي الكبير مفرغ (The Glass Pavilion)
-                    _buildFeaturedCard(),
+                    _buildFeaturedCard(context, cardColor, secondaryTextColor),
                     const SizedBox(height: 10),
 
-                    // 🚗 الكرت الأول المفرغ: Classic '67 Rental
+                    // الكروت العمودية (تم ربط جميع النصوص بالترجمة داخل ملف الـ json الخاص بك)
                     _buildVerticalProductCard(
                       context,
-                      title: "Classic '67 Rental",
-                      subtitle: "Pristine condition vintage experience",
+                      title: "classic_67_rental_title".tr(),
+                      subtitle: "classic_67_rental_sub".tr(),
                       price: "\$650",
-                      unit: "/day",
+                      unit: "day_unit".tr(),
                       rating: "4.8",
                       primaryColor: primaryColor,
                       titleColor: darkTextColor,
                       subColor: secondaryTextColor,
                     ),
 
-                    // 🍳 الكرت الثاني المفرغ: Oslo Penthouse
                     _buildVerticalProductCard(
                       context,
-                      title: "Oslo Penthouse",
-                      subtitle: "Sleek nordic design with harbor view",
+                      title: "oslo_penthouse_title".tr(),
+                      subtitle: "oslo_penthouse_sub".tr(),
                       price: "\$450",
-                      unit: "/night",
+                      unit: "night_unit".tr(),
                       rating: "4.9",
                       primaryColor: primaryColor,
                       titleColor: darkTextColor,
                       subColor: secondaryTextColor,
                     ),
 
-                    // 🛥️ الكرت الثالث المفرغ: Azure Explorer
                     _buildVerticalProductCard(
                       context,
-                      title: "Azure Explorer",
-                      subtitle: "Full crewed day charter in Ibiza",
+                      title: "azure_explorer_title".tr(),
+                      subtitle: "azure_explorer_sub".tr(),
                       price: "\$1,800",
-                      unit: "/day",
+                      unit: "day_unit".tr(),
                       rating: "5.0",
                       primaryColor: primaryColor,
                       titleColor: darkTextColor,
                       subColor: secondaryTextColor,
                     ),
-                    const SizedBox(height: 100), // مساحة تمرير سفلية مريحة حتى لا يغطي شريط الـ Nav على محتوى الكروت
+                    const SizedBox(height: 100), 
                   ],
                 ),
               ),
@@ -223,14 +225,14 @@ class HomeScreen extends StatelessWidget {
   }
 
   // شريط البحث المخصص
-  Widget _buildSearchBar(Color filterBgColor, Color textColor) {
+  Widget _buildSearchBar(BuildContext context, Color filterBgColor, Color textColor, Color cardColor) {
     return Row(
       children: [
         Expanded(
           child: Container(
             height: 55,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: cardColor,
               borderRadius: BorderRadius.circular(30),
               boxShadow: [
                 BoxShadow(
@@ -241,8 +243,9 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
             child: TextField(
+              style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
               decoration: InputDecoration(
-                hintText: 'Search homes, cars, etc...',
+                hintText: 'search_hint'.tr(), 
                 hintStyle: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 15, fontWeight: FontWeight.w500),
                 prefixIcon: Padding(
                   padding: const EdgeInsets.only(left: 12.0, right: 8.0),
@@ -268,13 +271,14 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // قسم الأيقونات مع البقعة الانسيابية لعنصر السيارات النشط
+  // قسم الأيقونات
   Widget _buildCategoriesSection(
     BuildContext context,
     Color activeColor,
     Color inactiveIconColor,
     Color textColor,
   ) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
@@ -286,8 +290,8 @@ class HomeScreen extends StatelessWidget {
           },
           child: _buildCategoryItem(
             Icons.king_bed_outlined,
-            'HOTELS',
-            const Color(0xFFEBF9F9),
+            'HOTELS'.tr(), 
+            isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFEBF9F9),
             inactiveIconColor,
             textColor,
           ),
@@ -317,15 +321,15 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'CARS',
+              'CARS'.tr(), 
               style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: activeColor, letterSpacing: 0.5),
             )
           ],
         ),
         _buildCategoryItem(
           Icons.restaurant_outlined,
-          'EATS',
-          const Color(0xFFFFF9F2),
+          'EATS'.tr(), 
+          isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFFFF9F2),
           const Color(0xFFFFB057),
           textColor,
         ),
@@ -363,17 +367,20 @@ class HomeScreen extends StatelessWidget {
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: textColor, letterSpacing: -0.2),
         ),
         Text(
-          'VIEW ALL',
+          'view_all'.tr(), 
           style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: actionColor, letterSpacing: 0.8),
         ),
       ],
     );
   }
 
-  Widget _buildRecentlyViewedList(Color priceColor, Color textColor) {
+  Widget _buildRecentlyViewedList(BuildContext context, Color priceColor, Color textColor) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
+    // جعلنا الـ Keys والمحتوى يقبل الترجمة ديناميكياً
     final items = [
-      {'title': 'Modern Glass Villa', 'price': '\$2,400', 'unit': '/night', 'img': 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=400'},
-      {'title': "Classic '67 Edition", 'price': '\$650', 'unit': '/day', 'img': 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=400'},
+      {'title': 'modern_glass_villa_title'.tr(), 'price': '\$2,400', 'unit': 'night_unit'.tr()},
+      {'title': "classic_67_edition_title".tr(), 'price': '\$650', 'unit': 'day_unit'.tr()},
     ];
 
     return SizedBox(
@@ -397,12 +404,12 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEFF3F6),
+                          color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFEFF3F6),
                           borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: const Color(0xFFD9E2E8), width: 1.2),
+                          border: Border.all(color: isDarkMode ? Colors.white12 : const Color(0xFFD9E2E8), width: 1.2),
                         ),
-                        child: const Center(
-                          child: Icon(Icons.image_outlined, size: 30, color: Color(0xFFB7C3CB)),
+                        child: Center(
+                          child: Icon(Icons.image_outlined, size: 30, color: isDarkMode ? Colors.white30 : const Color(0xFFB7C3CB)),
                         ),
                       ),
                       Positioned(
@@ -433,12 +440,12 @@ class HomeScreen extends StatelessWidget {
                               child: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.75),
+                                  color: Colors.white.withValues(alpha: isDarkMode ? 0.2 : 0.75),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
                                   isFav ? Icons.favorite_rounded : Icons.favorite_border,
-                                  color: isFav ? const Color(0xFF0FA37A) : const Color(0xFF0F4A42),
+                                  color: isFav ? const Color(0xFF0FA37A) : (isDarkMode ? Colors.white : const Color(0xFF0F4A42)),
                                   size: 20,
                                 ),
                               ),
@@ -479,22 +486,23 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFeaturedCard() {
+  Widget _buildFeaturedCard(BuildContext context, Color cardColor, Color secondaryTextColor) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       height: 340,
       decoration: BoxDecoration(
-        color: const Color(0xFFE2E8F0), 
+        color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFE2E8F0), 
         borderRadius: BorderRadius.circular(40),
-        border: Border.all(color: Colors.white, width: 1.5),
+        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.white, width: 1.5),
       ),
       child: Stack(
         children: [
-          const Center(
+          Center(
             child: Icon(
               Icons.image_not_supported_outlined,
               size: 75,
-              color: Color(0xFF94A3B8),
+              color: isDarkMode ? Colors.white24 : const Color(0xFF94A3B8),
             ),
           ),
           Padding(
@@ -509,9 +517,9 @@ class HomeScreen extends StatelessWidget {
                     color: const Color(0xFF62CDFF),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Text(
-                    'TRENDING NOW',
-                    style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.6),
+                  child: Text(
+                    'trending_now'.tr(), 
+                    style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.6),
                   ),
                 ),
                 Row(
@@ -523,16 +531,16 @@ class HomeScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text(
-                            'The Glass\nPavilion',
-                            style: TextStyle(color: Color(0xFF0F4A42), fontSize: 26, fontWeight: FontWeight.w900, height: 1.15),
+                          Text(
+                            'glass_pavilion_title'.tr(),
+                            style: TextStyle(color: isDarkMode ? Colors.white : const Color(0xFF0F4A42), fontSize: 26, fontWeight: FontWeight.w900, height: 1.15),
                           ),
                           const SizedBox(height: 8),
                           Row(
-                            children: const [
-                              Icon(Icons.location_on, color: Color(0xFF557C7D), size: 16),
-                              SizedBox(width: 4),
-                              Text('Malibu, California', style: TextStyle(color: Color(0xFF557C7D), fontSize: 13, fontWeight: FontWeight.w600)),
+                            children: [
+                              Icon(Icons.location_on, color: isDarkMode ? secondaryTextColor : const Color(0xFF557C7D), size: 16),
+                              const SizedBox(width: 4),
+                              Text('malibu_california'.tr(), style: TextStyle(color: isDarkMode ? secondaryTextColor : const Color(0xFF557C7D), fontSize: 13, fontWeight: FontWeight.w600)),
                             ],
                           ),
                         ],
@@ -541,14 +549,14 @@ class HomeScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.85),
+                        color: cardColor.withValues(alpha: 0.85),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.white),
+                        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.white),
                       ),
                       child: Column(
-                        children: const [
-                          Text('STARTING FROM', style: TextStyle(color: Colors.grey, fontSize: 8, fontWeight: FontWeight.w900)),
-                          Text('\$2,400/night', style: TextStyle(color: Color(0xFF006653), fontSize: 14, fontWeight: FontWeight.w900)),
+                        children: [
+                          Text('starting_from'.tr(), style: const TextStyle(color: Colors.grey, fontSize: 8, fontWeight: FontWeight.w900)),
+                          Text('\$2,400/${'night_unit_short'.tr()}', style: const TextStyle(color: Color(0xFF006653), fontSize: 14, fontWeight: FontWeight.w900)),
                         ],
                       ),
                     ),
@@ -573,6 +581,7 @@ class HomeScreen extends StatelessWidget {
     required Color titleColor,
     required Color subColor,
   }) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 20, bottom: 10),
@@ -585,15 +594,15 @@ class HomeScreen extends StatelessWidget {
                 height: 220,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE2E8F0),
+                  color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFE2E8F0),
                   borderRadius: BorderRadius.circular(35),
-                  border: Border.all(color: Colors.white, width: 1.5),
+                  border: Border.all(color: isDarkMode ? Colors.white10 : Colors.white, width: 1.5),
                 ),
-                child: const Center(
+                child: Center(
                   child: Icon(
                     Icons.image_not_supported_outlined,
                     size: 55,
-                    color: Color(0xFF94A3B8),
+                    color: isDarkMode ? Colors.white24 : const Color(0xFF94A3B8),
                   ),
                 ),
               ),
@@ -624,12 +633,12 @@ class HomeScreen extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.75),
+                          color: Colors.white.withValues(alpha: isDarkMode ? 0.2 : 0.75),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           isFav ? Icons.favorite_rounded : Icons.favorite_border,
-                          color: isFav ? const Color(0xFF0FA37A) : const Color(0xFF0F4A42),
+                          color: isFav ? const Color(0xFF0FA37A) : (isDarkMode ? Colors.white : const Color(0xFF0F4A42)),
                           size: 20,
                         ),
                       ),

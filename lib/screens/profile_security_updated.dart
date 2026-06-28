@@ -1,29 +1,25 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:easy_localization/easy_localization.dart'; // تأكدي من استيراد حزمة الترجمة المستخدمة لديكِ
 
 class ProfileSecurityUpdated extends StatefulWidget {
   const ProfileSecurityUpdated({super.key});
 
   @override
-  State<ProfileSecurityUpdated> createState() =>
-      _ProfileSecurityUpdatedState();
+  State<ProfileSecurityUpdated> createState() => _ProfileSecurityUpdatedState();
 }
 
 class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
-  bool _themeOn = false;
-
   final ImagePicker _imagePicker = ImagePicker();
   XFile? _avatarImage;
 
-  // Demo/local state (بدون backend)
+  // ديمو البيانات المحلية
   String _fullName = 'Alex Curator';
   String _email = 'alex.c@bymatravel.com';
   String _phone = '+1 (555) 0123 4567';
-
   DateTime _dateOfBirth = DateTime(1988, 3, 24);
-  String _gender = 'Male'; // Male / Female
+  String _gender = 'Male'; 
 
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -33,10 +29,7 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  // UI-only masked password to reflect that update happened (بدون backend)
   String _passwordMasked = '••••••••••';
-
-  // Edit Profile dialog password (simplified)
   final _editPasswordController = TextEditingController();
 
   @override
@@ -44,32 +37,19 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
     _fullNameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
-
     _currentPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
-
     _editPasswordController.dispose();
     super.dispose();
   }
 
   String _formatDob(DateTime d) {
-    // Keep similar look to: March 24, 1988
     const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December'
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
     ];
-    return '${months[d.month - 1]} ${d.day}, ${d.year}';
+    return '${context.tr(months[d.month - 1])} ${d.day}, ${d.year}';
   }
 
   Future<void> _pickDob({
@@ -92,8 +72,6 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
     _fullNameController.text = _fullName;
     _emailController.text = _email;
     _phoneController.text = _phone;
-
-    // keep blank by default; user types if he wants to change
     _editPasswordController.clear();
 
     String tempGender = _gender;
@@ -104,8 +82,10 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
       builder: (dialogContext) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            final theme = Theme.of(context);
             return AlertDialog(
-              title: const Text('Edit Profile'),
+              backgroundColor: theme.scaffoldBackgroundColor,
+              title: Text(context.tr('edit_profile'), style: TextStyle(color: theme.textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
               content: SingleChildScrollView(
                 child: SizedBox(
                   width: 420,
@@ -114,35 +94,37 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
                     children: [
                       TextField(
                         controller: _fullNameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Full Name',
-                          prefixIcon: Icon(Icons.person_outline),
+                        style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+                        decoration: InputDecoration(
+                          labelText: context.tr('full_name'),
+                          prefixIcon: const Icon(Icons.person_outline),
                         ),
                       ),
                       const SizedBox(height: 12),
                       TextField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
-                          labelText: 'Email Address',
-                          prefixIcon: Icon(Icons.email_outlined),
+                        style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+                        decoration: InputDecoration(
+                          labelText: context.tr('email_address'),
+                          prefixIcon: const Icon(Icons.email_outlined),
                         ),
                       ),
                       const SizedBox(height: 12),
                       TextField(
                         controller: _phoneController,
                         keyboardType: TextInputType.phone,
-                        decoration: const InputDecoration(
-                          labelText: 'Phone Number',
-                          prefixIcon: Icon(Icons.phone_outlined),
+                        style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+                        decoration: InputDecoration(
+                          labelText: context.tr('phone_number'),
+                          prefixIcon: const Icon(Icons.phone_outlined),
                         ),
                       ),
                       const SizedBox(height: 12),
                       TextField(
                         readOnly: true,
-                        controller: TextEditingController(
-                          text: _formatDob(tempDob),
-                        ),
+                        style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+                        controller: TextEditingController(text: _formatDob(tempDob)),
                         onTap: () async {
                           await _pickDob(
                             dialogContext: dialogContext,
@@ -152,60 +134,55 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
                             },
                           );
                         },
-                        decoration: const InputDecoration(
-                          labelText: 'Date of Birth',
-                          prefixIcon: Icon(Icons.calendar_month_outlined),
+                        decoration: InputDecoration(
+                          labelText: context.tr('date_of_birth'),
+                          prefixIcon: const Icon(Icons.calendar_month_outlined),
                         ),
                       ),
                       const SizedBox(height: 12),
                       TextField(
                         controller: _editPasswordController,
                         obscureText: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Password',
-                          prefixIcon: Icon(Icons.lock_outline),
+                        style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+                        decoration: InputDecoration(
+                          labelText: context.tr('password'),
+                          prefixIcon: const Icon(Icons.lock_outline),
                         ),
                       ),
                       const SizedBox(height: 12),
                       TextField(
                         readOnly: true,
-                        controller: TextEditingController(
-                          text: tempGender,
-                        ),
+                        style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+                        controller: TextEditingController(text: context.tr(tempGender.toLowerCase())),
                         onTap: () async {
-                          final gender =
-                              await showModalBottomSheet<String>(
+                          final gender = await showModalBottomSheet<String>(
                             context: dialogContext,
-                            builder: (_) => Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ListTile(
-                                  title: const Text('Male'),
-                                  onTap: () =>
-                                      Navigator.pop(context, 'Male'),
-                                ),
-                                ListTile(
-                                  title: const Text('Female'),
-                                  onTap: () => Navigator.pop(
-                                      context, 'Female'),
-                                ),
-                              ],
+                            backgroundColor: theme.scaffoldBackgroundColor,
+                            builder: (_) => SafeArea(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ListTile(
+                                    title: Text(context.tr('male'), style: TextStyle(color: theme.textTheme.bodyLarge?.color)),
+                                    onTap: () => Navigator.pop(context, 'Male'),
+                                  ),
+                                  ListTile(
+                                    title: Text(context.tr('female'), style: TextStyle(color: theme.textTheme.bodyLarge?.color)),
+                                    onTap: () => Navigator.pop(context, 'Female'),
+                                  ),
+                                ],
+                              ),
                             ),
                           );
-
                           if (gender != null) {
                             setDialogState(() => tempGender = gender);
                           }
                         },
-                        decoration: const InputDecoration(
-                          labelText: 'Gender',
-                          prefixIcon: Icon(Icons.person_outline),
+                        decoration: InputDecoration(
+                          labelText: context.tr('gender'),
+                          prefixIcon: const Icon(Icons.person_outline),
                         ),
                       ),
-                      const SizedBox(height: 12),
-
-
-                     
                     ],
                   ),
                 ),
@@ -213,29 +190,24 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(context.tr('cancel'), style: TextStyle(color: theme.colorScheme.primary)),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    backgroundColor: const Color(0xFF66D0FF),
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color(0xFF0E7E8A), // لون داكن وواضح للتباين العالي
                   ),
                   onPressed: () {
                     final newName = _fullNameController.text.trim();
                     final newEmail = _emailController.text.trim();
                     final newPhone = _phoneController.text.trim();
 
-                    if (newName.isEmpty ||
-                        newEmail.isEmpty ||
-                        newPhone.isEmpty) {
+                    if (newName.isEmpty || newEmail.isEmpty || newPhone.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please fill all fields.')),
+                        SnackBar(content: Text(context.tr('fill_all_fields'))),
                       );
                       return;
                     }
-
-                    final typedPassword =
-                        _editPasswordController.text.trim();
 
                     setState(() {
                       _fullName = newName;
@@ -243,16 +215,11 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
                       _phone = newPhone;
                       _dateOfBirth = tempDob;
                       _gender = tempGender;
-
-                      // If user typed password in Edit Profile -> reflect in UI (demo)
-                      if (typedPassword.isNotEmpty) {
-                        _passwordMasked = '••••••••••';
-                      }
                     });
 
                     Navigator.of(dialogContext).pop();
                   },
-                  child: const Text('Save'),
+                  child: Text(context.tr('save')),
                 ),
               ],
             );
@@ -270,8 +237,10 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
     showDialog<void>(
       context: context,
       builder: (context) {
+        final theme = Theme.of(context);
         return AlertDialog(
-          title: const Text('Change Password'),
+          backgroundColor: theme.scaffoldBackgroundColor,
+          title: Text(context.tr('change_password'), style: TextStyle(color: theme.textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
           content: SingleChildScrollView(
             child: SizedBox(
               width: 420,
@@ -281,28 +250,22 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
                   TextField(
                     controller: _currentPasswordController,
                     obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Current Password',
-                      prefixIcon: Icon(Icons.lock_outline),
-                    ),
+                    style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+                    decoration: InputDecoration(labelText: context.tr('current_password'), prefixIcon: const Icon(Icons.lock_outline)),
                   ),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _newPasswordController,
                     obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'New Password',
-                      prefixIcon: Icon(Icons.lock_open_outlined),
-                    ),
+                    style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+                    decoration: InputDecoration(labelText: context.tr('new_password'), prefixIcon: const Icon(Icons.lock_open_outlined)),
                   ),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _confirmPasswordController,
                     obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Confirm New Password',
-                      prefixIcon: Icon(Icons.lock_outline),
-                    ),
+                    style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+                    decoration: InputDecoration(labelText: context.tr('confirm_new_password'), prefixIcon: const Icon(Icons.lock_outline)),
                   ),
                 ],
               ),
@@ -311,41 +274,27 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: Text(context.tr('cancel'), style: TextStyle(color: theme.colorScheme.primary)),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0E7E8A), foregroundColor: Colors.white),
               onPressed: () {
                 final current = _currentPasswordController.text.trim();
                 final next = _newPasswordController.text.trim();
                 final confirm = _confirmPasswordController.text.trim();
 
                 if (current.isEmpty || next.isEmpty || confirm.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please fill all fields.')),
-                  );
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('fill_all_fields'))));
                   return;
                 }
                 if (next != confirm) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('New passwords do not match.')),
-                  );
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.tr('password_not_match'))));
                   return;
                 }
 
-                // TODO: replace with API call
-                setState(() {
-                  // reflect update in UI (demo)
-                  _passwordMasked = '••••••••••';
-                });
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Password updated (demo).')),
-                );
-
                 Navigator.of(context).pop();
               },
-              child: const Text('Update'),
+              child: Text(context.tr('update')),
             ),
           ],
         );
@@ -353,41 +302,34 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
     );
   }
 
-
   Future<void> _pickAvatar(ImageSource source) async {
-    final picked = await _imagePicker.pickImage(
-      source: source,
-      imageQuality: 85,
-      maxWidth: 1200,
-    );
-
+    final picked = await _imagePicker.pickImage(source: source, imageQuality: 85, maxWidth: 1200);
     if (picked == null) return;
-
-    setState(() {
-      _avatarImage = picked;
-    });
+    setState(() { _avatarImage = picked; });
   }
 
   void _openAvatarPickerSheet() {
+    final theme = Theme.of(context);
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      backgroundColor: theme.scaffoldBackgroundColor,
       builder: (sheetContext) {
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.camera_alt_outlined),
-                title: const Text('Camera'),
+                leading: Icon(Icons.camera_alt_outlined, color: theme.iconTheme.color),
+                title: Text(context.tr('camera'), style: TextStyle(color: theme.textTheme.bodyLarge?.color)),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   _pickAvatar(ImageSource.camera);
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library_outlined),
-                title: const Text('Gallery'),
+                leading: Icon(Icons.photo_library_outlined, color: theme.iconTheme.color),
+                title: Text(context.tr('gallery'), style: TextStyle(color: theme.textTheme.bodyLarge?.color)),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   _pickAvatar(ImageSource.gallery);
@@ -402,22 +344,22 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
 
   @override
   Widget build(BuildContext context) {
-    const bg = Color(0xFFF2F6F7);
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF072332)),
+          icon: Icon(Icons.arrow_back, color: theme.iconTheme.color ?? const Color(0xFF072332)),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: const Text(
-          'Account Settings',
+        title: Text(
+          context.tr('account_settings'),
           style: TextStyle(
-            color: Color(0xFF072332),
+            color: theme.textTheme.titleLarge?.color ?? const Color(0xFF072332),
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -429,8 +371,6 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 8),
-
-              // Account / avatar header (approx. matching the provided design)
               Center(
                 child: Stack(
                   clipBehavior: Clip.none,
@@ -441,20 +381,12 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
                       height: 170,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0xFF0E7E8A),
-                          width: 4,
-                        ),
+                        border: Border.all(color: const Color(0xFF0E7E8A), width: 4),
                       ),
                       child: ClipOval(
                         child: _avatarImage == null
-                            ? Container(
-                                color: const Color(0xFFF2F6F7),
-                              )
-                            : Image.file(
-                                File(_avatarImage!.path),
-                                fit: BoxFit.cover,
-                              ),
+                            ? Container(color: theme.cardColor)
+                            : Image.file(File(_avatarImage!.path), fit: BoxFit.cover),
                       ),
                     ),
                     Positioned(
@@ -466,194 +398,88 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
                         child: Container(
                           width: 46,
                           height: 46,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFF0E7E8A),
-                            boxShadow: [
-                              BoxShadow(
-                                color:
-                                    const Color(0xFF0E7E8A).withOpacity(0.28),
-                                blurRadius: 16,
-                                offset: const Offset(0, 8),
-                              )
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.edit,
-                            size: 18,
-                            color: Colors.white,
-                          ),
+                          decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF0E7E8A)),
+                          child: const Icon(Icons.edit, size: 18, color: Colors.white),
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-
               const SizedBox(height: 12),
-
               Center(
                 child: Text(
                   _fullName,
-                  style: const TextStyle(
-                    fontSize: 34,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF000000),
-                  ),
+                  style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: theme.textTheme.bodyLarge?.color),
                 ),
               ),
-
               const SizedBox(height: 18),
-
-              // Profile card
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.cardColor,
                   borderRadius: BorderRadius.circular(26),
-                  border: Border.all(
-                    color: const Color(0xFFE5EEF1),
-                    width: 1.2,
-                  ),
+                  border: Border.all(color: theme.dividerColor, width: 1.2),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Section header row
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
                           width: 44,
                           height: 44,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFD7F0F6),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: const Icon(
-                            Icons.person_outline,
-                            color: Color(0xFF0F4B61),
-                          ),
+                          decoration: BoxDecoration(color: const Color(0xFFD7F0F6), borderRadius: BorderRadius.circular(14)),
+                          child: const Icon(Icons.person_outline, color: Color(0xFF0F4B61)),
                         ),
                         const SizedBox(width: 12),
-                        const Expanded(
+                        Expanded(
                           child: Text(
-                            'Personal\nInformation',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFF072332),
-                              fontSize: 22,
-                              height: 1.05,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: const Color(0xFFD0E3E7),
-                              width: 2,
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.edit_outlined,
-                            color: Color(0xFF94A3B8),
-                            size: 22,
+                            context.tr('personal_information'),
+                            style: TextStyle(fontWeight: FontWeight.w900, color: theme.textTheme.bodyLarge?.color, fontSize: 22, height: 1.05),
                           ),
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 22),
-
-                    // Fields
-                    _Field(
-                      label: 'FULL NAME',
-                      value: _fullName,
-                    ),
-                    _Field(
-                      label: 'EMAIL ADDRESS',
-                      value: _email,
-                    ),
-                    _Field(
-                      label: 'PHONE NUMBER',
-                      value: _phone,
-                    ),
-                    _Field(
-                      label: 'DATE OF BIRTH',
-                      value: _formatDob(_dateOfBirth),
-                    ),
-                    _Field(
-                      label: 'GENDER',
-                      value: _gender == 'Male' ? 'Male' : 'Female',
-                    ),
-
+                    _Field(label: context.tr('full_name_label'), value: _fullName),
+                    _Field(label: context.tr('email_address_label'), value: _email),
+                    _Field(label: context.tr('phone_number_label'), value: _phone),
+                    _Field(label: context.tr('date_of_birth_label'), value: _formatDob(_dateOfBirth)),
+                    _Field(label: context.tr('gender_label'), value: context.tr(_gender.toLowerCase())),
                     const SizedBox(height: 10),
-
-                    // Password row with "Change"
                     Row(
                       children: [
-                        Expanded(
-                          child: _Field(
-                            label: 'PASSWORD',
-                            value: _passwordMasked,
-                            asPassword: true,
-                          ),
-                        ),
+                        Expanded(child: _Field(label: context.tr('password_label'), value: _passwordMasked, asPassword: true)),
                         IconButton(
                           onPressed: _openChangePasswordDialog,
-                          icon: const Icon(
-                            Icons.refresh,
-                            color: Color(0xFF0E7E8A),
-                          ),
+                          icon: const Icon(Icons.refresh, color: Color(0xFF0E7E8A)),
                         ),
-                        const Text(
-                          'Change',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            color: Color(0xFF0E7E8A),
-                            fontSize: 14,
-                          ),
+                        Text(
+                          context.tr('change'),
+                          style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF0E7E8A), fontSize: 14),
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 18),
-
-                    // Edit profile button
                     SizedBox(
                       height: 56,
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF66D0FF),
-                          foregroundColor: Colors.black,
+                          backgroundColor: const Color(0xFF0E7E8A), // تباين قوي للسطوع العالي
+                          foregroundColor: Colors.white,
                           elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                         ),
                         onPressed: _openEditProfileDialog,
-                        icon: const Icon(
-                          Icons.edit,
-                          size: 20,
-                        ),
-                        label: const Text(
-                          'Edit Profile',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 16,
-                          ),
-                        ),
+                        icon: const Icon(Icons.edit, size: 20),
+                        label: Text(context.tr('edit_profile'), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
                       ),
                     ),
                   ],
                 ),
               ),
-
               const SizedBox(height: 16),
             ],
           ),
@@ -668,36 +494,24 @@ class _Field extends StatelessWidget {
   final String value;
   final bool asPassword;
 
-  const _Field({
-    required this.label,
-    required this.value,
-    this.asPassword = false,
-  });
+  const _Field({required this.label, required this.value, this.asPassword = false});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label,
-            style: const TextStyle(
-              fontWeight: FontWeight.w900,
-              color: Color(0xFF52AAB5),
-              letterSpacing: 1.2,
-              fontSize: 12,
-            ),
+            label.toUpperCase(),
+            style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF52AAB5), letterSpacing: 1.2, fontSize: 12),
           ),
           const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(
-              fontWeight: FontWeight.w900,
-              color: Color(0xFF072332),
-              fontSize: 18,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w900, color: theme.textTheme.bodyLarge?.color ?? const Color(0xFF072332), fontSize: 18),
           ),
         ],
       ),

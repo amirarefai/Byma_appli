@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-
+import 'package:easy_localization/easy_localization.dart';
 import '../widgets/byma_bottom_nav.dart';
 import 'main_layout_screen.dart';
-import 'messages_final_navigation.dart';
+import 'messages_final_navigation.dart'; // تأكد أن BymaChatScreen موجود هنا
 import 'settings_refined_screen.dart';
 
 class BookingsScreen extends StatefulWidget {
@@ -17,8 +17,10 @@ class _BookingsScreenState extends State<BookingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9), 
+      backgroundColor: theme.scaffoldBackgroundColor, 
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -31,22 +33,22 @@ class _BookingsScreenState extends State<BookingsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+                    icon: Icon(Icons.arrow_back_ios_new, size: 20, color: theme.iconTheme.color),
                     onPressed: () => Navigator.maybePop(context),
                   ),
-                  const Text(
+                  Text(
                     'BYMA',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w900, 
-                      color: Color(0xFF0F2942),
+                      color: theme.colorScheme.primary,
                       letterSpacing: 1.2,
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: theme.cardColor,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -55,42 +57,42 @@ class _BookingsScreenState extends State<BookingsScreen> {
                         )
                       ],
                     ),
-                    child: const Icon(Icons.notifications_none_outlined, size: 22),
+                    child: Icon(Icons.notifications_none_outlined, size: 22, color: theme.iconTheme.color),
                   ),
                 ],
               ),
             ),
 
             // العناوين الترحيبية
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'JOURNEY HISTORY',
+                    'journey_history'.tr(),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF64748B),
+                      color: theme.colorScheme.secondary,
                       letterSpacing: 1.1,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    'Your Stays.',
+                    'your_stays'.tr(),
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w900,
-                      color: Color(0xFF0F2942),
+                      color: theme.colorScheme.primary,
                     ),
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   Text(
-                    'Relive your most extraordinary moments or prepare for your upcoming adventures.',
+                    'stays_subtitle'.tr(),
                     style: TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF64748B),
+                      color: theme.colorScheme.tertiary, 
                       height: 1.4,
                     ),
                   ),
@@ -106,11 +108,11 @@ class _BookingsScreenState extends State<BookingsScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Row(
                   children: [
-                    _buildTabButton('All Stays'),
+                    _buildTabButton('All Stays', 'all_stays'.tr(), theme),
                     const SizedBox(width: 10),
-                    _buildTabButton('Upcoming'),
+                    _buildTabButton('Upcoming', 'upcoming_tab'.tr(), theme),
                     const SizedBox(width: 10),
-                    _buildTabButton('Completed'),
+                    _buildTabButton('Completed', 'completed_tab'.tr(), theme),
                   ],
                 ),
               ),
@@ -123,41 +125,44 @@ class _BookingsScreenState extends State<BookingsScreen> {
                 children: [
                   if (_selectedTab == 'All Stays' || _selectedTab == 'Upcoming') ...[
                     _buildBookingCard(
+                      context: context,
                       imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
-                      tag: 'UPCOMING',
-                      location: 'SANTORINI, GREECE',
-                      title: 'Azure Horizon Estate',
-                      checkIn: 'Oct 12, 2024',
-                      nights: '5 Nights',
+                      tag: 'upcoming_tag'.tr(),
+                      location: 'santorini_greece'.tr(),
+                      title: 'azure_horizon'.tr(),
+                      checkIn: 'Oct 12, 2024', 
+                      nights: '5_nights'.tr(),
                       isUpcoming: true,
+                      theme: theme,
                     ),
                     const SizedBox(height: 20),
                   ],
                   if (_selectedTab == 'All Stays' || _selectedTab == 'Completed') ...[
                     _buildBookingCard(
+                      context: context,
                       imageUrl: 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=800&q=80',
-                      tag: 'COMPLETED',
-                      location: 'Oslo, Norway • Aug 14 - 18',
-                      title: 'Nordic Pine Retreat',
+                      tag: 'completed_tag'.tr(),
+                      location: 'oslo_norway'.tr(),
+                      title: 'nordic_pine'.tr(),
                       checkIn: '',
                       nights: '',
                       isUpcoming: false,
+                      theme: theme,
                     ),
                     const SizedBox(height: 20),
-                  ],
-                  if (_selectedTab == 'All Stays' || _selectedTab == 'Completed') ...[
                     _buildBookingCard(
+                      context: context,
                       imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
-                      tag: 'COMPLETED',
-                      location: 'New York, USA • June 02 - 05',
-                      title: 'The Industrial Loft',
+                      tag: 'completed_tag'.tr(),
+                      location: 'new_york_usa'.tr(),
+                      title: 'industrial_loft'.tr(),
                       checkIn: '',
                       nights: '',
                       isUpcoming: false,
+                      theme: theme,
                     ),
                     const SizedBox(height: 20),
                   ],
-                  // تباعد إضافي أسفل القائمة لمنع اختفاء الكروت خلف الأزرار والشريط السفلي
                   const SizedBox(height: 160), 
                 ],
               ),
@@ -173,7 +178,6 @@ class _BookingsScreenState extends State<BookingsScreen> {
             Navigator.maybePop(context);
             return;
           }
-
           if (tab == BymaBottomNavTab.chat) {
             Navigator.push(
               context,
@@ -181,7 +185,6 @@ class _BookingsScreenState extends State<BookingsScreen> {
             );
             return;
           }
-
           if (tab == BymaBottomNavTab.profile) {
             Navigator.push(
               context,
@@ -189,37 +192,36 @@ class _BookingsScreenState extends State<BookingsScreen> {
             );
             return;
           }
-
-          // tab == bookings: stay on this screen
         },
       ),
-
     );
   }
 
-  Widget _buildTabButton(String label) {
-    final isActive = _selectedTab == label;
+  Widget _buildTabButton(String key, String translatedLabel, ThemeData theme) {
+    final isActive = _selectedTab == key;
     return GestureDetector(
       onTap: () {
         setState(() {
-          _selectedTab = label;
+          _selectedTab = key;
         });
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFF0FA37A) : Colors.white,
+          color: isActive ? theme.colorScheme.primary : theme.cardColor,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: isActive ? Colors.transparent : const Color(0xFFE2E8F0),
+            color: isActive ? Colors.transparent : theme.dividerColor,
           ),
         ),
         child: Text(
-          label,
+          translatedLabel,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: isActive ? Colors.white : const Color(0xFF0F2942),
+            color: isActive 
+                ? (theme.brightness == Brightness.dark && theme.colorScheme.primary == Colors.yellow ? Colors.black : Colors.white)
+                : theme.colorScheme.secondary,
           ),
         ),
       ),
@@ -227,6 +229,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
   }
 
   Widget _buildBookingCard({
+    required BuildContext context,
     required String imageUrl,
     required String tag,
     required String location,
@@ -234,10 +237,13 @@ class _BookingsScreenState extends State<BookingsScreen> {
     required String checkIn,
     required String nights,
     required bool isUpcoming,
+    required ThemeData theme,
   }) {
+    final isYellowTheme = theme.colorScheme.primary == Colors.yellow;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
@@ -258,13 +264,17 @@ class _BookingsScreenState extends State<BookingsScreen> {
                   height: 180,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFF3F6),
+                    color: theme.scaffoldBackgroundColor,
                     border: Border.all(
-                      color: const Color(0xFFD9E2E8),
+                      color: theme.dividerColor,
                       width: 1.2,
                     ),
                   ),
-                  child: const SizedBox(),
+                  child: Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.broken_image)),
+                  ),
                 ),
               ),
               Positioned(
@@ -273,15 +283,17 @@ class _BookingsScreenState extends State<BookingsScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: isUpcoming ? const Color(0xFF38B6FF).withOpacity(0.9) : Colors.black.withOpacity(0.6), 
+                    color: isUpcoming 
+                        ? (isYellowTheme ? Colors.yellow : const Color(0xFF38B6FF))
+                        : (isYellowTheme ? Colors.white : Colors.black.withOpacity(0.6)), 
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     tag,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w900,
-                      color: Colors.white,
+                      color: isYellowTheme ? Colors.black : Colors.white,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -296,10 +308,10 @@ class _BookingsScreenState extends State<BookingsScreen> {
               children: [
                 Text(
                   location.toUpperCase(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF0FA37A),
+                    color: theme.colorScheme.primary, 
                     letterSpacing: 1,
                   ),
                 ),
@@ -310,21 +322,21 @@ class _BookingsScreenState extends State<BookingsScreen> {
                     Expanded(
                       child: Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w900,
-                          color: Color(0xFF0F2942),
+                          color: theme.colorScheme.secondary,
                         ),
                       ),
                     ),
                     if (!isUpcoming)
-                      const Icon(Icons.check_circle, color: Color(0xFF0FA37A), size: 20),
+                      Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20),
                   ],
                 ),
                 if (isUpcoming) ...[
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Divider(color: Color(0xFFF1F5F9), height: 1),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Divider(color: theme.dividerColor, height: 1),
                   ),
                   Row(
                     children: [
@@ -332,9 +344,9 @@ class _BookingsScreenState extends State<BookingsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('CHECK IN', style: TextStyle(fontSize: 10, color: Color(0xFF94A3B8), fontWeight: FontWeight.bold)),
+                            Text('check_in_label'.tr(), style: TextStyle(fontSize: 10, color: theme.colorScheme.tertiary, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
-                            Text(checkIn, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFF0F2942))),
+                            Text(checkIn, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: theme.colorScheme.secondary)),
                           ],
                         ),
                       ),
@@ -342,9 +354,9 @@ class _BookingsScreenState extends State<BookingsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('NIGHTS', style: TextStyle(fontSize: 10, color: Color(0xFF94A3B8), fontWeight: FontWeight.bold)),
+                            Text('nights_label'.tr(), style: TextStyle(fontSize: 10, color: theme.colorScheme.tertiary, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
-                            Text(nights, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFF0F2942))),
+                            Text(nights, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: theme.colorScheme.secondary)),
                           ],
                         ),
                       ),
@@ -355,7 +367,8 @@ class _BookingsScreenState extends State<BookingsScreen> {
                     width: double.infinity,
                     height: 48,
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
+                      color: isYellowTheme ? Colors.yellow : null,
+                      gradient: isYellowTheme ? null : const LinearGradient(
                         colors: [Color(0xFF50B5D9), Color(0xFF1F94A8)],
                       ),
                       borderRadius: BorderRadius.circular(16),
@@ -367,9 +380,13 @@ class _BookingsScreenState extends State<BookingsScreen> {
                         shadowColor: Colors.transparent,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
-                      child: const Text(
-                        'Manage Booking',
-                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Colors.white),
+                      child: Text(
+                        'manage_booking'.tr(),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800, 
+                          fontSize: 14, 
+                          color: isYellowTheme ? Colors.black : Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -379,14 +396,14 @@ class _BookingsScreenState extends State<BookingsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Rate Now',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF0FA37A)),
+                      Text(
+                        'rate_now'.tr(),
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: theme.colorScheme.primary),
                       ),
                       Container(
                         padding: const EdgeInsets.all(6),
-                        decoration: const BoxDecoration(color: Color(0xFFE2E8F0), shape: BoxShape.circle),
-                        child: const Icon(Icons.arrow_forward_ios, size: 10, color: Color(0xFF475569)),
+                        decoration: BoxDecoration(color: theme.dividerColor, shape: BoxShape.circle),
+                        child: Icon(Icons.arrow_forward_ios, size: 10, color: theme.colorScheme.secondary),
                       )
                     ],
                   ),

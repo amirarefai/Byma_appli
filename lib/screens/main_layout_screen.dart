@@ -17,52 +17,35 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      // الـ IndexedStack يقوم بعرض الشاشة المطلوبة بناءً على الـ index
+      backgroundColor: theme.scaffoldBackgroundColor, // متناسق مع الثيم
+      
+      // الـ IndexedStack يعرض الشاشة المطلوبة بناءً على الـ index ويحافظ على حالتها
       body: IndexedStack(
-  index: _currentTab.index,
-  children: [
-     HomeScreen(
-      onTabChanged: (tab) {
-        setState(() {
-          _currentTab = tab;
-        });
-      },
-    ), // index 0
-    const BookingsScreen(), // index 1
-    const BymaChatScreen(),
-    const SettingsRefinedScreen(),
-  ],
-),
+        index: _currentTab.index,
+        children: [
+          HomeScreen(
+            onTabChanged: (tab) {
+              setState(() {
+                _currentTab = tab;
+              });
+            },
+          ), // index 0
+          const BookingsScreen(), // index 1
+          const BymaChatScreen(), // index 2
+          const SettingsRefinedScreen(), // index 3
+        ],
+      ),
+      
       extendBody: true, 
       bottomNavigationBar: BymaBottomNav(
         activeTab: _currentTab,
         onTabSelected: (tab) {
-          if (tab == BymaBottomNavTab.bookings) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const BookingsScreen()),
-            );
-            return;
-          }
-
-          if (tab == BymaBottomNavTab.chat) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const BymaChatScreen()),
-            );
-            return;
-          }
-
-          if (tab == BymaBottomNavTab.profile) {
-            setState(() {
-              _currentTab = tab;
-            });
-            return;
-          }
-
+          // تم تبسيط الكود: بمجرد الضغط على أي تبويب، يتم الانتقال إليه داخل الـ Stack
           setState(() {
-            _currentTab = tab; // تحديث الواجهة فوراً عند الضغط
+            _currentTab = tab; 
           });
         },
       ),

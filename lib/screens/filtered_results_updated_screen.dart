@@ -1,22 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
-import '../constance/app_colors.dart';
-import '../state/favorites_scope.dart';
-import '../state/favorites_store.dart';
-import '../widgets/byma_bottom_nav.dart';
-import 'bookings_screen.dart';
 import 'filters_advanced_screen.dart';
 import 'hotel_details_screen.dart';
-import 'main_layout_screen.dart';
-import 'messages_final_navigation.dart';
-import 'reserve_your_stay_screen.dart';
-import 'settings_refined_screen.dart';
 
-class CuratedStaysScreen extends StatelessWidget {
+class FilteredResultsUpdatedScreen extends StatelessWidget {
   final String? location;
   final DateTimeRange? dateRange;
 
-  const CuratedStaysScreen({
+  const FilteredResultsUpdatedScreen({
     super.key,
     this.location,
     this.dateRange,
@@ -30,17 +22,18 @@ class CuratedStaysScreen extends StatelessWidget {
     required double rating,
     required double price,
     required String nightsLabel,
+    required ThemeData theme,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 18),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.98),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(26),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x33000000),
+            color: theme.shadowColor.withValues(alpha: 0.15),
             blurRadius: 18,
-            offset: Offset(0, 8),
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -67,76 +60,36 @@ class CuratedStaysScreen extends StatelessWidget {
                 width: double.infinity,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(26),
-                  child: Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEFF3F6),
-                          border: Border.all(
-                            color: const Color(0xFFD9E2E8),
-                            width: 1.2,
-                          ),
-                        ),
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.image_outlined, size: 38, color: Color(0xFFB7C3CB)),
-                              SizedBox(height: 6),
-                              Text(
-                                'Photo placeholder',
-                                style: TextStyle(
-                                  color: Color(0xFF7E8A95),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.3,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: theme.dividerColor.withValues(alpha: 0.2),
+                      border: Border.all(
+                        color: theme.dividerColor,
+                        width: 1.2,
                       ),
-                      Positioned(
-                        right: 15,
-                        top: 15,
-                        child: AnimatedBuilder(
-                          animation: FavoritesScope.of(context),
-                          builder: (context, _) {
-                            final isFav = FavoritesScope.of(context).isFavorite(title);
-                            return InkWell(
-                              borderRadius: BorderRadius.circular(999),
-                              onTap: () {
-                                FavoritesScope.of(context).toggleFavorite(
-                                  FavoriteItem(
-                                    id: title,
-                                    title: title,
-                                    subtitle: subtitle,
-                                    rating: rating.toString(),
-                                    fromText: '',
-                                    price: '\$${price.toInt()}/night',
-                                    ctaText: '',
-                                    imageAsset: '',
-                                    compactBadge: null,
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.75),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  isFav ? Icons.favorite_rounded : Icons.favorite_border,
-                                  color: isFav ? const Color(0xFF0FA37A) : const Color(0xFF0F4A42),
-                                  size: 20,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.image_outlined, 
+                            size: 38, 
+                            color: theme.iconTheme.color?.withValues(alpha: 0.5),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'image_preview_placeholder'.tr(),
+                            style: TextStyle(
+                              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -151,27 +104,27 @@ class CuratedStaysScreen extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          title,
-                          style: const TextStyle(
+                          title.tr(), // دعم ترجمة أسماء الفنادق الديناميكية إذا لزم الأمر
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
-                            color: AppTheme.kTextColor,
+                            color: theme.textTheme.titleLarge?.color,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       const SizedBox(width: 10),
-                      _RatingChip(rating: rating),
+                      _RatingChip(rating: rating, theme: theme),
                     ],
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    subtitle,
-                    style: const TextStyle(
+                    subtitle.tr(),
+                    style: TextStyle(
                       fontSize: 13.5,
                       fontWeight: FontWeight.w500,
-                      color: AppTheme.kSubTextColor,
+                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -179,9 +132,13 @@ class CuratedStaysScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      _PriceBlock(price: price, nightsLabel: nightsLabel),
+                      _PriceBlock(
+                        price: price, 
+                        nightsLabel: nightsLabel.tr(), 
+                        theme: theme,
+                      ),
                       const Spacer(),
-                      _BookNowButton(),
+                      _BookNowButton(theme: theme),
                     ],
                   ),
                 ],
@@ -197,9 +154,10 @@ class CuratedStaysScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
     final topPad = media.padding.top;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppTheme.kBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         top: true,
         bottom: false,
@@ -211,11 +169,11 @@ class CuratedStaysScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.cardColor,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
+                      color: theme.shadowColor.withValues(alpha: 0.06),
                       blurRadius: 14,
                       offset: const Offset(0, 6),
                     ),
@@ -230,46 +188,37 @@ class CuratedStaysScreen extends StatelessWidget {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF4F8F8),
+                          color: theme.dividerColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(18),
                         ),
-                        child: const Icon(Icons.arrow_back_ios_new, size: 18, color: AppTheme.kTextColor),
+                        child: Icon(Icons.arrow_back_ios_new, size: 18, color: theme.iconTheme.color),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Text(
-                            'Curated Stays',
+                            'selected_stays'.tr(),
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w900,
-                              color: AppTheme.kTextColor,
+                              color: theme.textTheme.titleLarge?.color,
                               letterSpacing: -0.2,
                             ),
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
-                            'Hand-picked stays for your trip',
+                            'selected_stays_sub'.tr(),
                             style: TextStyle(
                               fontSize: 11,
-                              color: AppTheme.kSubTextColor,
+                              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF4F8F8),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.notifications_none_outlined, size: 20, color: AppTheme.kTextColor),
                     ),
                   ],
                 ),
@@ -281,16 +230,16 @@ class CuratedStaysScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(18, 6, 18, 0),
                 child: ListView(
-                  padding: const EdgeInsets.only(bottom: 90),
+                  padding: const EdgeInsets.only(bottom: 30),
                   children: [
                     // Destination card
                     Container(
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        color: AppTheme.kPrimaryColor.withValues(alpha: 0.06),
+                        color: theme.primaryColor.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(30),
                         border: Border.all(
-                          color: AppTheme.kPrimaryColor.withValues(alpha: 0.18),
+                          color: theme.primaryColor.withValues(alpha: 0.3),
                           width: 1.2,
                         ),
                       ),
@@ -303,30 +252,30 @@ class CuratedStaysScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'DESTINATION',
+                                  'destination_label'.tr(),
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w800,
                                     letterSpacing: 1.1,
-                                    color: AppTheme.kPrimaryColor,
+                                    color: theme.primaryColor,
                                   ),
                                 ),
                                 const SizedBox(height: 10),
-                                const Text(
-                                  'Amalfi Coast, Italy',
+                                Text(
+                                  'amalfi_coast_mock'.tr(), 
                                   style: TextStyle(
                                     fontSize: 28,
                                     fontWeight: FontWeight.w900,
-                                    color: AppTheme.kTextColor,
+                                    color: theme.textTheme.titleLarge?.color,
                                   ),
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  'Oct 12 — Oct 18 • 2 Guests',
-                                  style: const TextStyle(
+                                  'trip_details_mock'.tr(),
+                                  style: TextStyle(
                                     fontSize: 13.5,
                                     fontWeight: FontWeight.w600,
-                                    color: AppTheme.kSubTextColor,
+                                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                                   ),
                                 ),
                               ],
@@ -339,7 +288,7 @@ class CuratedStaysScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const FiltersScreen(),
+                                  builder: (_) => const FiltersAdvancedScreen(),
                                 ),
                               );
                             },
@@ -347,15 +296,15 @@ class CuratedStaysScreen extends StatelessWidget {
                               margin: const EdgeInsets.only(top: 18),
                               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                               decoration: BoxDecoration(
-                                color: AppTheme.kPrimaryColor,
+                                color: theme.primaryColor,
                                 borderRadius: BorderRadius.circular(18),
                               ),
-                              child: const Text(
-                                'MODIFY',
+                              child: Text(
+                                'edit_button'.tr(),
                                 style: TextStyle(
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 0.4,
-                                  color: Colors.white,
+                                  color: theme.colorScheme.onPrimary,
                                   fontSize: 14,
                                 ),
                               ),
@@ -370,73 +319,17 @@ class CuratedStaysScreen extends StatelessWidget {
                     // Hotel cards
                     _buildHotelCard(
                       context: context,
-                      imageUrl:
-                          'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
-                      title: 'Sea View Suite',
-                      subtitle: 'Grand Miramare Resort • Positano',
+                      imageUrl: '',
+                      title: 'sea_view_suite_title',
+                      subtitle: 'grand_miramar_resort_sub',
                       rating: 4.9,
                       price: 420,
-                      nightsLabel: '/night',
-                    ),
-                    _buildHotelCard(
-                      context: context,
-                      imageUrl:
-                          'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80',
-                      title: 'Panoramic Penthouse',
-                      subtitle: 'Grand Miramare Resort • Positano',
-                      rating: 4.9,
-                      price: 850,
-                      nightsLabel: '/night',
-                    ),
-                    _buildHotelCard(
-                      context: context,
-                      imageUrl:
-                          'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1200&q=80',
-                      title: 'Terrace Double',
-                      subtitle: 'Azurea Cliffside Villa • Praiano',
-                      rating: 4.8,
-                      price: 310,
-                      nightsLabel: '/night',
+                      nightsLabel: 'per_night',
+                      theme: theme,
                     ),
                   ],
                 ),
               ),
-            ),
-
-            BymaBottomNav(
-              activeTab: BymaBottomNavTab.home,
-              onTabSelected: (tab) {
-                if (tab == BymaBottomNavTab.home) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const MainLayoutScreen()),
-                  );
-                  return;
-                }
-
-                if (tab == BymaBottomNavTab.bookings) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const BookingsScreen()),
-                  );
-                  return;
-                }
-
-                if (tab == BymaBottomNavTab.chat) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const BymaChatScreen()),
-                  );
-                  return;
-                }
-
-                if (tab == BymaBottomNavTab.profile) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const SettingsRefinedScreen()),
-                  );
-                }
-              },
             ),
           ],
         ),
@@ -447,36 +340,32 @@ class CuratedStaysScreen extends StatelessWidget {
 
 class _RatingChip extends StatelessWidget {
   final double rating;
-  const _RatingChip({required this.rating});
+  final ThemeData theme;
+  const _RatingChip({required this.rating, required this.theme});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppTheme.kSecondaryColor.withValues(alpha: 0.35),
+        color: theme.colorScheme.secondary.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: AppTheme.kSecondaryColor.withValues(alpha: 0.55),
+          color: theme.colorScheme.secondary.withValues(alpha: 0.4),
           width: 1,
         ),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.star, size: 14, color: Colors.white),
+          const Icon(Icons.star, size: 14, color: Colors.amber),
           const SizedBox(width: 4),
           Text(
             rating.toStringAsFixed(1),
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w900,
               fontSize: 13,
-              color: Colors.white,
-              shadows: [
-                Shadow(
-                  color: Colors.black,
-                  blurRadius: 10,
-                )
-              ],
+              color: theme.textTheme.titleLarge?.color,
             ),
           ),
         ],
@@ -488,36 +377,39 @@ class _RatingChip extends StatelessWidget {
 class _PriceBlock extends StatelessWidget {
   final double price;
   final String nightsLabel;
+  final ThemeData theme;
 
   const _PriceBlock({
     required this.price,
     required this.nightsLabel,
+    required this.theme,
   });
 
   @override
   Widget build(BuildContext context) {
-    return RichText(
-      text: TextSpan(
-        style: const TextStyle(
+    // استخدام Text.rich بدلاً من RichText لضمان وراثة خصائص محاذاة النص والاتجاهات الافتراضية للثيم
+    return Text.rich(
+      TextSpan(
+        style: TextStyle(
           fontWeight: FontWeight.w800,
-          color: AppTheme.kPrimaryColor,
+          color: theme.primaryColor,
           fontSize: 22,
         ),
         children: [
           TextSpan(
             text: '\$${price.toInt()}',
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w900,
               fontSize: 22,
-              color: AppTheme.kPrimaryColor,
+              color: theme.primaryColor,
             ),
           ),
           TextSpan(
-            text: nightsLabel,
-            style: const TextStyle(
+            text: ' $nightsLabel', // إضافة مسافة بادئة لتجنب الالتصاق بالرقم
+            style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 13,
-              color: AppTheme.kSubTextColor,
+              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -527,29 +419,25 @@ class _PriceBlock extends StatelessWidget {
 }
 
 class _BookNowButton extends StatelessWidget {
+  final ThemeData theme;
+  const _BookNowButton({required this.theme});
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(18),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const ReserveYourStayScreen(),
-          ),
-        );
-      },
+      onTap: () {},
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
-          color: AppTheme.kPrimaryColor,
+          color: theme.primaryColor,
           borderRadius: BorderRadius.circular(18),
         ),
-        child: const Text(
-          'BOOK NOW',
+        child: Text(
+          'book_now'.tr(),
           style: TextStyle(
             fontWeight: FontWeight.w900,
-            color: Colors.white,
+            color: theme.colorScheme.onPrimary,
             fontSize: 14,
             letterSpacing: 0.2,
           ),
@@ -558,4 +446,3 @@ class _BookNowButton extends StatelessWidget {
     );
   }
 }
-

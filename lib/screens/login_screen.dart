@@ -1,16 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart'; // استيراد حزمة الترجمة
 
-import '../constance/app_colors.dart';
 import 'main_layout_screen.dart';
 import 'sign_up_screen.dart';
-
-// ألوان Login حسب AppTheme
-const Color bymaPrimaryColor = AppTheme.kPrimaryColor;
-const Color bymaSecondaryColor = AppTheme.kBackgroundColor;
-const Color bymaTextColor = AppTheme.kTextColor;
-const Color bymaHintTextColor = AppTheme.kSubTextColor;
-const Color bymaAccentColor = AppTheme.kSecondaryColor;
-
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,14 +12,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // للتحقق من الأخطاء في حقول الإدخال
   final _formKey = GlobalKey<FormState>();
-  
-  // وحدات التحكم لاستخراج النصوص عند الحاجة
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  
-  // لإخفاء/إظهار كلمة المرور
   bool _isPasswordObscured = true;
 
   @override
@@ -39,13 +26,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // جلب ألوان وبيانات الثيم الحالي (فاتح أو داكن)
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.white, Color(0xFFF1FBFF)], 
+            colors: isDarkMode 
+                ? [theme.scaffoldBackgroundColor, theme.scaffoldBackgroundColor.withOpacity(0.85)]
+                : [Colors.white, const Color(0xFFF1FBFF)], 
           ),
         ),
         child: SafeArea(
@@ -57,29 +51,29 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const SizedBox(height: 30),
                   
-                  // شعار BYMA في الأعلى
-                  const Text(
+                  // شعار التطبيق (BYMA)
+                  Text(
                     'BYMA',
                     style: TextStyle(
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF01A7A7), 
+                      color: theme.primaryColor, 
                       letterSpacing: -1,
                     ),
                   ),
                   
                   const SizedBox(height: 40),
                   
-                  // بطاقة تسجيل الدخول المركزية بظل
+                  // بطاقة تسجيل الدخول المركزية
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.fromLTRB(30, 40, 30, 20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: theme.cardColor, 
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
+                          color: isDarkMode ? Colors.black26 : Colors.black.withOpacity(0.06),
                           blurRadius: 25,
                           offset: const Offset(0, 10),
                         ),
@@ -90,40 +84,40 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // عنوان البطاقة
-                          const Text(
-                            'Welcome back',
+                          // عنوان البطاقة مترجم
+                          Text(
+                            'welcome_back'.tr(), 
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
-                              color: bymaTextColor,
+                              color: theme.textTheme.titleLarge?.color,
                             ),
                           ),
                           const SizedBox(height: 5),
-                          const Text(
-                            'Access your curated dashboard',
+                          Text(
+                            'login_subtitle'.tr(),
                             style: TextStyle(
                               fontSize: 14,
-                              color: bymaTextColor,
+                              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
                               fontWeight: FontWeight.w400,
                             ),
                           ),
                           
                           const SizedBox(height: 45),
                           
-                          // حقل الإيميل بحدود مخصصة وعلامة مدمجة
+                          // حقل الإيميل
                           BymaCustomInput(
                             controller: _emailController,
-                            label: 'EMAIL',
-                            hintText: 'email',
+                            label: 'email_label'.tr().toUpperCase(),
+                            hintText: 'email_hint'.tr(),
                             icon: Icons.person_outline_rounded,
                             keyboardType: TextInputType.emailAddress,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
-                                return 'Please enter your email';
+                                return 'email_empty_error'.tr();
                               }
                               if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
-                                return 'Please enter a valid email address';
+                                return 'email_invalid_error'.tr();
                               }
                               return null;
                             },
@@ -134,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           // حقل كلمة المرور 
                           BymaCustomInput(
                             controller: _passwordController,
-                            label: 'PASSWORD', 
+                            label: 'password_label'.tr().toUpperCase(), 
                             hintText: '************',
                             icon: Icons.lock_outline_rounded,
                             isPassword: true,
@@ -146,10 +140,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Please enter your password';
+                                return 'password_empty_error'.tr();
                               }
                               if (value.length < 6) {
-                                return 'Password must be at least 6 characters';
+                                return 'password_length_error'.tr();
                               }
                               return null;
                             },
@@ -162,16 +156,16 @@ class _LoginScreenState extends State<LoginScreen> {
                             alignment: Alignment.centerRight,
                             child: TextButton(
                               onPressed: () {
-                                // إضافة منطق استعادة كلمة المرور
+                                // منطق استعادة كلمة المرور
                               },
                               style: TextButton.styleFrom(
                                 padding: EdgeInsets.zero,
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
-                              child: const Text(
-                                'Forgotten your key?',
+                              child: Text(
+                                'forgot_password'.tr(),
                                 style: TextStyle(
-                                  color: bymaAccentColor,
+                                  color: theme.colorScheme.secondary, 
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -183,16 +177,16 @@ class _LoginScreenState extends State<LoginScreen> {
                           
                           // زر تسجيل الدخول الأساسي
                           BymaButton(
-  text: 'LOGIN',
-  onPressed: () {
-    if (_formKey.currentState!.validate()) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const MainLayoutScreen(),
-        ),
-      );
-    }
-  },
+                            text: 'login_button'.tr(),
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                    builder: (context) => const MainLayoutScreen(),
+                                  ),
+                                );
+                              }
+                            },
                           ),
                           
                           const SizedBox(height: 25),
@@ -203,26 +197,26 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Text(
-                                  "Don't have an account? ",
+                                Text(
+                                  'dont_have_account'.tr(),
                                   style: TextStyle(
-                                    color: bymaTextColor,
+                                    color: theme.textTheme.bodyMedium?.color,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w400,
                                   ),
                                 ),
-                               GestureDetector(
-  onTap: () {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const SignUpScreen(), // تأكدي من إزالة const إذا استمر الخطأ
-      ),
-    );
-  },
-                                  child: const Text(
-                                    'Register Now',
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => const SignUpScreen(),
+                                      ),
+                                    );
+                                  },
+                                  child: Text(
+                                    'register_now'.tr(),
                                     style: TextStyle(
-                                      color: bymaPrimaryColor,
+                                      color: theme.primaryColor,
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -246,7 +240,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-// عنصر إدخال مخصص مُعدل لدعم الـ Validation والـ Controllers
+// عنصر إدخال مخصص يدعم اللغات والثيم تلقائياً
 class BymaCustomInput extends StatelessWidget {
   final String label;
   final String hintText;
@@ -273,87 +267,68 @@ class BymaCustomInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none, 
-      children: [
-        TextFormField(
-          controller: controller,
-          validator: validator,
-          obscureText: isPassword && isPasswordObscured,
-          keyboardType: keyboardType,
-          style: const TextStyle(
-            color: bymaTextColor,
-            fontSize: 16,
-            height: 1.2,
-          ),
-          decoration: InputDecoration(
-            hintText: hintText,
-            hintStyle: const TextStyle(
-              color: bymaHintTextColor,
-              fontSize: 16,
-              letterSpacing: 0.5,
-            ),
-            prefixIcon: Container(
-              padding: const EdgeInsets.only(left: 14, right: 10),
-              child: Icon(
-                icon,
-                color: bymaTextColor.withOpacity(0.8),
-                size: 22, 
-              ),
-            ),
-            suffixIcon: isPassword
-                ? IconButton(
-                    icon: Icon(
-                      isPasswordObscured ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                      color: bymaTextColor.withOpacity(0.5),
-                    ),
-                    onPressed: onVisibilityToggle,
-                  )
-                : null,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.withOpacity(0.3), width: 1.5), 
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: bymaPrimaryColor, width: 2.2), 
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.redAccent, width: 1.8), 
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.redAccent, width: 2.2),
-            ),
-          ),
+    final theme = Theme.of(context);
+    
+    return TextFormField(
+      controller: controller,
+      validator: validator,
+      obscureText: isPassword && isPasswordObscured,
+      keyboardType: keyboardType,
+      style: TextStyle(
+        color: theme.textTheme.bodyLarge?.color,
+        fontSize: 16,
+      ),
+      decoration: InputDecoration(
+        labelText: label, // يدعم الـ RTL والـ LTR تلقائياً حسب لغة الجهاز
+        labelStyle: TextStyle(
+          color: theme.hintColor,
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.8,
         ),
-        
-        // التسمية العلوية (Label)
-        Positioned(
-          left: 14,
-          top: -9, 
-          child: Container(
-            color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            child: Text(
-              label,
-              style: const TextStyle(
-                color: bymaHintTextColor,
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.8,
-              ),
-            ),
-          ),
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+        hintText: hintText,
+        hintStyle: TextStyle(
+          color: theme.hintColor.withOpacity(0.6),
+          fontSize: 15,
         ),
-      ],
+        prefixIcon: Icon(
+          icon,
+          color: theme.iconTheme.color?.withOpacity(0.7) ?? theme.primaryColor,
+          size: 22, 
+        ),
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  isPasswordObscured ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  color: theme.hintColor,
+                ),
+                onPressed: onVisibilityToggle,
+              )
+            : null,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: theme.dividerColor, width: 1.5), 
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: theme.primaryColor, width: 2.2), 
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: theme.colorScheme.error, width: 1.8), 
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: theme.colorScheme.error, width: 2.2),
+        ),
+      ),
     );
   }
 }
 
-// زر BYMA الأساسي
+// زر مخصص متناسق مع الثيم
 class BymaButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
@@ -366,19 +341,21 @@ class BymaButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return SizedBox(
       width: double.infinity,
       height: 52,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: bymaPrimaryColor,
-          elevation: 5,
-          shadowColor: bymaPrimaryColor.withOpacity(0.3),
+          backgroundColor: theme.primaryColor,
+          foregroundColor: theme.colorScheme.onPrimary, 
+          elevation: 4,
+          shadowColor: theme.primaryColor.withOpacity(0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -386,16 +363,15 @@ class BymaButton extends StatelessWidget {
             Text(
               text,
               style: const TextStyle(
-                color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2,
               ),
             ),
             const SizedBox(width: 8),
+            // قمنا بإزالة السهم الثابت أو يمكنك تركه، لكن يفضل بالترجمة البرمجية تركه يتجه مع اتجاه النص
             const Icon(
               Icons.arrow_forward_rounded,
-              color: Colors.white,
               size: 22,
             ),
           ],

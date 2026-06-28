@@ -1,8 +1,9 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:easy_localization/easy_localization.dart';
 
+import '../main.dart'; // للتحكم بالثيمات الثلاثة
 import 'bookings_screen.dart';
 import 'messages_final_navigation.dart';
 import 'main_layout_screen.dart';
@@ -19,7 +20,6 @@ class SettingsRefinedScreen extends StatefulWidget {
 }
 
 class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
-  bool _themeOn = false;
   XFile? _avatarXFile;
 
   Future<void> _pickAvatar(ImageSource source) async {
@@ -35,11 +35,10 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bg = const Color(0xFFF2F6F7);
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: bg,
-      // موجود دائماً "آخر الواجهة" حتى لو فتحت SettingsRefinedScreen من أي مكان
+      backgroundColor: theme.scaffoldBackgroundColor,
       bottomNavigationBar: BymaBottomNav(
         activeTab: BymaBottomNavTab.profile,
         onTabSelected: (tab) {
@@ -58,10 +57,9 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
             return;
           }
           if (tab == BymaBottomNavTab.profile) {
-            return; // نفس الصفحة
+            return;
           }
           if (tab == BymaBottomNavTab.home) {
-            // Home بتنقلك للـ layout اللي فيه الـ BottomNav ويدير الـ tabs
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (_) => const MainLayoutScreen()),
@@ -78,31 +76,31 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
             children: [
               const SizedBox(height: 8),
 
-              // Top row: BYMA + bell
+              // الأعلى: الاسم والإشعارات
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'BYMA',
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.5,
                       fontSize: 18,
-                      color: Color(0xFF0B2530),
+                      color: theme.colorScheme.primary,
                     ),
                   ),
                   Container(
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.85),
+                      color: theme.cardColor,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.black.withOpacity(0.06)),
+                      border: Border.all(color: theme.dividerColor),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.notifications_none_outlined,
                       size: 18,
-                      color: Color(0xFF0B2530),
+                      color: theme.colorScheme.primary,
                     ),
                   ),
                 ],
@@ -110,7 +108,7 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
 
               const SizedBox(height: 18),
 
-              // Avatar card
+              // الصورة الشخصية (الأفاتار)
               Center(
                 child: Stack(
                   clipBehavior: Clip.none,
@@ -123,13 +121,6 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                       decoration: BoxDecoration(
                         color: const Color(0xFF072332).withOpacity(0.85),
                         borderRadius: BorderRadius.circular(22),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF072332).withOpacity(0.18),
-                            blurRadius: 18,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(18),
@@ -143,12 +134,6 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                                       Color(0xFF0B2B3A),
                                       Color(0xFF0D3A4E),
                                     ],
-                                  ),
-                                ),
-                                child: const Center(
-                                  child: SizedBox(
-                                    width: 54,
-                                    height: 70,
                                   ),
                                 ),
                               )
@@ -170,26 +155,22 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                           showDialog<void>(
                             context: context,
                             builder: (ctx) => AlertDialog(
-                              title: const Text('Change photo'),
-                              content: const Text('Select from Camera or Gallery'),
+                              title: Text('change_photo_title'.tr()),
+                              content: Text('change_photo_subtitle'.tr()),
                               actions: [
                                 TextButton(
                                   onPressed: () async {
                                     Navigator.of(ctx).pop();
                                     await _pickAvatar(ImageSource.camera);
                                   },
-                                  child: const Text('Camera'),
+                                  child: Text('camera_option'.tr()),
                                 ),
                                 TextButton(
                                   onPressed: () async {
                                     Navigator.of(ctx).pop();
                                     await _pickAvatar(ImageSource.gallery);
                                   },
-                                  child: const Text('Gallery'),
-                                ),
-                                TextButton(
-                                  onPressed: () => Navigator.of(ctx).pop(),
-                                  child: const Text('Cancel'),
+                                  child: Text('gallery_option'.tr()),
                                 ),
                               ],
                             ),
@@ -201,23 +182,12 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: const Color(0xFF4FC3C9),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF4FC3C9).withOpacity(0.35),
-                                blurRadius: 14,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
                             border: Border.all(
                               width: 3,
-                              color: bg,
+                              color: theme.scaffoldBackgroundColor,
                             ),
                           ),
-                          child: const Icon(
-                            Icons.edit,
-                            size: 18,
-                            color: Color(0xFF08313F),
-                          ),
+                          child: const Icon(Icons.edit, size: 18, color: Color(0xFF08313F)),
                         ),
                       ),
                     ),
@@ -227,31 +197,28 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
 
               const SizedBox(height: 10),
 
-              // Name + premium badge
+              // الاسم وعضوية بريميوم
               Center(
                 child: Column(
                   children: [
-                    const Text(
+                    Text(
                       'Alex Curator',
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF072332),
+                        color: theme.colorScheme.primary,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 7,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
                       decoration: BoxDecoration(
                         color: const Color(0xFFBFE6F2).withOpacity(0.65),
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: const Text(
-                        'PREMIUM MEMBER',
-                        style: TextStyle(
+                      child: Text(
+                        'premium_member_badge'.tr(),
+                        style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 1.4,
@@ -265,12 +232,12 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
 
               const SizedBox(height: 26),
 
-              // 2-column stats
+              // الإحصائيات (الكرت الثنائي)
               Row(
                 children: [
                   Expanded(
                     child: _StatCard(
-                      title: 'ACTIVE RENTALS',
+                      title: 'active_rentals_label'.tr(),
                       value: '03',
                       icon: Icons.home_outlined,
                     ),
@@ -278,7 +245,7 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                   const SizedBox(width: 14),
                   Expanded(
                     child: _StatCard(
-                      title: 'POINTS EARNED',
+                      title: 'points_earned_label'.tr(),
                       value: '1,240',
                       icon: Icons.stars_outlined,
                     ),
@@ -288,42 +255,38 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
 
               const SizedBox(height: 22),
 
-              _SectionTitle(title: 'Manage Experience'),
+              _SectionTitle(title: 'manage_experience_section'.tr()),
               const SizedBox(height: 10),
 
-                  _ActionGroup(
+              _ActionGroup(
                 items: [
                   _SettingRow(
-                    leading: _CircleIcon(
-                      bg: const Color(0xFFD7F0F6),
-                      iconBg: const Color(0xFF2F7F8F),
+                    leading: const _CircleIcon(
+                      bg: Color(0xFFD7F0F6),
+                      iconBg: Color(0xFF2F7F8F),
                       icon: Icons.favorite_border,
                     ),
-                    title: 'Favorites',
+                    title: 'favorites_title'.tr(),
                     trailingIcon: Icons.chevron_right,
                     onTap: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const FavoritesScreen(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const FavoritesScreen()),
                       );
                     },
                   ),
                   const _SettingDivider(),
                   _SettingRow(
-                    leading: _CircleIcon(
-                      bg: const Color(0xFFD4E9EA),
-                      iconBg: const Color(0xFF0F8E88),
+                    leading: const _CircleIcon(
+                      bg: Color(0xFFD4E9EA),
+                      iconBg: Color(0xFF0F8E88),
                       icon: Icons.account_balance_wallet_outlined,
                     ),
-                    title: 'Payment & Wallet',
-                    subtitle: 'VISA •• 42',
+                    title: 'payment_wallet_title'.tr(),
+                    subtitle: 'payment_wallet_subtitle'.tr(),
                     trailingIcon: Icons.chevron_right,
                     onTap: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const WalletRewardsScreen(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const WalletRewardsScreen()),
                       );
                     },
                   ),
@@ -332,24 +295,22 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
 
               const SizedBox(height: 22),
 
-              _SectionTitle(title: 'Preferences'),
+              _SectionTitle(title: 'preferences_section'.tr()),
               const SizedBox(height: 10),
 
               _ActionGroup(
                 items: [
                   _SettingRow(
-                    leading: _CircleIcon(
-                      bg: const Color(0xFFD8E2E6),
-                      iconBg: const Color(0xFF576E7C),
+                    leading: const _CircleIcon(
+                      bg: Color(0xFFD8E2E6),
+                      iconBg: Color(0xFF576E7C),
                       icon: Icons.settings_outlined,
                     ),
-                    title: 'Account Settings',
+                    title: 'account_settings_title'.tr(),
                     trailingIcon: Icons.chevron_right,
                     onTap: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const ProfileSecurityUpdated(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const ProfileSecurityUpdated()),
                       );
                     },
                   ),
@@ -358,95 +319,126 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
 
               const SizedBox(height: 22),
 
-              _SectionTitle(title: 'Accessibility'),
+              _SectionTitle(title: 'accessibility_section'.tr()),
               const SizedBox(height: 10),
 
               _ActionGroup(
                 items: [
                   _SettingRow(
-                    leading: _CircleIcon(
-                      bg: const Color(0xFFD8E2E6),
-                      iconBg: const Color(0xFF576E7C),
+                    leading: const _CircleIcon(
+                      bg: Color(0xFFD8E2E6),
+                      iconBg: Color(0xFF576E7C),
                       icon: Icons.language_outlined,
                     ),
-                    title: 'Language',
+                    title: 'language_title'.tr(),
                     trailingWidget: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
+                      children: [
                         Text(
-                          'EN',
+                          context.locale.languageCode.toUpperCase(),
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF0F4B61),
+                            color: theme.colorScheme.primary,
                             fontSize: 12,
                           ),
                         ),
-                        SizedBox(width: 10),
-                        Icon(
-                          Icons.keyboard_arrow_down,
-                          size: 18,
-                          color: Color(0xFF0F4B61),
-                        ),
+                        const SizedBox(width: 10),
+                        Icon(Icons.swap_horiz, size: 18, color: theme.colorScheme.primary),
                       ],
                     ),
-                    onTap: () {},
+                    onTap: () {
+                      if (context.locale.languageCode == 'en') {
+                        context.setLocale(const Locale('ar'));
+                      } else {
+                        context.setLocale(const Locale('en'));
+                      }
+                    },
                   ),
                   const _SettingDivider(),
                   _SettingRow(
-                    leading: _CircleIcon(
-                      bg: const Color(0xFFD8E2E6),
-                      iconBg: const Color(0xFF576E7C),
-                      icon: Icons.nightlight_round_outlined,
+                    leading: const _CircleIcon(
+                      bg: Color(0xFFD8E2E6),
+                      iconBg: Color(0xFF576E7C),
+                      icon: Icons.palette_outlined,
                     ),
-                    title: 'Theme',
-                    trailingWidget: Switch(
-                      value: _themeOn,
-                      activeColor: const Color(0xFF0FA37A),
-                      inactiveThumbColor: Colors.white,
-                      inactiveTrackColor: const Color(0xFFD5DADF),
-                      onChanged: (v) => setState(() => _themeOn = v),
-                    ),
-                    onTap: () {},
+                    title: 'theme_title'.tr(),
+                    trailingIcon: Icons.arrow_drop_down,
+                    onTap: () {
+                      showModalBottomSheet<void>(
+                        context: context,
+                        backgroundColor: theme.cardColor,
+                        builder: (ctx) => SafeArea(
+                          child: Wrap(
+                            children: [
+                              ListTile(
+                                leading: const Icon(Icons.wb_sunny_outlined),
+                                title: Text('theme_light'.tr(), style: TextStyle(color: theme.colorScheme.primary)),
+                                onTap: () {
+                                  BymaApp.of(context)?.changeTheme('light');
+                                  Navigator.pop(ctx);
+                                },
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.nightlight_round_outlined),
+                                title: Text('theme_dark'.tr(), style: TextStyle(color: theme.colorScheme.primary)),
+                                onTap: () {
+                                  BymaApp.of(context)?.changeTheme('dark');
+                                  Navigator.pop(ctx);
+                                },
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.visibility_outlined, color: Colors.yellow),
+                                title: Text('theme_high_contrast'.tr(), style: TextStyle(color: theme.colorScheme.primary)),
+                                onTap: () {
+                                  BymaApp.of(context)?.changeTheme('high_contrast');
+                                  Navigator.pop(ctx);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
 
               const SizedBox(height: 22),
 
-              _SectionTitle(title: 'Policies & Legal'),
+              _SectionTitle(title: 'policies_legal_section'.tr()),
               const SizedBox(height: 10),
 
               _ActionGroup(
                 items: [
                   _SettingRow(
-                    leading: _CircleIcon(
-                      bg: const Color(0xFFD8E2E6),
-                      iconBg: const Color(0xFF576E7C),
+                    leading: const _CircleIcon(
+                      bg: Color(0xFFD8E2E6),
+                      iconBg: Color(0xFF576E7C),
                       icon: Icons.description_outlined,
                     ),
-                    title: 'Compensation Policy',
+                    title: 'compensation_policy_title'.tr(),
                     trailingIcon: Icons.chevron_right,
                     onTap: () {},
                   ),
                   const _SettingDivider(),
                   _SettingRow(
-                    leading: _CircleIcon(
-                      bg: const Color(0xFFD8E2E6),
-                      iconBg: const Color(0xFF576E7C),
+                    leading: const _CircleIcon(
+                      bg: Color(0xFFD8E2E6),
+                      iconBg: Color(0xFF576E7C),
                       icon: Icons.event_note_outlined,
                     ),
-                    title: 'Cancellation Terms',
+                    title: 'cancellation_terms_title'.tr(),
                     trailingIcon: Icons.chevron_right,
                     onTap: () {},
                   ),
                   const _SettingDivider(),
                   _SettingRow(
-                    leading: _CircleIcon(
-                      bg: const Color(0xFFD8E2E6),
-                      iconBg: const Color(0xFF576E7C),
+                    leading: const _CircleIcon(
+                      bg: Color(0xFFD8E2E6),
+                      iconBg: Color(0xFF576E7C),
                       icon: Icons.gavel_outlined,
                     ),
-                    title: 'Legal Accountability',
+                    title: 'legal_accountability_title'.tr(),
                     trailingIcon: Icons.chevron_right,
                     onTap: () {},
                   ),
@@ -455,39 +447,37 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
 
               const SizedBox(height: 22),
 
-              // Logout button
-              Container(
-                height: 52,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF0E9EC),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
+              // زر تسجيل الخروج
+              InkWell(
+                onTap: () {
+                  // أضف منطق تسجيل الخروج هنا إذا رغبت
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  height: 52,
+                  decoration: BoxDecoration(
                     color: const Color(0xFFF0E9EC),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                ),
-                child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(
-                        Icons.logout,
-                        size: 18,
-                        color: Color(0xFFEF3A2D),
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        'LOGOUT FROM BYMA',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFFEF3A2D),
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.logout, size: 18, color: Color(0xFFEF3A2D)),
+                        const SizedBox(width: 10),
+                        Text(
+                          'logout_button_text'.tr(),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFFEF3A2D),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-
               const SizedBox(height: 8),
             ],
           ),
@@ -502,22 +492,17 @@ class _StatCard extends StatelessWidget {
   final String value;
   final IconData icon;
 
-  const _StatCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-  });
+  const _StatCard({required this.title, required this.value, required this.icon});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       height: 90,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.55),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: const Color(0xFF1F2937).withOpacity(0.06),
-        ),
+        border: Border.all(color: theme.dividerColor),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
@@ -541,24 +526,17 @@ class _StatCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFFEFF9FA),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: const Color(0xFF0F8E88).withOpacity(0.14),
-                  ),
                 ),
-                child: Icon(
-                  icon,
-                  size: 18,
-                  color: const Color(0xFF0F4B61),
-                ),
+                child: Icon(icon, size: 18, color: const Color(0xFF0F4B61)),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w900,
-                    color: Color(0xFF072332),
+                    color: theme.colorScheme.primary,
                   ),
                 ),
               ),
@@ -572,7 +550,6 @@ class _StatCard extends StatelessWidget {
 
 class _SectionTitle extends StatelessWidget {
   final String title;
-
   const _SectionTitle({required this.title});
 
   @override
@@ -591,20 +568,18 @@ class _SectionTitle extends StatelessWidget {
 
 class _ActionGroup extends StatelessWidget {
   final List<Widget> items;
-
   const _ActionGroup({required this.items});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.55),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF1F2937).withOpacity(0.06)),
+        border: Border.all(color: theme.dividerColor),
       ),
-      child: Column(
-        children: items,
-      ),
+      child: Column(children: items),
     );
   }
 }
@@ -614,11 +589,7 @@ class _SettingDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Divider(
-      height: 1,
-      thickness: 1,
-      color: const Color(0xFF1F2937).withOpacity(0.06),
-    );
+    return Divider(height: 1, thickness: 1, color: Theme.of(context).dividerColor);
   }
 }
 
@@ -641,18 +612,8 @@ class _SettingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget trailing;
-    if (trailingWidget != null) {
-      trailing = trailingWidget!;
-    } else if (trailingIcon != null) {
-      trailing = Icon(
-        trailingIcon,
-        size: 18,
-        color: const Color(0xFF0B2530),
-      );
-    } else {
-      trailing = const SizedBox.shrink();
-    }
+    final theme = Theme.of(context);
+    final Widget trailing = trailingWidget ?? (trailingIcon != null ? Icon(trailingIcon, size: 18, color: theme.colorScheme.primary) : const SizedBox.shrink());
 
     return InkWell(
       onTap: onTap,
@@ -660,7 +621,6 @@ class _SettingRow extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             leading,
             const SizedBox(width: 12),
@@ -670,22 +630,11 @@ class _SettingRow extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF072332),
-                    ),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: theme.colorScheme.primary),
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 4),
-                    Text(
-                      subtitle!,
-                      style: const TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF7C8FA0),
-                      ),
-                    ),
+                    Text(subtitle!, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF7C8FA0))),
                   ],
                 ],
               ),
@@ -703,21 +652,14 @@ class _CircleIcon extends StatelessWidget {
   final Color iconBg;
   final IconData icon;
 
-  const _CircleIcon({
-    required this.bg,
-    required this.iconBg,
-    required this.icon,
-  });
+  const _CircleIcon({required this.bg, required this.iconBg, required this.icon});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 42,
       height: 42,
-      decoration: BoxDecoration(
-        color: bg,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
       child: Center(
         child: Container(
           width: 28,
@@ -725,13 +667,8 @@ class _CircleIcon extends StatelessWidget {
           decoration: BoxDecoration(
             color: iconBg.withOpacity(0.14),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: iconBg.withOpacity(0.28)),
           ),
-          child: Icon(
-            icon,
-            size: 16,
-            color: iconBg,
-          ),
+          child: Icon(icon, size: 16, color: iconBg),
         ),
       ),
     );

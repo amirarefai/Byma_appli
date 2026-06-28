@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
-class FiltersScreen extends StatefulWidget {
-  const FiltersScreen({super.key});
+class FiltersAdvancedScreen extends StatefulWidget {
+  const FiltersAdvancedScreen({super.key});
 
   @override
-  State<FiltersScreen> createState() => _FiltersScreenState();
+  State<FiltersAdvancedScreen> createState() => _FiltersAdvancedScreenState();
 }
 
-class _FiltersScreenState extends State<FiltersScreen> {
+class _FiltersAdvancedScreenState extends State<FiltersAdvancedScreen> {
   RangeValues _priceRange = const RangeValues(120, 850);
 
   int _adults = 2;
   int _children = 0;
 
- String _roomPrefs = '';
-
+  String _roomPrefs = '';
   String? _bedType = 'King';
   String? _floorPref = 'Mid';
 
@@ -27,25 +27,45 @@ class _FiltersScreenState extends State<FiltersScreen> {
   bool _stepFreeAccess = true;
   bool _petFriendly = false;
 
+  // دالة مساعدة لجلب الألوان بناءً على حالة السطوع العالي أو الثيم الحالي
+  Color _getAdaptiveColor(BuildContext context, {required Color light, required Color dark, required Color highContrast}) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final isHighContrast = theme.colorScheme.primary == Colors.black || theme.colorScheme.primary == Colors.white; 
+
+    if (isHighContrast) return highContrast;
+    return isDark ? dark : light;
+  }
+
   Widget _switchRow({
+    required BuildContext context,
     required bool value,
     required ValueChanged<bool> onChanged,
     required IconData icon,
     required String title,
     required String subtitle,
   }) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: _getAdaptiveColor(context, 
+          light: Colors.grey.shade100, 
+          dark: Colors.grey.shade900, 
+          highContrast: Colors.black
+        ),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withAlpha(50),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 22,
-            backgroundColor: Colors.blue.shade50,
-            child: Icon(icon, size: 18, color: Colors.blue.shade700),
+            backgroundColor: theme.colorScheme.primary.withAlpha(30),
+            child: Icon(icon, size: 18, color: theme.colorScheme.primary),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -54,14 +74,18 @@ class _FiltersScreenState extends State<FiltersScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800, 
+                    fontSize: 14,
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
                   style: TextStyle(
                     fontSize: 11.5,
-                    color: Colors.grey.shade600,
+                    color: theme.colorScheme.onSurface.withAlpha(150),
                     height: 1.2,
                   ),
                 ),
@@ -71,7 +95,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFF0FA37A),
+            activeColor: theme.colorScheme.primary,
           ),
         ],
       ),
@@ -79,22 +103,32 @@ class _FiltersScreenState extends State<FiltersScreen> {
   }
 
   Widget _toggleRow({
+    required BuildContext context,
     required bool value,
     required ValueChanged<bool> onChanged,
     required IconData icon,
     required String title,
     required String subtitle,
   }) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: _getAdaptiveColor(context, 
+          light: Colors.grey.shade100, 
+          dark: Colors.grey.shade900, 
+          highContrast: Colors.black
+        ),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withAlpha(50),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: const Color(0xFF0FA37A)),
+          Icon(icon, size: 18, color: theme.colorScheme.primary),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -102,7 +136,11 @@ class _FiltersScreenState extends State<FiltersScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900, 
+                    fontSize: 14,
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
                 if (subtitle.isNotEmpty) ...[
                   const SizedBox(height: 2),
@@ -110,7 +148,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
                     subtitle,
                     style: TextStyle(
                       fontSize: 11.5,
-                      color: Colors.grey.shade600,
+                      color: theme.colorScheme.onSurface.withAlpha(150),
                       height: 1.2,
                     ),
                   ),
@@ -121,7 +159,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFF0FA37A),
+            activeColor: theme.colorScheme.primary,
           ),
         ],
       ),
@@ -129,13 +167,24 @@ class _FiltersScreenState extends State<FiltersScreen> {
   }
 
   Widget _circlePref({
+    required BuildContext context,
     required bool selected,
     required String label,
     required IconData icon,
-    Color selectedColor = const Color(0xFF7FE6D2),
-    Color unselectedBg = const Color(0xFFECEFF2),
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
+    
+    final selectedBg = theme.colorScheme.primary;
+    final unselectedBg = _getAdaptiveColor(context, 
+      light: const Color(0xFFECEFF2), 
+      dark: Colors.grey.shade800, 
+      highContrast: Colors.black
+    );
+
+    final selectedContentColor = theme.colorScheme.onPrimary;
+    final unselectedContentColor = theme.colorScheme.onSurface;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -144,11 +193,15 @@ class _FiltersScreenState extends State<FiltersScreen> {
         height: 74,
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: selected ? selectedColor : unselectedBg,
+          color: selected ? selectedBg : unselectedBg,
           borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected ? theme.colorScheme.primary : theme.colorScheme.outline.withAlpha(80),
+            width: 1.5,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: selected ? 0.08 : 0.04),
+              color: Colors.black.withAlpha((selected ? 0.08 * 255 : 0.04 * 255).round()),
               blurRadius: selected ? 14 : 10,
               offset: const Offset(0, 6),
             ),
@@ -157,13 +210,13 @@ class _FiltersScreenState extends State<FiltersScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 18, color: selected ? Colors.white : const Color(0xFF2B2F33)),
+            Icon(icon, size: 18, color: selected ? selectedContentColor : unselectedContentColor),
             const SizedBox(height: 8),
             Text(
               label,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: selected ? Colors.white : const Color(0xFF2B2F33),
+                color: selected ? selectedContentColor : unselectedContentColor,
                 fontWeight: FontWeight.w900,
                 fontSize: 12,
               ),
@@ -174,48 +227,27 @@ class _FiltersScreenState extends State<FiltersScreen> {
     );
   }
 
-  Widget _pillPref({
-    required bool selected,
-    required String label,
-    required VoidCallback onTap,
-    Color selectedBg = const Color(0xFF7FE6D2),
-    Color unselectedBg = const Color(0xFFECEFF2),
-    Color? selectedTextColor,
-    Color? unselectedTextColor,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 13),
-        decoration: BoxDecoration(
-          color: selected ? selectedBg : unselectedBg,
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected ? (selectedTextColor ?? Colors.white) : (unselectedTextColor ?? const Color(0xFF2B2F33)),
-            fontWeight: FontWeight.w900,
-            fontSize: 13,
-          ),
-        ),
-      ),
-    );
-  }
-
-
   Widget _guestCard({
+    required BuildContext context,
     required String title,
     required int value,
     required VoidCallback onMinus,
     required VoidCallback onPlus,
   }) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: _getAdaptiveColor(context, 
+          light: Colors.grey.shade100, 
+          dark: Colors.grey.shade900, 
+          highContrast: Colors.black
+        ),
         borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: theme.colorScheme.outline.withAlpha(50),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
@@ -223,18 +255,18 @@ class _FiltersScreenState extends State<FiltersScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'STAY WITH US',
+                Text(
+                  'STAY_WITH_US'.tr(),
                   style: TextStyle(
                     fontSize: 11.5,
                     fontWeight: FontWeight.w800,
-                    color: Colors.grey,
+                    color: theme.colorScheme.onSurface.withAlpha(120),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
                 ),
               ],
             ),
@@ -246,16 +278,16 @@ class _FiltersScreenState extends State<FiltersScreen> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: theme.colorScheme.outline.withAlpha(40),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.remove, color: Colors.black54),
+              child: Icon(Icons.remove, color: theme.colorScheme.onSurface.withAlpha(180)),
             ),
           ),
           const SizedBox(width: 6),
           Text(
             '$value',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
           ),
           const SizedBox(width: 6),
           IconButton(
@@ -264,10 +296,10 @@ class _FiltersScreenState extends State<FiltersScreen> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFF1FB0A0),
+                color: theme.colorScheme.primary,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.add, color: Colors.white),
+              child: Icon(Icons.add, color: theme.colorScheme.onPrimary),
             ),
           ),
         ],
@@ -282,7 +314,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6FAFA),
+      backgroundColor: theme.colorScheme.surface,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(110),
         child: SafeArea(
@@ -291,11 +323,12 @@ class _FiltersScreenState extends State<FiltersScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: _getAdaptiveColor(context, light: Colors.white, dark: Colors.grey.shade900, highContrast: Colors.black),
                 borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: theme.colorScheme.outline.withAlpha(60), width: 1.2),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
+                    color: Colors.black.withAlpha((0.06 * 255).round()),
                     blurRadius: 14,
                     offset: const Offset(0, 6),
                   ),
@@ -309,11 +342,12 @@ class _FiltersScreenState extends State<FiltersScreen> {
                     child: Container(
                       width: 40,
                       height: 40,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF4F8F8),
-                        borderRadius: BorderRadius.all(Radius.circular(18)),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: const BorderRadius.all(Radius.circular(18)),
+                        border: Border.all(color: theme.colorScheme.outline.withAlpha(40)),
                       ),
-                      child: const Icon(Icons.arrow_back_ios_new, size: 18, color: Color(0xFF263238)),
+                      child: Icon(Icons.arrow_back_ios_new, size: 18, color: theme.colorScheme.onSurface),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -321,22 +355,22 @@ class _FiltersScreenState extends State<FiltersScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
+                      children: [
                         Text(
-                          'Advanced Filters',
+                          'ADVANCED_FILTERS'.tr(),
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w900,
-                            color: Color(0xFF263238),
+                            color: theme.colorScheme.onSurface,
                             letterSpacing: -0.2,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
-                          'Refine your perfect stay',
+                          'REFINE_YOUR_PERFECT_STAY'.tr(),
                           style: TextStyle(
                             fontSize: 11,
-                            color: Color(0xFF90A4AE),
+                            color: theme.colorScheme.onSurface.withAlpha(140),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -349,7 +383,9 @@ class _FiltersScreenState extends State<FiltersScreen> {
                         _priceRange = const RangeValues(120, 850);
                         _adults = 2;
                         _children = 0;
-                        _roomPrefs = 'Sea';
+                        _roomPrefs = '';
+                        _bedType = 'King';
+                        _floorPref = 'Mid';
                         _privatePool = true;
                         _balcony = false;
                         _breakfastIncluded = false;
@@ -359,10 +395,10 @@ class _FiltersScreenState extends State<FiltersScreen> {
                         _petFriendly = false;
                       });
                     },
-                    child: const Text(
-                      'Reset',
+                    child: Text(
+                      'RESET'.tr(),
                       style: TextStyle(
-                        color: Color(0xFF0FA37A),
+                        color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w800,
                         fontSize: 13,
                       ),
@@ -376,7 +412,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
             const SizedBox(height: 6),
 
@@ -384,12 +420,12 @@ class _FiltersScreenState extends State<FiltersScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: _getAdaptiveColor(context, light: Colors.white, dark: Colors.grey.shade900, highContrast: Colors.black),
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: const Color(0xFFE5EEEC), width: 1.2),
+                border: Border.all(color: theme.colorScheme.outline.withAlpha(60), width: 1.2),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
+                    color: Colors.black.withAlpha((0.04 * 255).round()),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),
@@ -398,9 +434,9 @@ class _FiltersScreenState extends State<FiltersScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Price Range',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF263238)),
+                  Text(
+                    'PRICE_RANGE'.tr(),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
                   ),
                   const SizedBox(height: 10),
                   Row(
@@ -410,20 +446,20 @@ class _FiltersScreenState extends State<FiltersScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'MINIMUM',
+                            'MINIMUM'.tr(),
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w900,
-                              color: Colors.grey.shade500,
+                              color: theme.colorScheme.onSurface.withAlpha(140),
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             _formatPrice(_priceRange.start),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w900,
                               fontSize: 18,
-                              color: Color(0xFF0FA37A),
+                              color: theme.colorScheme.primary,
                             ),
                           ),
                         ],
@@ -432,20 +468,20 @@ class _FiltersScreenState extends State<FiltersScreen> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            'MAXIMUM',
+                            'MAXIMUM'.tr(),
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w900,
-                              color: Colors.grey.shade500,
+                              color: theme.colorScheme.onSurface.withAlpha(140),
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             _formatPrice(_priceRange.end),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w900,
                               fontSize: 18,
-                              color: Color(0xFF0FA37A),
+                              color: theme.colorScheme.primary,
                             ),
                           ),
                         ],
@@ -467,8 +503,8 @@ class _FiltersScreenState extends State<FiltersScreen> {
                         _priceRange = values;
                       });
                     },
-                    activeColor: const Color(0xFF0FA37A),
-                    inactiveColor: Colors.grey.shade300,
+                    activeColor: theme.colorScheme.primary,
+                    inactiveColor: theme.colorScheme.outline.withAlpha(60),
                   ),
                 ],
               ),
@@ -477,40 +513,26 @@ class _FiltersScreenState extends State<FiltersScreen> {
             const SizedBox(height: 24),
 
             // Guest selection
-            const Text(
-              'Guest selection',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+            Text(
+              'GUEST_SELECTION'.tr(),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
             ),
             const SizedBox(height: 10),
 
             _guestCard(
-              title: 'Adults',
+              context: context,
+              title: 'ADULTS'.tr(),
               value: _adults,
-              onMinus: () {
-                setState(() {
-                  _adults = (_adults - 1).clamp(0, 99);
-                });
-              },
-              onPlus: () {
-                setState(() {
-                  _adults = (_adults + 1).clamp(0, 99);
-                });
-              },
+              onMinus: () => setState(() => _adults = (_adults - 1).clamp(0, 99)),
+              onPlus: () => setState(() => _adults = (_adults + 1).clamp(0, 99)),
             ),
             const SizedBox(height: 12),
             _guestCard(
-              title: 'Children',
+              context: context,
+              title: 'CHILDREN'.tr(),
               value: _children,
-              onMinus: () {
-                setState(() {
-                  _children = (_children - 1).clamp(0, 99);
-                });
-              },
-              onPlus: () {
-                setState(() {
-                  _children = (_children + 1).clamp(0, 99);
-                });
-              },
+              onMinus: () => setState(() => _children = (_children - 1).clamp(0, 99)),
+              onPlus: () => setState(() => _children = (_children + 1).clamp(0, 99)),
             ),
 
             const SizedBox(height: 24),
@@ -519,12 +541,12 @@ class _FiltersScreenState extends State<FiltersScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: _getAdaptiveColor(context, light: Colors.white, dark: Colors.grey.shade900, highContrast: Colors.black),
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: const Color(0xFFE5EEEC), width: 1.2),
+                border: Border.all(color: theme.colorScheme.outline.withAlpha(60), width: 1.2),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
+                    color: Colors.black.withAlpha((0.04 * 255).round()),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   ),
@@ -533,220 +555,202 @@ class _FiltersScreenState extends State<FiltersScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Room Preferences',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF263238),
-                    ),
+                  Text(
+                    'ROOM_PREFERENCES'.tr(),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
                   ),
                   const SizedBox(height: 12),
 
-                  const Align(
-                    alignment: Alignment.centerLeft,
+                  Align(
+                    alignment: AlignmentDirectional.centerStart, // يدعم RTL تلقائياً للعربية
                     child: Text(
-                      'VIEW TYPE',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.grey,
-                      ),
+                      'VIEW_TYPE'.tr(),
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface.withAlpha(140)),
                     ),
                   ),
                   const SizedBox(height: 10),
 
-                  const SizedBox(height: 2),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _circlePref(
+                        context: context,
                         selected: _roomPrefs == 'Sea',
-                        label: 'Sea',
+                        label: 'SEA'.tr(),
                         icon: Icons.waves,
-                        selectedColor: const Color(0xFF7FE6D2),
-                        onTap: () => setState(() {
-                          _roomPrefs = _roomPrefs == 'Sea' ? '' : 'Sea';
-                        }),
+                        onTap: () => setState(() => _roomPrefs = _roomPrefs == 'Sea' ? '' : 'Sea'),
                       ),
                       _circlePref(
+                        context: context,
                         selected: _roomPrefs == 'Garden',
-                        label: 'Garden',
+                        label: 'GARDEN'.tr(),
                         icon: Icons.eco_outlined,
-                        selectedColor: const Color(0xFF7FE6D2),
-                        onTap: () => setState(() {
-                          _roomPrefs = _roomPrefs == 'Garden' ? '' : 'Garden';
-                        }),
+                        onTap: () => setState(() => _roomPrefs = _roomPrefs == 'Garden' ? '' : 'Garden'),
                       ),
                       _circlePref(
+                        context: context,
                         selected: _roomPrefs == 'City',
-                        label: 'City',
+                        label: 'CITY'.tr(),
                         icon: Icons.location_city_outlined,
-                        selectedColor: const Color(0xFF7FE6D2),
-                        onTap: () => setState(() {
-                          _roomPrefs = _roomPrefs == 'City' ? '' : 'City';
-                        }),
+                        onTap: () => setState(() => _roomPrefs = _roomPrefs == 'City' ? '' : 'City'),
                       ),
                     ],
                   ),
 
                   const SizedBox(height: 18),
-                  const Align(
-                    alignment: Alignment.centerLeft,
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
                     child: Text(
-                      'BED TYPE',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.grey,
-                      ),
+                      'BED_TYPE'.tr(),
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface.withAlpha(140)),
                     ),
                   ),
                   const SizedBox(height: 10),
 
-                  const SizedBox(height: 2),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _circlePref(
+                        context: context,
                         selected: _bedType == 'King',
-                        label: 'King',
-                        icon: Icons.hotel, // placeholder icon
-                        selectedColor: const Color(0xFF7FE6D2),
+                        label: 'KING'.tr(),
+                        icon: Icons.hotel,
                         onTap: () => setState(() => _bedType = 'King'),
                       ),
                       _circlePref(
+                        context: context,
                         selected: _bedType == 'Twin',
-                        label: 'Twin',
+                        label: 'TWIN'.tr(),
                         icon: Icons.king_bed_outlined,
-                        selectedColor: const Color(0xFF7FE6D2),
                         onTap: () => setState(() => _bedType = 'Twin'),
                       ),
                       _circlePref(
+                        context: context,
                         selected: _bedType == 'Queen',
-                        label: 'Queen',
+                        label: 'QUEEN'.tr(),
                         icon: Icons.bedroom_parent_outlined,
-                        selectedColor: const Color(0xFF7FE6D2),
                         onTap: () => setState(() => _bedType = 'Queen'),
                       ),
                     ],
                   ),
 
                   const SizedBox(height: 18),
-                  const Align(
-                    alignment: Alignment.centerLeft,
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
                     child: Text(
-                      'FLOOR PREFERENCE',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.grey,
-                      ),
+                      'FLOOR_PREFERENCE'.tr(),
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface.withAlpha(140)),
                     ),
                   ),
                   const SizedBox(height: 10),
 
-                  const SizedBox(height: 2),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _circlePref(
+                        context: context,
                         selected: _floorPref == 'Ground',
-                        label: 'Ground',
+                        label: 'GROUND'.tr(),
                         icon: Icons.terrain,
-                        selectedColor: const Color(0xFF7FE6D2),
                         onTap: () => setState(() => _floorPref = 'Ground'),
                       ),
                       _circlePref(
+                        context: context,
                         selected: _floorPref == 'Mid',
-                        label: 'Mid',
-                        icon: Icons.height, // placeholder icon
-                        selectedColor: const Color(0xFF7FE6D2),
+                        label: 'MID'.tr(),
+                        icon: Icons.height,
                         onTap: () => setState(() => _floorPref = 'Mid'),
                       ),
                       _circlePref(
+                        context: context,
                         selected: _floorPref == 'High',
-                        label: 'High',
+                        label: 'HIGH'.tr(),
                         icon: Icons.stairs_outlined,
-                        selectedColor: const Color(0xFF7FE6D2),
                         onTap: () => setState(() => _floorPref = 'High'),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 24),
                 ],
               ),
             ),
 
+            const SizedBox(height: 24),
+
             // Luxury Amenities
-            const Text(
-              'Luxury Amenities',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+            Text(
+              'LUXURY_AMENITIES'.tr(),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
             ),
             const SizedBox(height: 10),
 
             _switchRow(
+              context: context,
               value: _privatePool,
               onChanged: (v) => setState(() => _privatePool = v),
               icon: Icons.pool,
-              title: 'Private Pool',
-              subtitle: 'Exclusive pool in your suite',
+              title: 'PRIVATE_POOL'.tr(),
+              subtitle: 'PRIVATE_POOL_SUB'.tr(),
             ),
             const SizedBox(height: 12),
             _switchRow(
+              context: context,
               value: _balcony,
               onChanged: (v) => setState(() => _balcony = v),
               icon: Icons.wb_sunny_outlined,
-              title: 'Balcony',
-              subtitle: 'Private outdoor space',
+              title: 'BALCONY'.tr(),
+              subtitle: 'BALCONY_SUB'.tr(),
             ),
             const SizedBox(height: 12),
             _switchRow(
+              context: context,
               value: _breakfastIncluded,
               onChanged: (v) => setState(() => _breakfastIncluded = v),
               icon: Icons.free_breakfast,
-              title: 'Breakfast Included',
-              subtitle: 'Start your day right!',
+              title: 'BREAKFAST_INCLUDED'.tr(),
+              subtitle: 'BREAKFAST_INCLUDED_SUB'.tr(),
             ),
             const SizedBox(height: 12),
             _switchRow(
+              context: context,
               value: _highSpeedWifi,
               onChanged: (v) => setState(() => _highSpeedWifi = v),
               icon: Icons.wifi,
-              title: 'High-Speed WiFi',
-              subtitle: 'Stay connected everywhere',
+              title: 'HIGH_SPEED_WIFI'.tr(),
+              subtitle: 'HIGH_SPEED_WIFI_SUB'.tr(),
             ),
 
             const SizedBox(height: 24),
 
             // Accessibility & Others
-            const Text(
-              'Accessibility & Others',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+            Text(
+              'ACCESSIBILITY_AND_OTHERS'.tr(),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
             ),
             const SizedBox(height: 10),
 
             _toggleRow(
+              context: context,
               value: _nearElevator,
               onChanged: (v) => setState(() => _nearElevator = v),
               icon: Icons.elevator,
-              title: 'Near Elevator',
+              title: 'NEAR_ELEVATOR'.tr(),
               subtitle: '',
             ),
             _toggleRow(
+              context: context,
               value: _stepFreeAccess,
               onChanged: (v) => setState(() => _stepFreeAccess = v),
               icon: Icons.accessibility_new,
-              title: 'Step-free Access',
+              title: 'STEP_FREE_ACCESS'.tr(),
               subtitle: '',
             ),
             _toggleRow(
+              context: context,
               value: _petFriendly,
               onChanged: (v) => setState(() => _petFriendly = v),
               icon: Icons.pets,
-              title: 'Pet Friendly',
-              subtitle: 'Bringing a furry friend along?',
+              title: 'PET_FRIENDLY'.tr(),
+              subtitle: 'PET_FRIENDLY_SUB'.tr(),
             ),
 
             const SizedBox(height: 16),
@@ -754,21 +758,21 @@ class _FiltersScreenState extends State<FiltersScreen> {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: const Color(0xFFEEF9F6),
+                color: theme.colorScheme.primary.withAlpha(20),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.teal.shade50),
+                border: Border.all(color: theme.colorScheme.primary.withAlpha(60)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline, color: Color(0xFF0FA37A)),
+                  Icon(Icons.info_outline, color: theme.colorScheme.primary),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Looking for something specific?\nYou can request additional services directly from the hotel after booking.',
+                      'SPECIFIC_REQUEST_INFO'.tr(),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: Colors.grey.shade700,
+                        color: theme.colorScheme.onSurface.withAlpha(200),
                         height: 1.25,
                       ),
                     ),
@@ -779,46 +783,58 @@ class _FiltersScreenState extends State<FiltersScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: _applyButton(),
+      bottomNavigationBar: _applyButton(context),
     );
   }
 
-
-
-  Widget _applyButton() {
+  Widget _applyButton(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
+        color: _getAdaptiveColor(context, light: Colors.white, dark: const Color(0xFF0B1F1C), highContrast: Colors.black), boxShadow: [
           BoxShadow(
             blurRadius: 18,
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withAlpha((0.06 * 255).round()),
           )
         ],
+        border: Border.all(color: theme.colorScheme.outline.withAlpha(30)),
       ),
       child: SizedBox(
         height: 52,
         width: double.infinity,
         child: ElevatedButton(
           onPressed: () {
-            // Close and go back to previous screen
             if (Navigator.canPop(context)) {
-              Navigator.pop(context);
+              Navigator.pop(context, {
+                'priceRange': _priceRange,
+                'adults': _adults,
+                'children': _children,
+                'roomPrefs': _roomPrefs,
+                'bedType': _bedType,
+                'floorPref': _floorPref,
+                'privatePool': _privatePool,
+                'balcony': _balcony,
+                'breakfastIncluded': _breakfastIncluded,
+                'highSpeedWifi': _highSpeedWifi,
+                'nearElevator': _nearElevator,
+                'stepFreeAccess': _stepFreeAccess,
+                'petFriendly': _petFriendly,
+              });
             }
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF0FA37A),
+            backgroundColor: theme.colorScheme.primary,
+            foregroundColor: theme.colorScheme.onPrimary,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             elevation: 0,
           ),
-          child: const Text(
-            'APPLY FILTERS',
-            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13.5, color: Colors.white),
+          child: Text(
+            'APPLY_FILTERS'.tr(),
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13.5),
           ),
         ),
       ),
     );
   }
 }
-

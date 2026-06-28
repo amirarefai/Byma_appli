@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class WalletRewardsScreen extends StatelessWidget {
   const WalletRewardsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const bg = Color(0xFFF2F6F7);
-    const deepTeal = Color(0xFF072332);
-    const tealBrand = Color(0xFF0B6B7C);
-    const aquaBrand = Color(0xFF4FC3C9);
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         bottom: false,
         child: Column(
           children: [
             _TopBar(
-              title: 'Wallet & Rewards',
+              title: 'wallet_rewards_title'.tr(),
               onBack: () => Navigator.pop(context),
             ),
             Expanded(
@@ -30,10 +28,13 @@ class WalletRewardsScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(
+                        gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [Color(0xFF0B6B7C), Color(0xFF6ED2E4)],
+                          colors: [
+                            theme.colorScheme.primary,
+                            theme.colorScheme.primary.withOpacity(0.6),
+                          ],
                         ),
                         borderRadius: BorderRadius.circular(32),
                       ),
@@ -42,14 +43,14 @@ class WalletRewardsScreen extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              const Expanded(
+                              Expanded(
                                 child: Text(
-                                  'BYMA WALLET BALANCE',
+                                  'wallet_balance_label'.tr(),
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: 1.2,
-                                    color: Colors.white,
+                                    color: theme.colorScheme.onPrimary,
                                   ),
                                 ),
                               ),
@@ -57,46 +58,46 @@ class WalletRewardsScreen extends StatelessWidget {
                                 width: 48,
                                 height: 48,
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.22),
+                                  color: theme.colorScheme.onPrimary.withOpacity(0.22),
                                   borderRadius: BorderRadius.circular(14),
                                   border: Border.all(
-                                    color: Colors.white.withOpacity(0.22),
+                                    color: theme.colorScheme.onPrimary.withOpacity(0.22),
                                   ),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.copy,
-                                  color: Colors.white,
+                                  color: theme.colorScheme.onPrimary,
                                   size: 20,
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 12),
-                          const Text(
-                            '\$4,250.00',
+                          Text(
+                            '\$4,250.00', // يمكن ربطه لاحقاً بمتغير قادم من السيرفر أو الكيوبيت
                             style: TextStyle(
                               fontSize: 44,
                               fontWeight: FontWeight.w900,
-                              color: Colors.white,
+                              color: theme.colorScheme.onPrimary,
                               height: 1.05,
                             ),
                           ),
                           const SizedBox(height: 14),
                           Row(
-                            children: const [
+                            children: [
                               Icon(
                                 Icons.verified_rounded,
                                 size: 18,
-                                color: Colors.white,
+                                color: theme.colorScheme.onPrimary,
                               ),
-                              SizedBox(width: 8),
+                              const SizedBox(width: 8),
                               Text(
-                                'SECURED & ENCRYPTED',
+                                'secured_encrypted'.tr(),
                                 style: TextStyle(
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 0.8,
-                                  color: Colors.white,
+                                  color: theme.colorScheme.onPrimary,
                                 ),
                               ),
                             ],
@@ -111,10 +112,10 @@ class WalletRewardsScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.88),
+                        color: theme.cardColor,
                         borderRadius: BorderRadius.circular(26),
                         border: Border.all(
-                          color: deepTeal.withOpacity(0.11),
+                          color: theme.dividerColor.withOpacity(0.2),
                           width: 2,
                         ),
                       ),
@@ -125,22 +126,22 @@ class WalletRewardsScreen extends StatelessWidget {
                             height: 64,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(18),
-                              color: const Color(0xFFD9F7F3),
+                              color: theme.colorScheme.secondary.withOpacity(0.15),
                               border: Border.all(
-                                color: const Color(0xFF19B9A7).withOpacity(0.25),
+                                color: theme.colorScheme.secondary.withOpacity(0.3),
                                 width: 1.5,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF19B9A7).withOpacity(0.15),
+                                  color: theme.colorScheme.secondary.withOpacity(0.1),
                                   blurRadius: 16,
                                   offset: const Offset(0, 8),
                                 ),
                               ],
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.star_rounded,
-                              color: Color(0xFF0FA37A),
+                              color: theme.colorScheme.secondary,
                               size: 26,
                             ),
                           ),
@@ -151,30 +152,26 @@ class WalletRewardsScreen extends StatelessWidget {
                               children: [
                                 Row(
                                   children: [
-                                    const Text(
-                                      'REWARD POINTS',
+                                    Text(
+                                      'reward_points_label'.tr(),
                                       style: TextStyle(
                                         fontWeight: FontWeight.w900,
                                         fontSize: 13,
-                                        color: Color(0xFF072332),
+                                        color: theme.textTheme.titleLarge?.color,
                                       ),
                                     ),
                                     const Spacer(),
                                     Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 14,
-                                        vertical: 6,
-                                      ),
+                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF6DE6D3)
-                                            .withOpacity(0.35),
+                                        color: theme.colorScheme.secondary.withOpacity(0.2),
                                         borderRadius: BorderRadius.circular(20),
                                       ),
-                                      child: const Text(
+                                      child: Text(
                                         '+15%',
                                         style: TextStyle(
                                           fontWeight: FontWeight.w900,
-                                          color: Color(0xFF0FA37A),
+                                          color: theme.colorScheme.secondary,
                                           fontSize: 12,
                                         ),
                                       ),
@@ -182,20 +179,20 @@ class WalletRewardsScreen extends StatelessWidget {
                                   ],
                                 ),
                                 const SizedBox(height: 10),
-                                const Text(
-                                  '1,250 pts',
+                                Text(
+                                  '1,250 ${'pts'.tr()}',
                                   style: TextStyle(
                                     fontSize: 36,
                                     fontWeight: FontWeight.w900,
-                                    color: Color(0xFF072332),
+                                    color: theme.textTheme.titleLarge?.color,
                                   ),
                                 ),
                                 const SizedBox(height: 6),
-                                const Text(
-                                  'Redeem for exclusive rentals',
+                                Text(
+                                  'redeem_hint'.tr(),
                                   style: TextStyle(
                                     fontSize: 15,
-                                    color: Color(0xFF0FA37A),
+                                    color: theme.colorScheme.secondary,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -210,8 +207,8 @@ class WalletRewardsScreen extends StatelessWidget {
 
                     // Payment Methods header
                     _SectionHeader(
-                      left: 'Payment Methods',
-                      rightText: 'Manage',
+                      left: 'payment_methods_title'.tr(),
+                      rightText: 'manage_btn'.tr(),
                     ),
 
                     const SizedBox(height: 10),
@@ -220,15 +217,17 @@ class WalletRewardsScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.fromLTRB(18, 18, 16, 16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2A3B45).withOpacity(0.95),
+                        color: theme.brightness == Brightness.light 
+                            ? const Color(0xFF2A3B45) 
+                            : theme.cardColor,
                         borderRadius: BorderRadius.circular(26),
                         border: Border.all(
-                          color: Colors.black.withOpacity(0.08),
+                          color: theme.dividerColor.withOpacity(0.3),
                           width: 1,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: deepTeal.withOpacity(0.22),
+                            color: Colors.black.withOpacity(0.15),
                             blurRadius: 22,
                             offset: const Offset(0, 10),
                           ),
@@ -242,14 +241,14 @@ class WalletRewardsScreen extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: aquaBrand.withOpacity(0.18),
+                                color: theme.colorScheme.primary.withOpacity(0.4),
                                 width: 2,
                               ),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.credit_card_rounded,
                               size: 24,
-                              color: Color(0xFF1DD3C0),
+                              color: theme.colorScheme.primary,
                             ),
                           ),
                           const SizedBox(width: 14),
@@ -257,9 +256,9 @@ class WalletRewardsScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'PRIMARY SOURCE',
-                                  style: TextStyle(
+                                Text(
+                                  'primary_source_label'.tr(),
+                                  style: const TextStyle(
                                     fontSize: 11.5,
                                     letterSpacing: 2,
                                     fontWeight: FontWeight.w900,
@@ -267,18 +266,18 @@ class WalletRewardsScreen extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                const Text(
-                                  'BYMA Wallet',
-                                  style: TextStyle(
+                                Text(
+                                  'byma_wallet_text'.tr(),
+                                  style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w900,
                                     color: Colors.white,
                                   ),
                                 ),
                                 const SizedBox(height: 22),
-                                const Text(
-                                  'Available Balance',
-                                  style: TextStyle(
+                                Text(
+                                  'available_balance_label'.tr(),
+                                  style: const TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,
                                     color: Colors.white60,
@@ -302,41 +301,38 @@ class WalletRewardsScreen extends StatelessWidget {
                                 width: 44,
                                 height: 44,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF0FA37A).withOpacity(0.18),
+                                  color: theme.colorScheme.secondary.withOpacity(0.18),
                                   borderRadius: BorderRadius.circular(14),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.copy,
                                   size: 18,
-                                  color: Color(0xFF0FA37A),
+                                  color: theme.colorScheme.secondary,
                                 ),
                               ),
                               const SizedBox(height: 12),
                               Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 18,
-                                  vertical: 10,
-                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                                 decoration: BoxDecoration(
-                                  color: aquaBrand.withOpacity(0.45),
+                                  color: theme.colorScheme.primary.withOpacity(0.45),
                                   borderRadius: BorderRadius.circular(999),
                                 ),
-                                child: const Row(
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      'ACTIVE',
+                                      'status_active'.tr(),
                                       style: TextStyle(
                                         fontWeight: FontWeight.w900,
-                                        color: Color(0xFF06343A),
+                                        color: theme.brightness == Brightness.light ? const Color(0xFF06343A) : Colors.white,
                                         fontSize: 12.5,
                                       ),
                                     ),
-                                    SizedBox(width: 8),
+                                    const SizedBox(width: 8),
                                     Icon(
                                       Icons.keyboard_arrow_down_rounded,
                                       size: 18,
-                                      color: Color(0xFF06343A),
+                                      color: theme.brightness == Brightness.light ? const Color(0xFF06343A) : Colors.white,
                                     ),
                                   ],
                                 ),
@@ -351,7 +347,7 @@ class WalletRewardsScreen extends StatelessWidget {
 
                     // Recent Activity header
                     _SectionHeader(
-                      left: 'Recent Activity',
+                      left: 'recent_activity_title'.tr(),
                       rightIcon: Icons.filter_list,
                       rightText: null,
                     ),
@@ -361,42 +357,43 @@ class WalletRewardsScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.88),
+                        color: theme.cardColor,
                         borderRadius: BorderRadius.circular(26),
+                        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
                       ),
                       child: Column(
                         children: [
                           _ActivityRow(
-                            iconBg: const Color(0xFF6ED2E4).withOpacity(0.25),
+                            iconBg: theme.colorScheme.primary.withOpacity(0.15),
                             icon: Icons.location_city_outlined,
                             title: 'The Glass House',
-                            subtitle: 'Rental',
+                            subtitle: 'activity_type_rental'.tr(),
                             dateText: 'May 12, 2024 • 02:30 PM',
                             amountText: '- \$1,200.00',
-                            amountColor: const Color(0xFFEF4444),
-                            statusText: 'PENDING',
+                            amountColor: Colors.redAccent,
+                            statusText: 'status_pending'.tr(),
                           ),
                           const SizedBox(height: 14),
                           _ActivityRow(
-                            iconBg: const Color(0xFF7CF5D8).withOpacity(0.22),
+                            iconBg: theme.colorScheme.secondary.withOpacity(0.15),
                             icon: Icons.emoji_events_outlined,
-                            title: 'Loyalty Reward',
-                            subtitle: 'Points',
+                            title: 'loyalty_reward_title'.tr(),
+                            subtitle: 'activity_type_points'.tr(),
                             dateText: 'May 10, 2024 • 11:15 AM',
                             amountText: '+ 250 pts',
-                            amountColor: const Color(0xFF0FA37A),
-                            statusText: 'EARNED',
+                            amountColor: theme.colorScheme.secondary,
+                            statusText: 'status_earned'.tr(),
                           ),
                           const SizedBox(height: 14),
                           _ActivityRow(
-                            iconBg: const Color(0xFF9CA3AF).withOpacity(0.22),
+                            iconBg: theme.disabledColor.withOpacity(0.15),
                             icon: Icons.receipt_long_outlined,
-                            title: 'Wallet Refund',
+                            title: 'wallet_refund_title'.tr(),
                             subtitle: '',
                             dateText: 'May 08, 2024 • 09:00 AM',
                             amountText: '+ \$45.00',
-                            amountColor: const Color(0xFF0B88FF),
-                            statusText: 'COMPLETED',
+                            amountColor: Colors.blueAccent,
+                            statusText: 'status_completed'.tr(),
                           ),
                         ],
                       ),
@@ -422,6 +419,7 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
       child: Row(
@@ -430,12 +428,12 @@ class _TopBar extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.85),
+              color: theme.cardColor,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.black.withOpacity(0.06)),
+              border: Border.all(color: theme.dividerColor.withOpacity(0.2)),
             ),
             child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+              icon: Icon(Icons.arrow_back_ios_new, size: 18, color: theme.textTheme.titleLarge?.color),
               onPressed: onBack,
               splashRadius: 18,
             ),
@@ -445,10 +443,10 @@ class _TopBar extends StatelessWidget {
             child: Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w900,
                 fontSize: 22,
-                color: Color(0xFF072332),
+                color: theme.textTheme.titleLarge?.color,
               ),
             ),
           ),
@@ -456,14 +454,14 @@ class _TopBar extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.85),
+              color: theme.cardColor,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.black.withOpacity(0.06)),
+              border: Border.all(color: theme.dividerColor.withOpacity(0.2)),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.notifications_none_outlined,
               size: 20,
-              color: Color(0xFF072332),
+              color: theme.textTheme.titleLarge?.color,
             ),
           ),
         ],
@@ -485,32 +483,33 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       children: [
         Expanded(
           child: Text(
             left,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w900,
-              color: Color(0xFF072332),
+              color: theme.textTheme.titleLarge?.color,
             ),
           ),
         ),
         if (rightText != null) ...[
           Text(
             rightText!,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w900,
-              color: Color(0xFF0B2530),
+              color: theme.colorScheme.primary,
             ),
           ),
         ] else if (rightIcon != null) ...[
           Icon(
             rightIcon,
             size: 22,
-            color: const Color(0xFF0B2530),
+            color: theme.textTheme.titleLarge?.color,
           ),
         ],
       ],
@@ -541,6 +540,7 @@ class _ActivityRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -555,7 +555,7 @@ class _ActivityRow extends StatelessWidget {
             child: Icon(
               icon,
               size: 22,
-              color: const Color(0xFF0B6B7C),
+              color: theme.colorScheme.primary,
             ),
           ),
         ),
@@ -566,20 +566,20 @@ class _ActivityRow extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFF072332),
+                  color: theme.textTheme.titleLarge?.color,
                 ),
               ),
               if (subtitle.isNotEmpty) ...[
                 const SizedBox(height: 6),
                 Text(
                   subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF334D5C),
+                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8),
                   ),
                 ),
               ],
@@ -589,7 +589,7 @@ class _ActivityRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black.withOpacity(0.5),
+                  color: theme.hintColor,
                 ),
               ),
             ],

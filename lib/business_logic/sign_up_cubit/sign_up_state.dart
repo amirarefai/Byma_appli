@@ -18,6 +18,7 @@ class SignUpValidationError extends SignUpState {
 }
 
 class SignUpFailure extends SignUpState {
-  final String message;
-  SignUpFailure(this.message);
+  final String errorMessage; // تأكد أن الاسم هنا مطابقة تماماً لما في الواجهة
+
+  SignUpFailure(this.errorMessage);
 }

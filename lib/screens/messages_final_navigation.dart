@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart'; // استيراد الترجمة
 
 import 'bookings_screen.dart';
 import 'main_layout_screen.dart';
@@ -13,28 +14,29 @@ class BymaChatScreen extends StatefulWidget {
 }
 
 class _BymaChatScreenState extends State<BymaChatScreen> {
-  // نحدد التبويب النشط (رقم 2 هو الشات)
   int _activeTabIndex = 2; 
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      // لجعل المحتوى يمتد خلف شريط التنقل السفلي العائم
+      backgroundColor: theme.scaffoldBackgroundColor,
       extendBody: true, 
       appBar: AppBar(
-        leading: const Icon(Icons.arrow_back, color: Color(0xFF0F2942)),
-        title: const Text(
+        leading: Icon(Icons.arrow_back, color: theme.appBarTheme.iconTheme?.color ?? theme.primaryColor),
+        title: Text(
           'BYMA',
           style: TextStyle(
-            color: Color(0xFF0F2942),
+            color: theme.appBarTheme.titleTextStyle?.color ?? theme.primaryColor,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.5,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none, color: Color(0xFF0F2942)),
+            icon: Icon(Icons.notifications_none, color: theme.appBarTheme.iconTheme?.color ?? theme.primaryColor),
             onPressed: () {},
           ),
         ],
@@ -46,20 +48,20 @@ class _BymaChatScreenState extends State<BymaChatScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Messages',
+            Text(
+              'chat_title'.tr(), // مترجم
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.w900,
-                color: Color(0xFF0F2942),
+                color: theme.textTheme.headlineLarge?.color,
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Coordinate your stays with our expert property curators.',
+            Text(
+              'chat_subtitle'.tr(), // مترجم
               style: TextStyle(
                 fontSize: 16,
-                color: Color(0xFF64748B),
+                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
               ),
             ),
             const SizedBox(height: 24),
@@ -68,48 +70,47 @@ class _BymaChatScreenState extends State<BymaChatScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFFF3F5F7),
+                color: isDarkMode ? theme.cardColor : const Color(0xFFF3F5F7),
                 borderRadius: BorderRadius.circular(24),
               ),
-              child: const TextField(
+              child: TextField(
+                style: TextStyle(color: theme.textTheme.bodyLarge?.color),
                 decoration: InputDecoration(
-                  hintText: 'Search properties or messages...',
-                  prefixIcon: Icon(Icons.search, color: Color(0xFF64748B)),
+                  hintText: 'chat_search_hint'.tr(), // مترجم
+                  hintStyle: TextStyle(color: theme.hintColor.withOpacity(0.6)),
+                  prefixIcon: Icon(Icons.search, color: theme.hintColor),
                   border: InputBorder.none,
                 ),
               ),
             ),
             const SizedBox(height: 28),
             
-            // قائمة المحادثات (إطارات رمادية فاتحة وموحدة وقابلة للضغط)
-            _buildChatItem(context, 'property_1.jpg', 'The Azure Heights', '12:45 PM', 'Your late check-in has been approved. We look forward to your stay!'),
-            _buildChatItem(context, 'property_2.jpg', 'Velvet Palms Resort', 'JUST NOW', 'New booking request received. Tap to view custom details.'),
-            _buildChatItem(context, 'property_3.jpg', 'EcoStone Villas', 'YESTERDAY', 'How was your stay? We would love to hear your feedback!'),
-            _buildChatItem(context, 'property_4.jpg', 'The Obsidian Suite', 'TUESDAY', 'Your receipt for the additional room service is ready.'),
+            // قائمة المحادثات (تعتمد على ألوان الثيم وتدعم الترجمة التلقائية للوقت)
+            _buildChatItem(context, theme, isDarkMode, 'property_1.jpg', 'The Azure Heights', '12:45 PM', 'chat_msg_1'.tr()),
+            _buildChatItem(context, theme, isDarkMode, 'property_2.jpg', 'Velvet Palms Resort', 'chat_time_just_now'.tr(), 'chat_msg_2'.tr()),
+            _buildChatItem(context, theme, isDarkMode, 'property_3.jpg', 'EcoStone Villas', 'chat_time_yesterday'.tr(), 'chat_msg_3'.tr()),
+            _buildChatItem(context, theme, isDarkMode, 'property_4.jpg', 'The Obsidian Suite', 'chat_time_tuesday'.tr(), 'chat_msg_4'.tr()),
             
-            const SizedBox(height: 100), // مساحة إضافية لكي لا يغطي الشريط آخر محادثة
+            const SizedBox(height: 100), 
           ],
         ),
       ),
-
-      // تصميم شريط التنقل السفلي العائم مع النقطة
-      bottomNavigationBar: _buildBottomNav(),
+      bottomNavigationBar: _buildBottomNav(theme, isDarkMode),
     );
   }
 
-  // ويدجت شريط التنقل السفلي
-  Widget _buildBottomNav() {
+  Widget _buildBottomNav(ThemeData theme, bool isDarkMode) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
         child: Container(
           height: 72,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.bottomAppBarTheme.color ?? theme.cardColor,
             borderRadius: BorderRadius.circular(35),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: isDarkMode ? Colors.black26 : Colors.black.withOpacity(0.08),
                 blurRadius: 20,
                 offset: const Offset(0, 5),
               ),
@@ -118,10 +119,10 @@ class _BymaChatScreenState extends State<BymaChatScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _navItem(Icons.explore_outlined, "EXPLORE", 0),
-              _navItem(Icons.calendar_month_outlined, "BOOKINGS", 1),
-              _navItem(Icons.chat_bubble_outline, "CHAT", 2),
-              _navItem(Icons.person_outline, "PROFILE", 3),
+              _navItem(theme, Icons.explore_outlined, "nav_home".tr().toUpperCase(), 0),
+              _navItem(theme, Icons.calendar_month_outlined, "nav_bookings".tr().toUpperCase(), 1),
+              _navItem(theme, Icons.chat_bubble_outline, "nav_chat".tr().toUpperCase(), 2),
+              _navItem(theme, Icons.person_outline, "nav_settings".tr().toUpperCase(), 3),
             ],
           ),
         ),
@@ -129,38 +130,25 @@ class _BymaChatScreenState extends State<BymaChatScreen> {
     );
   }
 
-  // بناء كل أيقونة في شريط التنقل مع النقطة العلوية عند التفعيل
-  Widget _navItem(IconData icon, String label, int index) {
+  Widget _navItem(ThemeData theme, IconData icon, String label, int index) {
     bool isActive = _activeTabIndex == index;
-    Color activeColor = const Color(0xFF0FA37A); // اللون الأخضر في الصورة
-    Color inactiveColor = const Color(0xFF64748B);
+    Color activeColor = theme.colorScheme.secondary; // معتمد على لون الإبراز في الثيم
+    Color inactiveColor = theme.hintColor;
 
     return GestureDetector(
       onTap: () {
         if (index == 0) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const MainLayoutScreen()),
-          );
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainLayoutScreen()));
           return;
         }
-
         if (index == 1) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const BookingsScreen()),
-          );
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const BookingsScreen()));
           return;
         }
-
         if (index == 3) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const SettingsRefinedScreen()),
-          );
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const SettingsRefinedScreen()));
           return;
         }
-
         setState(() {
           _activeTabIndex = index;
         });
@@ -168,13 +156,12 @@ class _BymaChatScreenState extends State<BymaChatScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // النقطة التي تظهر فوق التبويب النشط
           Container(
             height: 4,
             width: 4,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isActive ? const Color(0xFF0F2942) : Colors.transparent,
+              color: isActive ? theme.textTheme.bodyLarge?.color : Colors.transparent,
             ),
           ),
           const SizedBox(height: 4),
@@ -194,21 +181,18 @@ class _BymaChatScreenState extends State<BymaChatScreen> {
     );
   }
 
-  // ويدجت بطاقة المحادثة (رمادية موحدة وقابلة للضغط)
-  Widget _buildChatItem(BuildContext context, String img, String name, String time, String msg) {
+  Widget _buildChatItem(BuildContext context, ThemeData theme, bool isDarkMode, String img, String name, String time, String msg) {
     return Container(
       margin: const EdgeInsets.only(bottom: 18),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9), // رمادي فاتح موحد
+        color: isDarkMode ? theme.cardColor.withOpacity(0.6) : const Color(0xFFF1F5F9), 
         borderRadius: BorderRadius.circular(24),
       ),
       child: InkWell(
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => const ConversationScreen(),
-            ),
+            MaterialPageRoute(builder: (_) => const ConversationScreen()),
           );
         },
         borderRadius: BorderRadius.circular(24),
@@ -218,7 +202,7 @@ class _BymaChatScreenState extends State<BymaChatScreen> {
             children: [
               CircleAvatar(
                 radius: 34,
-                backgroundColor: const Color(0xFFE2E8F0),
+                backgroundColor: isDarkMode ? theme.dividerColor : const Color(0xFFE2E8F0),
                 backgroundImage: AssetImage('assets/images/$img'),
               ),
               const SizedBox(width: 16),
@@ -229,12 +213,35 @@ class _BymaChatScreenState extends State<BymaChatScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Color(0xFF0F2942))),
-                        Text(time, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w600)),
+                        Text(
+                          name, 
+                          style: TextStyle(
+                            fontSize: 17, 
+                            fontWeight: FontWeight.w800, 
+                            color: theme.textTheme.bodyLarge?.color
+                          ),
+                        ),
+                        Text(
+                          time, 
+                          style: TextStyle(
+                            fontSize: 12, 
+                            color: theme.hintColor, 
+                            fontWeight: FontWeight.w600
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 6),
-                    Text(msg, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, color: Color(0xFF64748B), height: 1.3)),
+                    Text(
+                      msg, 
+                      maxLines: 2, 
+                      overflow: TextOverflow.ellipsis, 
+                      style: TextStyle(
+                        fontSize: 14, 
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8), 
+                        height: 1.3
+                      ),
+                    ),
                   ],
                 ),
               ),

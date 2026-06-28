@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ConversationScreen extends StatefulWidget {
   const ConversationScreen({super.key});
@@ -10,8 +11,6 @@ class ConversationScreen extends StatefulWidget {
 class _ConversationScreenState extends State<ConversationScreen> {
   final TextEditingController _controller = TextEditingController();
 
-  final Color _bg = const Color(0xFFEFF7FA);
-
   @override
   void dispose() {
     _controller.dispose();
@@ -20,17 +19,19 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Color headerColor = const Color(0xFF0F2942);
-    final Color subColor = const Color(0xFF64748B);
+    // جلب الثيم الحالي الموحد من التطبيق ليدعم الفاتح، الداكن، والسطوع العالي
+    final theme = Theme.of(context);
+    final isHighContrast = theme.colorScheme.primary == Colors.yellow;
 
     return Scaffold(
-      backgroundColor: _bg,
-      extendBody: true,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      extendBody: false, // لمنع تداخل شريط الإدخال السفلي مع المحتوى
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        automaticallyImplyLeading: false, // نتحكم بزر الرجوع يدويًا ليدعم الاتجاهات
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: headerColor),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.primary),
           onPressed: () => Navigator.pop(context),
         ),
         titleSpacing: 0,
@@ -38,22 +39,22 @@ class _ConversationScreenState extends State<ConversationScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'The Glass Pavilion',
+              'glass_pavilion_title'.tr(), 
               style: TextStyle(
                 fontWeight: FontWeight.w900,
-                color: headerColor,
+                color: theme.colorScheme.primary,
                 fontSize: 20,
                 height: 1.1,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            SizedBox(height: 2),
+            const SizedBox(height: 2),
             Text(
-              'PROPERTY ENQUIRY',
+              'property_enquiry'.tr(),
               style: TextStyle(
                 fontWeight: FontWeight.w800,
-                color: subColor,
+                color: theme.colorScheme.secondary,
                 fontSize: 12,
                 letterSpacing: 1.1,
               ),
@@ -62,82 +63,82 @@ class _ConversationScreenState extends State<ConversationScreen> {
         ),
         actions: [
           Padding(
-            padding: EdgeInsets.only(right: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: CircleAvatar(
               radius: 20,
-              backgroundImage: AssetImage('assets/images/property_1.jpg'),
-              backgroundColor: Colors.white,
+              backgroundImage: const AssetImage('assets/images/property_1.jpg'),
+              backgroundColor: theme.cardColor,
             ),
           ),
         ],
       ),
       body: SafeArea(
-        bottom: false,
         child: Column(
           children: [
             Expanded(
               child: ListView(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 children: [
-                  _ChatDateChip(text: 'TODAY'),
-                  SizedBox(height: 18),
+                  _ChatDateChip(text: 'today'.tr()),
+                  const SizedBox(height: 18),
                   _BubbleLeft(
-                    text:
-                        "Hello! I see you're interested in the Glass Pavilion for next weekend. It's a stunning choice during sunset. Do you have any specific questions about amenities?",
-                    time: '09:15 AM',
+                    text: "chat_msg_1".tr(),
+                    time: 'chat_time_1'.tr(),
                   ),
-                  SizedBox(height: 14),
+                  const SizedBox(height: 14),
                   _BubbleRight(
-                    text:
-                        "Hi! Yes, we're very excited. Quick question—does the main living area have integrated sound systems for the evening? We're planning a small, quiet dinner.",
-                    time: '09:18 AM',
+                    text: "chat_msg_2".tr(),
+                    time: 'chat_time_2'.tr(),
                   ),
-                  SizedBox(height: 18),
+                  const SizedBox(height: 18),
                   _PropertyCard(
-                    title: 'Glass Pavilion',
-                    subtitle: '4 Guests • 2 Bedrooms • Private Deck',
-                    tags: ['VERIFIED', 'FEATURED'],
+                    title: 'glass_pavilion_title'.tr(),
+                    subtitle: 'property_subtitle_format'.tr(args: [
+                      '4',
+                      '2',
+                      'private_deck'.tr()
+                    ]),
+                    tags: ['verified_tag'.tr(), 'featured_tag'.tr()],
                   ),
-                  SizedBox(height: 18),
+                  const SizedBox(height: 18),
                   _BubbleLeft(
-                    text:
-                        "Absolutely. There is a high-end Bose sound system that pairs beautifully with evening lighting. Would you like it set up for background music or a more immersive experience?",
-                    time: '09:23 AM',
+                    text: "chat_msg_3".tr(),
+                    time: 'chat_time_3'.tr(),
                   ),
                 ],
               ),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
               child: Row(
                 children: [
                   Container(
                     width: 46,
                     height: 46,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: theme.cardColor,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.black.withOpacity(0.04)),
+                      border: Border.all(color: theme.dividerColor),
                     ),
-                    child: Icon(Icons.add, color: headerColor),
+                    child: Icon(Icons.add, color: theme.colorScheme.primary),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Container(
                       height: 52,
-                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.85),
+                        color: theme.cardColor,
                         borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: Colors.black.withOpacity(0.05)),
+                        border: Border.all(color: theme.dividerColor),
                       ),
                       child: TextField(
                         controller: _controller,
-                        style: TextStyle(color: headerColor),
+                        style: TextStyle(color: theme.colorScheme.primary),
                         decoration: InputDecoration(
-                          hintText: 'Type your message...',
+                          hintText: 'type_message_hint'.tr(),
                           hintStyle: TextStyle(
-                            color: Color(0xFF94A3B8),
+                            color: theme.colorScheme.tertiary,
                             fontWeight: FontWeight.w700,
                           ),
                           border: InputBorder.none,
@@ -145,19 +146,25 @@ class _ConversationScreenState extends State<ConversationScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   GestureDetector(
                     onTap: () {
-                      setState(() => _controller.clear());
+                      if (_controller.text.trim().isNotEmpty) {
+                        setState(() => _controller.clear());
+                      }
                     },
                     child: Container(
                       width: 54,
                       height: 54,
                       decoration: BoxDecoration(
-                        color: Color(0xFF0FA37A),
+                        color: theme.colorScheme.primary,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.send, color: Colors.white, size: 22),
+                      child: Icon(
+                        Icons.send, 
+                        color: isHighContrast ? Colors.black : Colors.white, 
+                        size: 22
+                      ),
                     ),
                   ),
                 ],
@@ -176,18 +183,20 @@ class _ChatDateChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Center(
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 26, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.7),
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
         ),
         child: Text(
           text.toUpperCase(),
           style: TextStyle(
             fontWeight: FontWeight.w900,
-            color: Color(0xFF64748B),
+            color: theme.colorScheme.secondary,
             fontSize: 12,
             letterSpacing: 1,
           ),
@@ -200,50 +209,52 @@ class _ChatDateChip extends StatelessWidget {
 class _BubbleLeft extends StatelessWidget {
   final String text;
   final String time;
-  const _BubbleLeft({required this.text, required this.time});
+
+  const _BubbleLeft({
+    required this.text,
+    required this.time,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                constraints: BoxConstraints(maxWidth: 280),
-                padding: EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300.withOpacity(0.65),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  text,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF0F2942),
-                    height: 1.5,
-                  ),
-                ),
+    final theme = Theme.of(context);
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            constraints: const BoxConstraints(maxWidth: 280),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+            decoration: BoxDecoration(
+              color: theme.cardColor,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: theme.dividerColor),
+            ),
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: theme.colorScheme.primary,
+                height: 1.5,
               ),
-              SizedBox(height: 6),
-              Padding(
-                padding: EdgeInsets.only(left: 10),
-                child: Text(
-                  time,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF64748B),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: Text(
+              time,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: theme.colorScheme.tertiary,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -259,38 +270,46 @@ class _BubbleRight extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Flexible(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 14,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2E97C9),
-                  borderRadius: BorderRadius.circular(22),
-                ),
-                child: Text(
-                  text,
-                  softWrap: true,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
+    final theme = Theme.of(context);
+    final isHighContrast = theme.colorScheme.primary == Colors.yellow;
+
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Container(
+            constraints: const BoxConstraints(maxWidth: 280),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+            decoration: BoxDecoration(
+              color: isHighContrast ? Colors.black : const Color(0xFF2E97C9),
+              borderRadius: BorderRadius.circular(22),
+              border: isHighContrast ? Border.all(color: Colors.white, width: 1.5) : null,
+            ),
+            child: Text(
+              text,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                height: 1.5,
+                fontWeight: isHighContrast ? FontWeight.bold : FontWeight.normal,
               ),
-              const SizedBox(height: 6),
-              Text(time),
-            ],
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: Text(
+              time,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: theme.colorScheme.tertiary,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -308,15 +327,18 @@ class _PropertyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isHighContrast = theme.colorScheme.primary == Colors.yellow;
+
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
         width: double.infinity,
-        margin: EdgeInsets.zero,
-        padding: EdgeInsets.fromLTRB(18, 18, 18, 16),
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.8),
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(26),
+          border: Border.all(color: theme.dividerColor),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,36 +348,38 @@ class _PropertyCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w900,
-                color: Color(0xFF0F2942),
+                color: theme.colorScheme.primary,
               ),
             ),
-            SizedBox(height: 6),
+            const SizedBox(height: 6),
             Text(
               subtitle,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF64748B),
+                color: theme.colorScheme.secondary,
               ),
             ),
-            SizedBox(height: 12),
-            Row(
+            const SizedBox(height: 12),
+            Wrap( // تم استخدام Wrap بدل Row لتفادي مشاكل الأبعاد overflow عند تغير اللغات
+              spacing: 10,
+              runSpacing: 8,
               children: tags.map((t) {
-                final bool isVerified = t == 'VERIFIED';
-                final Color pillBg = (isVerified)
-                    ? Color(0xFF6EE7B7).withOpacity(0.35)
-                    : Color(0xFF60A5FA).withOpacity(0.25);
+                final bool isVerified = t == 'verified_tag'.tr();
+                final Color pillBg = isHighContrast 
+                    ? Colors.black 
+                    : (isVerified ? const Color(0xFF6EE7B7).withOpacity(0.2) : const Color(0xFF60A5FA).withOpacity(0.2));
 
-                final Color pillText = (isVerified)
-                    ? Color(0xFF0F7A54)
-                    : Color(0xFF1D4ED8);
+                final Color pillText = isHighContrast 
+                    ? (isVerified ? Colors.greenAccent : Colors.lightBlueAccent)
+                    : (isVerified ? const Color(0xFF0F7A54) : const Color(0xFF1D4ED8));
 
                 return Container(
-                  margin: EdgeInsets.only(right: 10),
-                  padding: EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
                     color: pillBg,
                     borderRadius: BorderRadius.circular(999),
+                    border: isHighContrast ? Border.all(color: pillText) : null,
                   ),
                   child: Text(
                     t,

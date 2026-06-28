@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart'; // استيراد حزمة الترجمة
 
 class FinalizeReservationScreen extends StatefulWidget {
   final String roomTitle;
@@ -20,27 +21,33 @@ class _FinalizeReservationScreenState extends State<FinalizeReservationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const teal = Color(0xFF0E6F63);
-    const teal2 = Color(0xFF0FA37A);
+    // جلب ألوان الثيم ديناميكياً
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
 
-    final bg = const Color(0xFFF2F6F8);
+    // ألوان الهوية البصرية (تتكيف مع وضع الثيم)
+    final tealColor = isDarkMode ? const Color(0xFF0FA37A) : const Color(0xFF0E6F63);
+    final accentTeal = const Color(0xFF0FA37A);
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white.withOpacity(0.0),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          icon: Icon(Icons.arrow_back_ios_new, color: theme.iconTheme.color),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Secure Booking',
-          style: TextStyle(fontWeight: FontWeight.w900),
+        title: Text(
+          'finalize_secure_booking'.tr(), // مترجم
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: theme.textTheme.titleLarge?.color,
+          ),
         ),
         centerTitle: false,
-        actions: const [
-          Icon(Icons.more_vert),
+        actions: [
+          Icon(Icons.more_vert, color: theme.iconTheme.color),
         ],
       ),
       body: SafeArea(
@@ -51,33 +58,34 @@ class _FinalizeReservationScreenState extends State<FinalizeReservationScreen> {
                 padding: const EdgeInsets.fromLTRB(18, 8, 18, 18),
                 children: [
                   const SizedBox(height: 8),
-                  const Text(
-                    'PAYMENT METHOD',
+                  Text(
+                    'finalize_payment_method'.tr().toUpperCase(), // مترجم
                     style: TextStyle(
                       fontWeight: FontWeight.w900,
                       fontSize: 12,
-                      color: Colors.black54,
+                      color: theme.hintColor,
                       letterSpacing: 0.5,
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
-                    'Finalize your\nreservation.',
+                  Text(
+                    'finalize_title'.tr(), // مترجم
                     style: TextStyle(
                       fontWeight: FontWeight.w900,
                       fontSize: 40,
                       height: 1.05,
-                      color: Colors.black87,
+                      color: theme.textTheme.headlineLarge?.color,
                     ),
                   ),
                   const SizedBox(height: 18),
 
+                  // خيارات الدفع مترجمة ومدعومة بالثيم
                   _PaymentOption(
                     index: 0,
                     selectedIndex: _selectedPayment,
-                    title: 'PAY AT ARRIVAL',
-                    subtitle: 'NO PREPAYMENT NEEDED',
-                    iconBackground: teal,
+                    title: 'pay_at_arrival_title'.tr().toUpperCase(),
+                    subtitle: 'pay_at_arrival_sub'.tr().toUpperCase(),
+                    iconBackground: tealColor,
                     icon: Icons.credit_card,
                     iconColor: Colors.white,
                   ),
@@ -85,9 +93,9 @@ class _FinalizeReservationScreenState extends State<FinalizeReservationScreen> {
                   _PaymentOption(
                     index: 1,
                     selectedIndex: _selectedPayment,
-                    title: 'BANK TRANSFER',
-                    subtitle: '1–2 BUSINESS DAYS',
-                    iconBackground: const Color(0xFF0E6F63),
+                    title: 'bank_transfer_title'.tr().toUpperCase(),
+                    subtitle: 'bank_transfer_sub'.tr().toUpperCase(),
+                    iconBackground: tealColor,
                     icon: Icons.account_balance_outlined,
                     iconColor: Colors.white,
                   ),
@@ -95,8 +103,8 @@ class _FinalizeReservationScreenState extends State<FinalizeReservationScreen> {
                   _PaymentOption(
                     index: 2,
                     selectedIndex: _selectedPayment,
-                    title: 'SHAM CASH',
-                    subtitle: 'INSTANT WALLET TRANSFER',
+                    title: 'sham_cash_title'.tr().toUpperCase(),
+                    subtitle: 'sham_cash_sub'.tr().toUpperCase(),
                     iconBackground: const Color(0xFF2A3D4B),
                     icon: Icons.payment_rounded,
                     iconColor: Colors.white,
@@ -105,8 +113,8 @@ class _FinalizeReservationScreenState extends State<FinalizeReservationScreen> {
                   _PaymentOption(
                     index: 3,
                     selectedIndex: _selectedPayment,
-                    title: 'MONEY TRANSFER\nCOMPANIES',
-                    subtitle: 'GLOBAL REACH',
+                    title: 'money_transfer_title'.tr().toUpperCase(),
+                    subtitle: 'money_transfer_sub'.tr().toUpperCase(),
                     iconBackground: const Color(0xFF71D3FF),
                     icon: Icons.store,
                     iconColor: Colors.white,
@@ -115,36 +123,52 @@ class _FinalizeReservationScreenState extends State<FinalizeReservationScreen> {
                   _PaymentOption(
                     index: 4,
                     selectedIndex: _selectedPayment,
-                    title: 'MY WALLET',
-                    subtitle: 'USE YOUR AVAILABLE BALANCE',
-                    iconBackground: teal,
+                    title: 'my_wallet_title'.tr().toUpperCase(),
+                    subtitle: 'my_wallet_sub'.tr().toUpperCase(),
+                    iconBackground: tealColor,
                     icon: Icons.wallet_rounded,
                     iconColor: Colors.white,
                   ),
 
                   const SizedBox(height: 20),
 
+                  // شارات الأمان والحماية المترجمة
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      _TinyBadge(leftIcon: Icons.shield, text1: 'SECURE SSL', text2: 'ENCRYPTION'),
-                      _TinyBadge(leftIcon: Icons.security, text1: 'FRAUD PROTECTION', text2: 'ACTIVE'),
+                    children: [
+                      _TinyBadge(
+                        leftIcon: Icons.shield, 
+                        text1: 'badge_secure_ssl'.tr().toUpperCase(), 
+                        text2: 'badge_encryption'.tr().toUpperCase(),
+                      ),
+                      _TinyBadge(
+                        leftIcon: Icons.security, 
+                        text1: 'badge_fraud_protection'.tr().toUpperCase(), 
+                        text2: 'badge_active'.tr().toUpperCase(),
+                      ),
                     ],
                   ),
 
                   const SizedBox(height: 14),
 
+                  // الموافقة على الشروط والسياسات
                   Row(
                     children: [
                       Checkbox(
                         value: _acceptedPolicy,
                         onChanged: (v) => setState(() => _acceptedPolicy = v ?? false),
-                        activeColor: teal2,
+                        activeColor: accentTeal,
+                        checkColor: Colors.white,
+                        side: BorderSide(color: theme.hintColor),
                       ),
                       Expanded(
-                        child: const Text(
-                          'I agree to the Booking Policies and Cancellation Terms.',
-                          textAlign: TextAlign.center,
+                        child: Text(
+                          'finalize_agree_policy'.tr(), // مترجم
+                          textAlign: TextAlign.start, // يدعم اتجاهات اللغات تلقائياً
+                          style: TextStyle(
+                            color: theme.textTheme.bodyMedium?.color,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
                     ],
@@ -154,29 +178,36 @@ class _FinalizeReservationScreenState extends State<FinalizeReservationScreen> {
               ),
             ),
 
+            // زر التأكيد النهائي السفلي
             SafeArea(
               top: false,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
                 child: SizedBox(
+                  width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
                     onPressed: _acceptedPolicy
                         ? () {
-                            // TODO: Connect to real booking/payment logic
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Confirmed & paying now...')),
+                              SnackBar(content: Text('finalize_processing'.tr())),
                             );
                           }
                         : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: teal2.withOpacity(_acceptedPolicy ? 1 : 0.5),
-                      disabledBackgroundColor: teal2.withOpacity(0.5),
+                      backgroundColor: accentTeal.withOpacity(_acceptedPolicy ? 1 : 0.5),
+                      disabledBackgroundColor: theme.disabledColor.withOpacity(0.15),
+                      elevation: _acceptedPolicy ? 2 : 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                     ),
-                    child: const Text(
-                      'CONFIRM & PAY NOW',
-                      style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 0.8),
+                    child: Text(
+                      'finalize_btn_confirm'.tr().toUpperCase(), // مترجم
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900, 
+                        fontSize: 16, 
+                        letterSpacing: 0.8,
+                        color: _acceptedPolicy ? Colors.white : theme.disabledColor,
+                      ),
                     ),
                   ),
                 ),
@@ -210,6 +241,9 @@ class _PaymentOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isSelected = index == selectedIndex;
+
     return GestureDetector(
       onTap: () {
         final state = context.findAncestorStateOfType<_FinalizeReservationScreenState>();
@@ -220,15 +254,26 @@ class _PaymentOption extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(26),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF0FA37A) : Colors.transparent,
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(theme.brightness == Brightness.dark ? 0.2 : 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
+          ],
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CircleAvatar(
               backgroundColor: iconBackground,
-              radius: 34,
+              radius: 30,
               child: Icon(icon, color: iconColor, size: 22),
             ),
             const SizedBox(width: 14),
@@ -238,10 +283,11 @@ class _PaymentOption extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w900,
-                      fontSize: 16,
-                      height: 1.0,
+                      fontSize: 15,
+                      color: theme.textTheme.bodyLarge?.color,
+                      height: 1.1,
                     ),
                   ),
                   const SizedBox(height: 5),
@@ -250,7 +296,7 @@ class _PaymentOption extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 11,
-                      color: Colors.black54.withOpacity(0.75),
+                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                       letterSpacing: 0.3,
                     ),
                   ),
@@ -288,25 +334,28 @@ class _TinyBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
-        Icon(leftIcon, color: const Color(0xFF0FA37A), size: 18),
+         Icon(leftIcon, color: Color(0xFF0FA37A), size: 18),
         const SizedBox(height: 6),
         Text(
           text1,
-          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11),
+          style: TextStyle(
+            fontWeight: FontWeight.w900, 
+            fontSize: 11,
+            color: theme.textTheme.bodyLarge?.color,
+          ),
         ),
         Text(
           text2,
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.black54),
+          style: TextStyle(
+            fontWeight: FontWeight.w800, 
+            fontSize: 11, 
+            color: theme.hintColor,
+          ),
         ),
       ],
     );
   }
-}
-
-// Needed for access from _PaymentOption
-extension _FindFinalizeState on BuildContext {
-  _FinalizeReservationScreenState? get finalizeState =>
-      findAncestorStateOfType<_FinalizeReservationScreenState>();
 }
