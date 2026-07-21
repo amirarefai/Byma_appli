@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+class NotificationsScreen extends StatelessWidget {
+  const NotificationsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('notifications_title'.tr())),
+      body: const Center(child: Text('شاشة الإشعارات')),
+    );
+  }
+}
+
 class ConversationScreen extends StatefulWidget {
   const ConversationScreen({super.key});
 
@@ -19,17 +31,18 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // جلب الثيم الحالي الموحد من التطبيق ليدعم الفاتح، الداكن، والسطوع العالي
     final theme = Theme.of(context);
     final isHighContrast = theme.colorScheme.primary == Colors.yellow;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      extendBody: false, // لمنع تداخل شريط الإدخال السفلي مع المحتوى
+      // تم إلغاء كافة الخصائص المسببة للتداخل السفلي
+      extendBody: false, 
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        automaticallyImplyLeading: false, // نتحكم بزر الرجوع يدويًا ليدعم الاتجاهات
+        automaticallyImplyLeading: false, 
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: theme.colorScheme.primary),
           onPressed: () => Navigator.pop(context),
@@ -43,7 +56,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w900,
                 color: theme.colorScheme.primary,
-                fontSize: 20,
+                fontSize: 18,
                 height: 1.1,
               ),
               maxLines: 1,
@@ -55,119 +68,140 @@ class _ConversationScreenState extends State<ConversationScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 color: theme.colorScheme.secondary,
-                fontSize: 12,
+                fontSize: 11,
                 letterSpacing: 1.1,
               ),
             ),
           ],
         ),
         actions: [
+          IconButton(
+            icon: Icon(Icons.notifications_none_outlined, color: theme.colorScheme.primary),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+              );
+            },
+          ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: CircleAvatar(
-              radius: 20,
+              radius: 18,
               backgroundImage: const AssetImage('assets/images/property_1.jpg'),
               backgroundColor: theme.cardColor,
             ),
           ),
         ],
       ),
+      // إجبار واجهة المحادثة وحقل النص على تعبئة المساحة بالكامل داخل الـ Stack
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                children: [
-                  _ChatDateChip(text: 'today'.tr()),
-                  const SizedBox(height: 18),
-                  _BubbleLeft(
-                    text: "chat_msg_1".tr(),
-                    time: 'chat_time_1'.tr(),
+            Column(
+              children: [
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 80), // مسافة حشو سفلية إضافية لمنع تداخل الرسائل مع شريط الشات
+                    children: [
+                      _ChatDateChip(text: 'today'.tr()),
+                      const SizedBox(height: 18),
+                      _BubbleLeft(
+                        text: "chat_msg_1".tr(),
+                        time: 'chat_time_1'.tr(),
+                      ),
+                      const SizedBox(height: 14),
+                      _BubbleRight(
+                        text: "chat_msg_2".tr(),
+                        time: 'chat_time_2'.tr(),
+                      ),
+                      const SizedBox(height: 18),
+                      _PropertyCard(
+                        title: 'glass_pavilion_title'.tr(),
+                        subtitle: 'property_subtitle_format'.tr(args: [
+                          '4',
+                          '2',
+                          'private_deck'.tr()
+                        ]),
+                        tags: ['verified_tag'.tr(), 'featured_tag'.tr()],
+                      ),
+                      const SizedBox(height: 18),
+                      _BubbleLeft(
+                        text: "chat_msg_3".tr(),
+                        time: 'chat_time_3'.tr(),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 14),
-                  _BubbleRight(
-                    text: "chat_msg_2".tr(),
-                    time: 'chat_time_2'.tr(),
-                  ),
-                  const SizedBox(height: 18),
-                  _PropertyCard(
-                    title: 'glass_pavilion_title'.tr(),
-                    subtitle: 'property_subtitle_format'.tr(args: [
-                      '4',
-                      '2',
-                      'private_deck'.tr()
-                    ]),
-                    tags: ['verified_tag'.tr(), 'featured_tag'.tr()],
-                  ),
-                  const SizedBox(height: 18),
-                  _BubbleLeft(
-                    text: "chat_msg_3".tr(),
-                    time: 'chat_time_3'.tr(),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-              child: Row(
-                children: [
-                  Container(
-                    width: 46,
-                    height: 46,
-                    decoration: BoxDecoration(
-                      color: theme.cardColor,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: theme.dividerColor),
-                    ),
-                    child: Icon(Icons.add, color: theme.colorScheme.primary),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Container(
-                      height: 52,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+            // وضع شريط الشات داخل Positioned ثابت في القاع لكي يغطي ويحجب أي شريط مكرر يظهر من الخلفية
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                color: theme.scaffoldBackgroundColor, // خلفية كاملة مصمتة لمنع الشفافية
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 46,
+                      height: 46,
                       decoration: BoxDecoration(
                         color: theme.cardColor,
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(16),
                         border: Border.all(color: theme.dividerColor),
                       ),
-                      child: TextField(
-                        controller: _controller,
-                        style: TextStyle(color: theme.colorScheme.primary),
-                        decoration: InputDecoration(
-                          hintText: 'type_message_hint'.tr(),
-                          hintStyle: TextStyle(
-                            color: theme.colorScheme.tertiary,
-                            fontWeight: FontWeight.w700,
+                      child: Icon(Icons.add, color: theme.colorScheme.primary),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Container(
+                        height: 52,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: theme.cardColor,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: theme.dividerColor),
+                        ),
+                        child: TextField(
+                          controller: _controller,
+                          style: TextStyle(color: theme.colorScheme.primary),
+                          decoration: InputDecoration(
+                            hintText: 'type_message_hint'.tr(),
+                            hintStyle: TextStyle(
+                              color: theme.colorScheme.tertiary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            border: InputBorder.none,
                           ),
-                          border: InputBorder.none,
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  GestureDetector(
-                    onTap: () {
-                      if (_controller.text.trim().isNotEmpty) {
-                        setState(() => _controller.clear());
-                      }
-                    },
-                    child: Container(
-                      width: 54,
-                      height: 54,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.send, 
-                        color: isHighContrast ? Colors.black : Colors.white, 
-                        size: 22
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () {
+                        if (_controller.text.trim().isNotEmpty) {
+                          setState(() => _controller.clear());
+                        }
+                      },
+                      child: Container(
+                        width: 54,
+                        height: 54,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.send, 
+                          color: isHighContrast ? Colors.black : Colors.white, 
+                          size: 22
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -177,6 +211,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   }
 }
 
+// الكلاسات المساعدة المتبقية (تظل كما هي بدون تغيير)
 class _ChatDateChip extends StatelessWidget {
   final String text;
   const _ChatDateChip({required this.text});
@@ -209,11 +244,7 @@ class _ChatDateChip extends StatelessWidget {
 class _BubbleLeft extends StatelessWidget {
   final String text;
   final String time;
-
-  const _BubbleLeft({
-    required this.text,
-    required this.time,
-  });
+  const _BubbleLeft({required this.text, required this.time});
 
   @override
   Widget build(BuildContext context) {
@@ -262,11 +293,7 @@ class _BubbleLeft extends StatelessWidget {
 class _BubbleRight extends StatelessWidget {
   final String text;
   final String time;
-
-  const _BubbleRight({
-    required this.text,
-    required this.time,
-  });
+  const _BubbleRight({required this.text, required this.time});
 
   @override
   Widget build(BuildContext context) {
@@ -361,7 +388,7 @@ class _PropertyCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            Wrap( // تم استخدام Wrap بدل Row لتفادي مشاكل الأبعاد overflow عند تغير اللغات
+            Wrap(
               spacing: 10,
               runSpacing: 8,
               children: tags.map((t) {
@@ -387,7 +414,6 @@ class _PropertyCard extends StatelessWidget {
                       fontSize: 12,
                       fontWeight: FontWeight.w900,
                       color: pillText,
-                      letterSpacing: 0.2,
                     ),
                   ),
                 );

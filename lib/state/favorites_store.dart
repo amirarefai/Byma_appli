@@ -33,6 +33,8 @@ class FavoritesStore extends ChangeNotifier {
 
   List<FavoriteItem> get favorites => _favorites.values.toList(growable: false);
 
+  get items => null;
+
   void toggleFavorite(FavoriteItem item) {
     if (_favorites.containsKey(item.id)) {
       _favorites.remove(item.id);

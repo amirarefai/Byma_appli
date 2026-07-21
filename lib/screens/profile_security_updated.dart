@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:easy_localization/easy_localization.dart'; // تأكدي من استيراد حزمة الترجمة المستخدمة لديكِ
+import 'package:easy_localization/easy_localization.dart';
 
 class ProfileSecurityUpdated extends StatefulWidget {
   const ProfileSecurityUpdated({super.key});
@@ -18,8 +18,6 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
   String _fullName = 'Alex Curator';
   String _email = 'alex.c@bymatravel.com';
   String _phone = '+1 (555) 0123 4567';
-  DateTime _dateOfBirth = DateTime(1988, 3, 24);
-  String _gender = 'Male'; 
 
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -29,8 +27,7 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  String _passwordMasked = '••••••••••';
-  final _editPasswordController = TextEditingController();
+  final String _passwordMasked = '••••••••••';
 
   @override
   void dispose() {
@@ -40,42 +37,14 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
     _currentPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
-    _editPasswordController.dispose();
     super.dispose();
   }
 
-  String _formatDob(DateTime d) {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    return '${context.tr(months[d.month - 1])} ${d.day}, ${d.year}';
-  }
-
-  Future<void> _pickDob({
-    required BuildContext dialogContext,
-    required DateTime initialDate,
-    required void Function(DateTime newDob) onPicked,
-  }) async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: dialogContext,
-      initialDate: initialDate,
-      firstDate: DateTime(now.year - 120),
-      lastDate: now,
-    );
-    if (picked == null) return;
-    onPicked(picked);
-  }
-
+  // نافذة تعديل الحساب (الاسم، الإيميل، الهاتف فقط)
   void _openEditProfileDialog() {
     _fullNameController.text = _fullName;
     _emailController.text = _email;
     _phoneController.text = _phone;
-    _editPasswordController.clear();
-
-    String tempGender = _gender;
-    DateTime tempDob = _dateOfBirth;
 
     showDialog<void>(
       context: context,
@@ -85,7 +54,10 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
             final theme = Theme.of(context);
             return AlertDialog(
               backgroundColor: theme.scaffoldBackgroundColor,
-              title: Text(context.tr('edit_profile'), style: TextStyle(color: theme.textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)),
+              title: Text(
+                context.tr('edit_profile'), 
+                style: TextStyle(color: theme.textTheme.bodyLarge?.color, fontWeight: FontWeight.bold),
+              ),
               content: SingleChildScrollView(
                 child: SizedBox(
                   width: 420,
@@ -120,69 +92,6 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
                           prefixIcon: const Icon(Icons.phone_outlined),
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        readOnly: true,
-                        style: TextStyle(color: theme.textTheme.bodyLarge?.color),
-                        controller: TextEditingController(text: _formatDob(tempDob)),
-                        onTap: () async {
-                          await _pickDob(
-                            dialogContext: dialogContext,
-                            initialDate: tempDob,
-                            onPicked: (newDob) {
-                              setDialogState(() => tempDob = newDob);
-                            },
-                          );
-                        },
-                        decoration: InputDecoration(
-                          labelText: context.tr('date_of_birth'),
-                          prefixIcon: const Icon(Icons.calendar_month_outlined),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _editPasswordController,
-                        obscureText: true,
-                        style: TextStyle(color: theme.textTheme.bodyLarge?.color),
-                        decoration: InputDecoration(
-                          labelText: context.tr('password'),
-                          prefixIcon: const Icon(Icons.lock_outline),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        readOnly: true,
-                        style: TextStyle(color: theme.textTheme.bodyLarge?.color),
-                        controller: TextEditingController(text: context.tr(tempGender.toLowerCase())),
-                        onTap: () async {
-                          final gender = await showModalBottomSheet<String>(
-                            context: dialogContext,
-                            backgroundColor: theme.scaffoldBackgroundColor,
-                            builder: (_) => SafeArea(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ListTile(
-                                    title: Text(context.tr('male'), style: TextStyle(color: theme.textTheme.bodyLarge?.color)),
-                                    onTap: () => Navigator.pop(context, 'Male'),
-                                  ),
-                                  ListTile(
-                                    title: Text(context.tr('female'), style: TextStyle(color: theme.textTheme.bodyLarge?.color)),
-                                    onTap: () => Navigator.pop(context, 'Female'),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                          if (gender != null) {
-                            setDialogState(() => tempGender = gender);
-                          }
-                        },
-                        decoration: InputDecoration(
-                          labelText: context.tr('gender'),
-                          prefixIcon: const Icon(Icons.person_outline),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -195,7 +104,7 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
-                    backgroundColor: const Color(0xFF0E7E8A), // لون داكن وواضح للتباين العالي
+                    backgroundColor: const Color(0xFF0E7E8A),
                   ),
                   onPressed: () {
                     final newName = _fullNameController.text.trim();
@@ -213,8 +122,6 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
                       _fullName = newName;
                       _email = newEmail;
                       _phone = newPhone;
-                      _dateOfBirth = tempDob;
-                      _gender = tempGender;
                     });
 
                     Navigator.of(dialogContext).pop();
@@ -229,6 +136,7 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
     );
   }
 
+  // نافذة تغيير كلمة المرور المنفصلة
   void _openChangePasswordDialog() {
     _currentPasswordController.clear();
     _newPasswordController.clear();
@@ -389,7 +297,7 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
                             : Image.file(File(_avatarImage!.path), fit: BoxFit.cover),
                       ),
                     ),
-                    Positioned(
+                    Positioned( // تم تصحيح الكلمة هنا بنجاح
                       right: 10,
                       bottom: 8,
                       child: InkWell(
@@ -446,8 +354,6 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
                     _Field(label: context.tr('full_name_label'), value: _fullName),
                     _Field(label: context.tr('email_address_label'), value: _email),
                     _Field(label: context.tr('phone_number_label'), value: _phone),
-                    _Field(label: context.tr('date_of_birth_label'), value: _formatDob(_dateOfBirth)),
-                    _Field(label: context.tr('gender_label'), value: context.tr(_gender.toLowerCase())),
                     const SizedBox(height: 10),
                     Row(
                       children: [
@@ -467,7 +373,7 @@ class _ProfileSecurityUpdatedState extends State<ProfileSecurityUpdated> {
                       height: 56,
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0E7E8A), // تباين قوي للسطوع العالي
+                          backgroundColor: const Color(0xFF0E7E8A),
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),

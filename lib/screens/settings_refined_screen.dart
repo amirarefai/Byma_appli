@@ -8,9 +8,15 @@ import 'bookings_screen.dart';
 import 'messages_final_navigation.dart';
 import 'main_layout_screen.dart';
 import 'profile_security_updated.dart';
-import 'wallet_rewards_screen.dart';
-import 'favorites_screen.dart';
+import 'favorites_screen.dart'; 
 import '../widgets/byma_bottom_nav.dart';
+
+// استيراد الشاشات المطلوبة بعد تعديل أسمائها
+import 'notifications_screen.dart'; 
+import 'login_screen.dart'; 
+// استيراد الشاشات الجديدة للاتصال بالأزرار
+import 'recently_viewed.dart';
+import 'collection.dart';
 
 class SettingsRefinedScreen extends StatefulWidget {
   const SettingsRefinedScreen({super.key});
@@ -89,18 +95,29 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                       color: theme.colorScheme.primary,
                     ),
                   ),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: theme.cardColor,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: theme.dividerColor),
-                    ),
-                    child: Icon(
-                      Icons.notifications_none_outlined,
-                      size: 18,
-                      color: theme.colorScheme.primary,
+                  
+                  // زر الجرس بعد التفعيل وربطه بـ NotificationsScreen
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: theme.cardColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: theme.dividerColor),
+                      ),
+                      child: Icon(
+                        Icons.notifications_none_outlined,
+                        size: 18,
+                        color: theme.colorScheme.primary,
+                      ),
                     ),
                   ),
                 ],
@@ -197,7 +214,7 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
 
               const SizedBox(height: 10),
 
-              // الاسم وعضوية بريميوم
+              // الاسم
               Center(
                 child: Column(
                   children: [
@@ -207,23 +224,6 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
                         color: theme.colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFBFE6F2).withOpacity(0.65),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Text(
-                        'premium_member_badge'.tr(),
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1.4,
-                          color: Color(0xFF0F4B61),
-                        ),
                       ),
                     ),
                   ],
@@ -255,9 +255,7 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
 
               const SizedBox(height: 22),
 
-              _SectionTitle(title: 'manage_experience_section'.tr()),
-              const SizedBox(height: 10),
-
+              // مجموعة الأزرار الأولى (المفضلة، شوهد مؤخراً، المجموعات)
               _ActionGroup(
                 items: [
                   _SettingRow(
@@ -277,26 +275,37 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                   const _SettingDivider(),
                   _SettingRow(
                     leading: const _CircleIcon(
-                      bg: Color(0xFFD4E9EA),
-                      iconBg: Color(0xFF0F8E88),
-                      icon: Icons.account_balance_wallet_outlined,
+                      bg: Color(0xFFE2F3F5),
+                      iconBg: Color(0xFF0E7E8A),
+                      icon: Icons.history_outlined,
                     ),
-                    title: 'payment_wallet_title'.tr(),
-                    subtitle: 'payment_wallet_subtitle'.tr(),
+                    title: 'recently_viewed_title'.tr(),
                     trailingIcon: Icons.chevron_right,
                     onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const WalletRewardsScreen()),
-                      );
-                    },
+  Navigator.of(context).push(
+    MaterialPageRoute(builder: (_) => const RecentlyViewed()),
+  );
+},
+                  ),
+                  const _SettingDivider(),
+                  _SettingRow(
+                    leading: const _CircleIcon(
+                      bg: Color(0xFFE8F1F5),
+                      iconBg: Color(0xFF4A7A96),
+                      icon: Icons.folder_open_outlined,
+                    ),
+                    title: 'collections_title'.tr(),
+                    trailingIcon: Icons.chevron_right,
+                   onTap: () {
+  Navigator.of(context).push(
+    MaterialPageRoute(builder: (_) => const Collection()),
+  );
+},
                   ),
                 ],
               ),
 
               const SizedBox(height: 22),
-
-              _SectionTitle(title: 'preferences_section'.tr()),
-              const SizedBox(height: 10),
 
               _ActionGroup(
                 items: [
@@ -318,9 +327,6 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
               ),
 
               const SizedBox(height: 22),
-
-              _SectionTitle(title: 'accessibility_section'.tr()),
-              const SizedBox(height: 10),
 
               _ActionGroup(
                 items: [
@@ -450,7 +456,11 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
               // زر تسجيل الخروج
               InkWell(
                 onTap: () {
-                  // أضف منطق تسجيل الخروج هنا إذا رغبت
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+                  );
                 },
                 borderRadius: BorderRadius.circular(16),
                 child: Container(

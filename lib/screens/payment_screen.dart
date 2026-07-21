@@ -46,9 +46,7 @@ class _FinalizeReservationScreenState extends State<FinalizeReservationScreen> {
           ),
         ),
         centerTitle: false,
-        actions: [
-          Icon(Icons.more_vert, color: theme.iconTheme.color),
-        ],
+        actions: const [], // تم إفراغ القائمة وحذف زر الثلاث نقاط من هنا
       ),
       body: SafeArea(
         child: Column(
@@ -79,7 +77,7 @@ class _FinalizeReservationScreenState extends State<FinalizeReservationScreen> {
                   ),
                   const SizedBox(height: 18),
 
-                  // خيارات الدفع مترجمة ومدعومة بالثيم
+                  // تم الإبقاء على خياري الدفع عند الوصول والتحويل البنكي فقط
                   _PaymentOption(
                     index: 0,
                     selectedIndex: _selectedPayment,
@@ -97,36 +95,6 @@ class _FinalizeReservationScreenState extends State<FinalizeReservationScreen> {
                     subtitle: 'bank_transfer_sub'.tr().toUpperCase(),
                     iconBackground: tealColor,
                     icon: Icons.account_balance_outlined,
-                    iconColor: Colors.white,
-                  ),
-                  const SizedBox(height: 14),
-                  _PaymentOption(
-                    index: 2,
-                    selectedIndex: _selectedPayment,
-                    title: 'sham_cash_title'.tr().toUpperCase(),
-                    subtitle: 'sham_cash_sub'.tr().toUpperCase(),
-                    iconBackground: const Color(0xFF2A3D4B),
-                    icon: Icons.payment_rounded,
-                    iconColor: Colors.white,
-                  ),
-                  const SizedBox(height: 14),
-                  _PaymentOption(
-                    index: 3,
-                    selectedIndex: _selectedPayment,
-                    title: 'money_transfer_title'.tr().toUpperCase(),
-                    subtitle: 'money_transfer_sub'.tr().toUpperCase(),
-                    iconBackground: const Color(0xFF71D3FF),
-                    icon: Icons.store,
-                    iconColor: Colors.white,
-                  ),
-                  const SizedBox(height: 14),
-                  _PaymentOption(
-                    index: 4,
-                    selectedIndex: _selectedPayment,
-                    title: 'my_wallet_title'.tr().toUpperCase(),
-                    subtitle: 'my_wallet_sub'.tr().toUpperCase(),
-                    iconBackground: tealColor,
-                    icon: Icons.wallet_rounded,
                     iconColor: Colors.white,
                   ),
 
@@ -337,7 +305,7 @@ class _TinyBadge extends StatelessWidget {
     final theme = Theme.of(context);
     return Column(
       children: [
-         Icon(leftIcon, color: Color(0xFF0FA37A), size: 18),
+         Icon(leftIcon, color: const Color(0xFF0FA37A), size: 18),
         const SizedBox(height: 6),
         Text(
           text1,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';  
 import '../widgets/byma_bottom_nav.dart';
 import 'main_layout_screen.dart';
-import 'messages_final_navigation.dart'; // تأكد أن BymaChatScreen موجود هنا
+import 'messages_final_navigation.dart'; 
 import 'settings_refined_screen.dart';
 
 class BookingsScreen extends StatefulWidget {
@@ -15,6 +15,175 @@ class BookingsScreen extends StatefulWidget {
 class _BookingsScreenState extends State<BookingsScreen> {
   String _selectedTab = 'All Stays';
 
+  // 1️⃣ واجهة إدارة الحجز (تعديل التاريخ أو الإلغاء) - للحجوزات القادمة
+  void _showManageBookingSheet(BuildContext context, String title, ThemeData theme, bool isYellowTheme) {
+    final messenger = ScaffoldMessenger.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.dividerColor, borderRadius: BorderRadius.circular(2)))),
+              const SizedBox(height: 20),
+              Text('manage_booking_label'.tr(), style: TextStyle(fontSize: 12, color: theme.colorScheme.tertiary)),
+              Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.colorScheme.secondary)),
+              const SizedBox(height: 24),
+              
+              // خيار تعديل التاريخ
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.calendar_month, color: theme.colorScheme.primary),
+                title: Text('edit_date_label'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+                onTap: () async {
+                  final picked = await showDateRangePicker(
+                    context: context,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (picked != null) {
+                    Navigator.pop(context); // إغلاق آمن
+                    messenger.showSnackBar(SnackBar(content: Text('date_updated_success'.tr())));
+                  }
+                },
+              ),
+              Divider(color: theme.dividerColor),
+              // خيار إلغاء الحجز
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.cancel_outlined, color: Colors.redAccent),
+                title: Text('cancel_booking_label'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent)),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.redAccent),
+                onTap: () {
+                  Navigator.pop(context);
+                  messenger.showSnackBar(SnackBar(content: Text('cancel_request_sent'.tr())));
+                },
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // 2️⃣ واجهة التقييم والبلاغات المارنة - للحجوزات المكتملة
+  void _showReviewAndReportSheet(BuildContext context, String title, ThemeData theme, bool isYellowTheme) {
+    int currentRating = 5;
+    bool isReporting = false; // التحكم في ظهور حقل الوصف
+    final reportController = TextEditingController();
+    final messenger = ScaffoldMessenger.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 24, right: 24, top: 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.dividerColor, borderRadius: BorderRadius.circular(2)))),
+                    const SizedBox(height: 20),
+                    Text('rate_stay_title'.tr(), style: TextStyle(fontSize: 12, color: theme.colorScheme.tertiary)),
+                    Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.colorScheme.secondary)),
+                    const SizedBox(height: 24),
+                    
+                    // اختيار النجوم
+                    Text('how_was_stay'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: List.generate(5, (index) {
+                        return IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          icon: Icon(
+                            index < currentRating ? Icons.star_rounded : Icons.star_border_rounded,
+                            color: Colors.amber, size: 38,
+                          ),
+                          onPressed: () => setSheetState(() => currentRating = index + 1),
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 20),
+                    
+                    // زر التبديل للإبلاغ
+                    if (!isReporting) 
+                      TextButton.icon(
+                        onPressed: () => setSheetState(() => isReporting = true),
+                        icon: const Icon(Icons.report_problem_outlined, color: Colors.redAccent, size: 20),
+                        label: Text('report_issue_btn'.tr(), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                      ),
+
+                    // حقل الديسكربشن (يظهر فقط إذا كبس إبلاغ)
+                    if (isReporting) ...[
+                      const SizedBox(height: 10),
+                      Text('report_hint'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: reportController,
+                        maxLines: 3,
+                        style: TextStyle(color: theme.colorScheme.secondary),
+                        decoration: InputDecoration(
+                          hintText: 'report_field_hint'.tr(),
+                          hintStyle: TextStyle(color: theme.colorScheme.tertiary.withOpacity(0.5), fontSize: 13),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: theme.colorScheme.primary), borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 24),
+                    
+                    // زر الإرسال الديناميكي
+                    Container(
+                      width: double.infinity,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: isYellowTheme ? Colors.yellow : theme.colorScheme.primary,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          final rText = reportController.text;
+                          Navigator.pop(context);
+                          if (isReporting && rText.isNotEmpty) {
+                            messenger.showSnackBar(SnackBar(content: Text('report_sent_success'.tr())));
+                          } else {
+                            messenger.showSnackBar(SnackBar(content: Text('thanks_for_rating'.tr(args: [currentRating.toString()]))));
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                        child: Text(
+                          isReporting ? 'submit_report'.tr() : 'submit_rating'.tr(),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: isYellowTheme ? Colors.black : Colors.white, fontSize: 15),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -26,39 +195,21 @@ class _BookingsScreenState extends State<BookingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // الهيدر العلوي
+            // الهيدر العلوي (تمت إزالة زر الجرس وإبقاء مساحة فارغة للتوازن)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    icon: Icon(Icons.arrow_back_ios_new, size: 20, color: theme.iconTheme.color),
-                    onPressed: () => Navigator.maybePop(context),
+                    icon: Icon(Icons.arrow_back_ios_new, size: 20, color: theme.iconTheme.color), 
+                    onPressed: () => Navigator.maybePop(context)
                   ),
                   Text(
-                    'BYMA',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w900, 
-                      color: theme.colorScheme.primary,
-                      letterSpacing: 1.2,
-                    ),
+                    'BYMA', 
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: theme.colorScheme.primary, letterSpacing: 1.2)
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: theme.cardColor,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
-                          blurRadius: 8,
-                        )
-                      ],
-                    ),
-                    child: Icon(Icons.notifications_none_outlined, size: 22, color: theme.iconTheme.color),
-                  ),
+                  const SizedBox(width: 48), // مساحة بديلة لزر الجرس الملغي للحفاظ على توسط كلمة BYMA
                 ],
               ),
             ),
@@ -69,33 +220,11 @@ class _BookingsScreenState extends State<BookingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'journey_history'.tr(),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: theme.colorScheme.secondary,
-                      letterSpacing: 1.1,
-                    ),
-                  ),
+                  Text('journey_history'.tr(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: theme.colorScheme.secondary, letterSpacing: 1.1)),
                   const SizedBox(height: 4),
-                  Text(
-                    'your_stays'.tr(),
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w900,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
+                  Text('your_stays'.tr(), style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: theme.colorScheme.primary)),
                   const SizedBox(height: 6),
-                  Text(
-                    'stays_subtitle'.tr(),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: theme.colorScheme.tertiary, 
-                      height: 1.4,
-                    ),
-                  ),
+                  Text('stays_subtitle'.tr(), style: TextStyle(fontSize: 14, color: theme.colorScheme.tertiary, height: 1.4)),
                 ],
               ),
             ),
@@ -118,7 +247,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
               ),
             ),
 
-            // قائمة الحجوزات المفلترة ديناميكياً
+            // قائمة البطاقات
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
@@ -135,7 +264,6 @@ class _BookingsScreenState extends State<BookingsScreen> {
                       isUpcoming: true,
                       theme: theme,
                     ),
-                    const SizedBox(height: 20),
                   ],
                   if (_selectedTab == 'All Stays' || _selectedTab == 'Completed') ...[
                     _buildBookingCard(
@@ -149,81 +277,35 @@ class _BookingsScreenState extends State<BookingsScreen> {
                       isUpcoming: false,
                       theme: theme,
                     ),
-                    const SizedBox(height: 20),
-                    _buildBookingCard(
-                      context: context,
-                      imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
-                      tag: 'completed_tag'.tr(),
-                      location: 'new_york_usa'.tr(),
-                      title: 'industrial_loft'.tr(),
-                      checkIn: '',
-                      nights: '',
-                      isUpcoming: false,
-                      theme: theme,
-                    ),
-                    const SizedBox(height: 20),
                   ],
-                  const SizedBox(height: 160), 
+                  const SizedBox(height: 120), 
                 ],
               ),
             ),
           ],
         ),
       ),
-
       bottomNavigationBar: BymaBottomNav(
         activeTab: BymaBottomNavTab.bookings,
         onTabSelected: (tab) {
-          if (tab == BymaBottomNavTab.home) {
-            Navigator.maybePop(context);
-            return;
-          }
-          if (tab == BymaBottomNavTab.chat) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const BymaChatScreen()),
-            );
-            return;
-          }
-          if (tab == BymaBottomNavTab.profile) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SettingsRefinedScreen()),
-            );
-            return;
-          }
+          // أضف منطق التنقل هنا عند الحاجة
         },
       ),
     );
   }
 
-  Widget _buildTabButton(String key, String translatedLabel, ThemeData theme) {
+  Widget _buildTabButton(String key, String label, ThemeData theme) {
     final isActive = _selectedTab == key;
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedTab = key;
-        });
-      },
+      onTap: () => setState(() => _selectedTab = key),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
           color: isActive ? theme.colorScheme.primary : theme.cardColor,
           borderRadius: BorderRadius.circular(30),
-          border: Border.all(
-            color: isActive ? Colors.transparent : theme.dividerColor,
-          ),
+          border: Border.all(color: isActive ? Colors.transparent : theme.dividerColor),
         ),
-        child: Text(
-          translatedLabel,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: isActive 
-                ? (theme.brightness == Brightness.dark && theme.colorScheme.primary == Colors.yellow ? Colors.black : Colors.white)
-                : theme.colorScheme.secondary,
-          ),
-        ),
+        child: Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isActive ? Colors.white : theme.colorScheme.secondary)),
       ),
     );
   }
@@ -242,170 +324,45 @@ class _BookingsScreenState extends State<BookingsScreen> {
     final isYellowTheme = theme.colorScheme.primary == Colors.yellow;
 
     return Container(
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(color: theme.cardColor, borderRadius: BorderRadius.circular(28), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10)]),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-                child: Container(
-                  height: 180,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: theme.scaffoldBackgroundColor,
-                    border: Border.all(
-                      color: theme.dividerColor,
-                      width: 1.2,
-                    ),
-                  ),
-                  child: Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.broken_image)),
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 14,
-                left: 14,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: isUpcoming 
-                        ? (isYellowTheme ? Colors.yellow : const Color(0xFF38B6FF))
-                        : (isYellowTheme ? Colors.white : Colors.black.withOpacity(0.6)), 
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    tag,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w900,
-                      color: isYellowTheme ? Colors.black : Colors.white,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            child: Image.network(imageUrl, height: 180, width: double.infinity, fit: BoxFit.cover),
           ),
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  location.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: theme.colorScheme.primary, 
-                    letterSpacing: 1,
-                  ),
-                ),
+                Text(location.toUpperCase(), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: theme.colorScheme.primary)),
                 const SizedBox(height: 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w900,
-                          color: theme.colorScheme.secondary,
-                        ),
-                      ),
-                    ),
-                    if (!isUpcoming)
-                      Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20),
-                  ],
-                ),
+                Text(title, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: theme.colorScheme.secondary)),
                 if (isUpcoming) ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Divider(color: theme.dividerColor, height: 1),
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('check_in_label'.tr(), style: TextStyle(fontSize: 10, color: theme.colorScheme.tertiary, fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 4),
-                            Text(checkIn, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: theme.colorScheme.secondary)),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('nights_label'.tr(), style: TextStyle(fontSize: 10, color: theme.colorScheme.tertiary, fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 4),
-                            Text(nights, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: theme.colorScheme.secondary)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
                   const SizedBox(height: 16),
-                  Container(
+                  SizedBox(
                     width: double.infinity,
                     height: 48,
-                    decoration: BoxDecoration(
-                      color: isYellowTheme ? Colors.yellow : null,
-                      gradient: isYellowTheme ? null : const LinearGradient(
-                        colors: [Color(0xFF50B5D9), Color(0xFF1F94A8)],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
                     child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                      child: Text(
-                        'manage_booking'.tr(),
-                        style: TextStyle(
-                          fontWeight: FontWeight.w800, 
-                          fontSize: 14, 
-                          color: isYellowTheme ? Colors.black : Colors.white,
-                        ),
-                      ),
+                      onPressed: () => _showManageBookingSheet(context, title, theme, isYellowTheme),
+                      style: ElevatedButton.styleFrom(backgroundColor: theme.colorScheme.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                      child: Text('manage_booking'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                     ),
                   ),
-                ],
-                if (!isUpcoming) ...[
+                ] else ...[
                   const SizedBox(height: 14),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'rate_now'.tr(),
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: theme.colorScheme.primary),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(color: theme.dividerColor, shape: BoxShape.circle),
-                        child: Icon(Icons.arrow_forward_ios, size: 10, color: theme.colorScheme.secondary),
-                      )
-                    ],
+                  GestureDetector(
+                    onTap: () => _showReviewAndReportSheet(context, title, theme, isYellowTheme),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('rate_now'.tr(), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: theme.colorScheme.primary)),
+                        const Icon(Icons.arrow_forward_ios, size: 12),
+                      ],
+                    ),
                   ),
                 ]
               ],

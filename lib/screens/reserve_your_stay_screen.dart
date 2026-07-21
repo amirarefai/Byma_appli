@@ -898,7 +898,7 @@ class _PerfectMatchCard extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (_) => RoomDetailsScreen(
                           roomTitle: title.replaceAll('\n', ' '),
-                          pricePerNight: '\$450',
+                          pricePerNight: '\$450', id: '',
                         ),
                       ),
                     );

@@ -11,7 +11,7 @@ class FilteredResultsUpdatedScreen extends StatelessWidget {
   const FilteredResultsUpdatedScreen({
     super.key,
     this.location,
-    this.dateRange,
+    this.dateRange, String? hotelName,
   });
 
   Widget _buildHotelCard({
@@ -50,7 +50,7 @@ class FilteredResultsUpdatedScreen extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (_) => HotelDetailsScreen(
                       title: title,
-                      imageUrl: imageUrl,
+                      imageUrl: imageUrl, id: '',
                     ),
                   ),
                 );

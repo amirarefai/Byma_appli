@@ -1,5 +1,21 @@
+import 'dart:async'; // 🌟 مطلوب للمؤقت الزمني للصور
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_bloc/flutter_bloc.dart'; // 🌟 مطلوب للـ BlocBuilder
+
+// استدعاء ملفات الـ Cubit الجديدة
+import '../business_logic/hotel_cubit/hotel_cubit.dart';
+import '../business_logic/hotel_cubit/hotel_state.dart';
+import '../business_logic/hotel_details_cubit/hotel_details_cubit.dart'; // 🌟 تأكد من صحة مسار ملف تفاصيل الكيوبيت لديك
+import '../data/repositories/hotel_repository.dart'; // 🌟 تأكد من صحة مسار ملف الريسيبتوري لديك
+
+// استدعاء الشاشات والملفات المرتبطة في مشروعك
+import 'soon_splash_screen.dart';
+import 'notifications_screen.dart';
+import 'filters_advanced_screen.dart';
+import 'hotel_details_screen.dart';    
+import 'recently_viewed.dart';
+import 'collection.dart';    // يحتوي على CollectionModel و CollectionItem و globalCollections
 
 import '../constance/app_colors.dart';
 import '../state/favorites_scope.dart';
@@ -7,7 +23,6 @@ import '../state/favorites_store.dart';
 import '../widgets/byma_bottom_nav.dart';
 import 'bookings_screen.dart';
 import 'messages_final_navigation.dart';
-import 'hotels_screen.dart';
 import 'main_layout_screen.dart';
 import 'settings_refined_screen.dart';
 
@@ -16,16 +31,179 @@ class HomeScreen extends StatelessWidget {
 
   const HomeScreen({super.key, this.onTabChanged});
 
+  // دالة منبثقة لإظهار المجموعات للمسخدم
+  void _showAddToCollectionSheet(BuildContext context, {required String hotelTitle, required String imageUrl}) {
+    final theme = Theme.of(context);
+    final TextEditingController newCollectionController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: theme.cardColor,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                top: 20,
+                left: 20,
+                right: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.tr('save_to_collection_sheet_title'),
+                    style: TextStyle(
+                      color: theme.colorScheme.secondary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: newCollectionController,
+                          decoration: InputDecoration(
+                            hintText: 'اسم المجموعة الجديدة...',
+                            hintStyle: TextStyle(color: theme.colorScheme.tertiary.withOpacity(0.6), fontSize: 14),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: theme.colorScheme.tertiary.withOpacity(0.3)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: theme.colorScheme.tertiary.withOpacity(0.3)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.primaryColor,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                        ),
+                        onPressed: () {
+                          final name = newCollectionController.text.trim();
+                          if (name.isNotEmpty) {
+                            setModalState(() {
+                              final newCol = CollectionModel(
+                                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                                name: name,
+                                items: List<CollectionItem>.from([]),
+                              );
+                              
+                              newCol.items.add(CollectionItem(
+                                id: hotelTitle,
+                                nameEn: hotelTitle,
+                                nameAr: hotelTitle,
+                                imageUrl: imageUrl,
+                                type: CollectionItemType.hotel,
+                              ));
+
+                              globalCollections.add(newCol);
+                              newCollectionController.clear();
+                              FocusScope.of(context).unfocus();
+                            });
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('تم إنشاء مجموعة "$name" وحفظ الفندق فيها')),
+                            );
+                          }
+                        },
+                        child: const Icon(Icons.add, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  const Divider(),
+                  const SizedBox(height: 10),
+
+                  if (globalCollections.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Center(
+                        child: Text(
+                          context.tr('no_collections'),
+                          style: TextStyle(color: theme.colorScheme.tertiary),
+                        ),
+                      ),
+                    )
+                  else
+                    Flexible(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: globalCollections.length,
+                        itemBuilder: (context, index) {
+                          final collection = globalCollections[index];
+                          final isAdded = collection.items.any((item) => item.id == hotelTitle);
+
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: Icon(
+                              isAdded ? Icons.folder_special : Icons.folder_special_outlined,
+                              color: theme.colorScheme.primary,
+                            ),
+                            title: Text(
+                              collection.name,
+                              style: TextStyle(color: theme.colorScheme.secondary, fontWeight: FontWeight.w600),
+                            ),
+                            trailing: Icon(
+                              isAdded ? Icons.check_circle : Icons.add_circle_outline,
+                              color: isAdded ? Colors.green : theme.colorScheme.tertiary,
+                            ),
+                            onTap: () {
+                              setModalState(() {
+                                if (!isAdded) {
+                                  collection.items.add(CollectionItem(
+                                    id: hotelTitle,
+                                    nameEn: hotelTitle,
+                                    nameAr: hotelTitle,
+                                    imageUrl: imageUrl,
+                                    type: CollectionItemType.hotel,
+                                  ));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('${context.tr('added_to')} ${collection.name}')),
+                                  );
+                                } else {
+                                  collection.items.removeWhere((item) => item.id == hotelTitle);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('${context.tr('removed_from')} ${collection.name}')),
+                                  );
+                                }
+                              });
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // التحقق مما إذا كان التطبيق في الوضع الداكن حالياً
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    // جلب الألوان ديناميكياً بناءً على الثيم
     final primaryColor = Theme.of(context).primaryColor;
-    final darkGreenColor = isDarkMode ? AppColors.kPrimaryColor : AppColors.kPrimaryColor; 
+    final darkGreenColor = AppColors.kPrimaryColor;
     final darkTextColor = Theme.of(context).textTheme.bodyLarge?.color ?? AppColors.kTextColor;
-    final bodyTextColor = Theme.of(context).textTheme.bodyMedium?.color ?? AppColors.kTextColor;
     final secondaryTextColor = Theme.of(context).textTheme.bodySmall?.color ?? AppColors.kSubTextColor;
     final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
     final cardColor = Theme.of(context).cardColor;
@@ -36,43 +214,27 @@ class HomeScreen extends StatelessWidget {
         activeTab: BymaBottomNavTab.home,
         onTabSelected: (tab) {
           if (tab == BymaBottomNavTab.home) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const MainLayoutScreen()),
-            );
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainLayoutScreen()));
             return;
           }
-
           if (tab == BymaBottomNavTab.bookings) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const BookingsScreen()),
-            );
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const BookingsScreen()));
             return;
           }
-
           if (tab == BymaBottomNavTab.chat) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const BymaChatScreen()),
-            );
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const BymaChatScreen()));
             return;
           }
-
           if (tab == BymaBottomNavTab.profile) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const SettingsRefinedScreen()),
-            );
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const SettingsRefinedScreen()));
           }
         },
       ),
       body: SafeArea(
-        top: false, 
+        top: false,
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
-            // 1. الهيدر العلوي (BYMA وزر التنبيهات)
             SliverAppBar(
               floating: true,
               pinned: false,
@@ -81,176 +243,186 @@ class HomeScreen extends StatelessWidget {
               automaticallyImplyLeading: false,
               titleSpacing: 0,
               toolbarHeight: 92,
-              title: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDarkMode ? 0.2 : 0.06),
-                        blurRadius: 14,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'BYMA'.tr(), 
-                            style: TextStyle(
-                              color: primaryColor,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 24,
-                              letterSpacing: 1.1,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'find_your_next_stay'.tr(), 
-                            style: TextStyle(
-                              color: secondaryTextColor,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      Container(
-                        height: 40,
-                        width: 40,
-                        decoration: BoxDecoration(
-                          color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF4F8F8),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.notifications_none_outlined,
-                          color: darkTextColor,
-                          size: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              title: _buildHeader(context, primaryColor, secondaryTextColor, darkTextColor, cardColor, isDarkMode),
             ),
 
-            // 2. محتويات الصفحة بالكامل
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 15),
+                    const SizedBox(height: 20),
+                    _buildCategoriesSection(context, darkGreenColor, primaryColor, secondaryTextColor),
                     const SizedBox(height: 25),
-
-                    // شريط البحث
                     _buildSearchBar(context, darkGreenColor, secondaryTextColor, cardColor),
-                    const SizedBox(height: 35),
-
-                    // قسم التصنيفات المموجة
-                    _buildCategoriesSection(
-                      context,
-                      darkGreenColor,
-                      primaryColor,
-                      secondaryTextColor,
-                    ),
-                    const SizedBox(height: 35),
-
-                    // عنوان قسم "Recently Viewed"
-                    _buildSectionHeader('recently_viewed'.tr(), darkTextColor, primaryColor),
-                    const SizedBox(height: 16),
-
-                    // القائمة الأفقية للعناصر المشاهدة مؤخراً
-                    _buildRecentlyViewedList(context, primaryColor, bodyTextColor),
-                    const SizedBox(height: 35),
-
-                    // الكرت الرئيسي الكبير مفرغ (The Glass Pavilion)
-                    _buildFeaturedCard(context, cardColor, secondaryTextColor),
-                    const SizedBox(height: 10),
-
-                    // الكروت العمودية (تم ربط جميع النصوص بالترجمة داخل ملف الـ json الخاص بك)
-                    _buildVerticalProductCard(
-                      context,
-                      title: "classic_67_rental_title".tr(),
-                      subtitle: "classic_67_rental_sub".tr(),
-                      price: "\$650",
-                      unit: "day_unit".tr(),
-                      rating: "4.8",
-                      primaryColor: primaryColor,
-                      titleColor: darkTextColor,
-                      subColor: secondaryTextColor,
-                    ),
-
-                    _buildVerticalProductCard(
-                      context,
-                      title: "oslo_penthouse_title".tr(),
-                      subtitle: "oslo_penthouse_sub".tr(),
-                      price: "\$450",
-                      unit: "night_unit".tr(),
-                      rating: "4.9",
-                      primaryColor: primaryColor,
-                      titleColor: darkTextColor,
-                      subColor: secondaryTextColor,
-                    ),
-
-                    _buildVerticalProductCard(
-                      context,
-                      title: "azure_explorer_title".tr(),
-                      subtitle: "azure_explorer_sub".tr(),
-                      price: "\$1,800",
-                      unit: "day_unit".tr(),
-                      rating: "5.0",
-                      primaryColor: primaryColor,
-                      titleColor: darkTextColor,
-                      subColor: secondaryTextColor,
-                    ),
-                    const SizedBox(height: 100), 
+                    const SizedBox(height: 25),
                   ],
                 ),
               ),
-            )
+            ),
+
+            BlocBuilder<HotelCubit, HotelState>(
+              builder: (context, state) {
+                if (state is HotelLoading) {
+                  return const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 60.0),
+                      child: Center(
+                        child: CircularProgressIndicator(color: AppColors.kPrimaryColor),
+                      ),
+                    ),
+                  );
+                }
+
+                if (state is HotelError) {
+                  return SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 20.0),
+                      child: Column(
+                        children: [
+                          const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                          const SizedBox(height: 12),
+                          Text(
+                            'حدث خطأ: ${state.message}',
+                            style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                if (state is HotelLoaded) {
+                  if (state.hotels.isEmpty) {
+                    return const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 40.0),
+                        child: Center(child: Text("لا توجد فنادق متاحة حالياً")),
+                      ),
+                    );
+                  }
+
+                  return SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final hotel = state.hotels[index];
+                          return _buildVerticalProductCard(
+                            context,
+                            id: hotel.id.toString(), // 🌟 تم تمرير الـ id الحقيقي هنا
+                            title: hotel.title,
+                            location: hotel.location,
+                            imageUrls: hotel.imageUrls,
+                            rating: hotel.rating,
+                            titleColor: darkTextColor,
+                            subColor: secondaryTextColor,
+                          );
+                        },
+                        childCount: state.hotels.length,
+                      ),
+                    ),
+                  );
+                }
+
+                return const SliverToBoxAdapter(child: SizedBox.shrink());
+              },
+            ),
+            
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
         ),
       ),
     );
   }
 
-  // شريط البحث المخصص
+  Widget _buildHeader(BuildContext context, Color primaryColor, Color secondaryTextColor, Color darkTextColor, Color cardColor, bool isDarkMode) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDarkMode ? 0.2 : 0.06), blurRadius: 14, offset: const Offset(0, 6))],
+        ),
+        child: Row(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('BYMA'.tr(), style: TextStyle(color: primaryColor, fontWeight: FontWeight.w900, fontSize: 24, letterSpacing: 1.1)),
+                const SizedBox(height: 2),
+                Text('find_your_next_stay'.tr(), style: TextStyle(color: secondaryTextColor, fontSize: 11, fontWeight: FontWeight.w500)),
+              ],
+            ),
+            const Spacer(),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
+              },
+              child: Container(
+                height: 40, width: 40,
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.white.withOpacity(0.05) : const Color(0xFFF4F8F8),
+                  shape: BoxShape.circle
+                ),
+                child: Icon(Icons.notifications_none_outlined, color: darkTextColor, size: 20),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoriesSection(BuildContext context, Color activeColor, Color inactiveIconColor, Color textColor) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        GestureDetector(
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SoonSplashScreen(title: 'CARS'.tr(), icon: Icons.directions_car_filled_outlined))),
+          child: _buildCategoryItem(Icons.directions_car_filled_outlined, 'CARS'.tr(), isDarkMode ? Colors.white.withOpacity(0.05) : const Color(0xFFEFF3F6), inactiveIconColor.withOpacity(0.6), textColor),
+        ),
+        Column(
+          children: [
+            Container(
+              height: 75, width: 75,
+              decoration: BoxDecoration(
+                color: activeColor,
+                borderRadius: const BorderRadius.only(topLeft: Radius.circular(32), topRight: Radius.circular(40), bottomLeft: Radius.circular(42), bottomRight: Radius.circular(30)),
+                boxShadow: [BoxShadow(color: activeColor.withOpacity(0.25), blurRadius: 15, offset: const Offset(0, 8))],
+              ),
+              child: const Icon(Icons.king_bed_outlined, color: Colors.white, size: 26),
+            ),
+            const SizedBox(height: 10),
+            Text('HOTELS'.tr(), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: activeColor, letterSpacing: 0.5))
+          ],
+        ),
+        GestureDetector(
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SoonSplashScreen(title: 'EATS'.tr(), icon: Icons.restaurant_outlined))),
+          child: _buildCategoryItem(Icons.restaurant_outlined, 'EATS'.tr(), isDarkMode ? Colors.white.withOpacity(0.05) : const Color(0xFFFFF9F2), const Color(0xFFFFB057), textColor),
+        ),
+      ],
+    );
+  }
+
   Widget _buildSearchBar(BuildContext context, Color filterBgColor, Color textColor, Color cardColor) {
     return Row(
       children: [
         Expanded(
           child: Container(
             height: 55,
-            decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
-                  blurRadius: 12,
-                  offset: const Offset(0, 5),
-                )
-              ],
-            ),
+            decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(30), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 12, offset: const Offset(0, 5))]),
             child: TextField(
-              style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
               decoration: InputDecoration(
-                hintText: 'search_hint'.tr(), 
-                hintStyle: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 15, fontWeight: FontWeight.w500),
-                prefixIcon: Padding(
-                  padding: const EdgeInsets.only(left: 12.0, right: 8.0),
-                  child: Icon(Icons.search, color: textColor.withValues(alpha: 0.7), size: 22),
-                ),
+                hintText: 'search_hotels_hint'.tr(),
+                hintStyle: TextStyle(color: textColor.withOpacity(0.5), fontSize: 15, fontWeight: FontWeight.w500),
+                prefixIcon: Padding(padding: const EdgeInsets.only(left: 12.0, right: 8.0), child: Icon(Icons.search, color: textColor.withOpacity(0.7), size: 22)),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 16),
               ),
@@ -258,80 +430,15 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        Container(
-          height: 55,
-          width: 55,
-          decoration: BoxDecoration(
-            color: filterBgColor,
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(Icons.tune, color: Colors.white, size: 22),
-        ),
-      ],
-    );
-  }
-
-  // قسم الأيقونات
-  Widget _buildCategoriesSection(
-    BuildContext context,
-    Color activeColor,
-    Color inactiveIconColor,
-    Color textColor,
-  ) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
         GestureDetector(
           onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const HotelsScreen()),
-            );
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const FiltersAdvancedScreen()));
           },
-          child: _buildCategoryItem(
-            Icons.king_bed_outlined,
-            'HOTELS'.tr(), 
-            isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFEBF9F9),
-            inactiveIconColor,
-            textColor,
+          child: Container(
+            height: 55, width: 55,
+            decoration: BoxDecoration(color: filterBgColor, shape: BoxShape.circle),
+            child: const Icon(Icons.tune, color: Colors.white, size: 22)
           ),
-        ),
-        Column(
-          children: [
-            Container(
-              height: 75,
-              width: 75,
-              decoration: BoxDecoration(
-                color: activeColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(32),
-                  topRight: Radius.circular(40),
-                  bottomLeft: Radius.circular(42),
-                  bottomRight: Radius.circular(30),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: activeColor.withValues(alpha: 0.25),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  )
-                ],
-              ),
-              child: const Icon(Icons.directions_car_filled_outlined, color: Colors.white, size: 26),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'CARS'.tr(), 
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: activeColor, letterSpacing: 0.5),
-            )
-          ],
-        ),
-        _buildCategoryItem(
-          Icons.restaurant_outlined,
-          'EATS'.tr(), 
-          isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFFFF9F2),
-          const Color(0xFFFFB057),
-          textColor,
         ),
       ],
     );
@@ -340,355 +447,251 @@ class HomeScreen extends StatelessWidget {
   Widget _buildCategoryItem(IconData icon, String label, Color bgColor, Color iconColor, Color textColor) {
     return Column(
       children: [
-        Container(
-          height: 75,
-          width: 75,
-          decoration: BoxDecoration(
-            color: bgColor,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: iconColor, size: 26),
-        ),
+        Container(height: 75, width: 75, decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle), child: Icon(icon, color: iconColor, size: 26)),
         const SizedBox(height: 10),
-        Text(
-          label,
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: textColor.withValues(alpha: 0.6), letterSpacing: 0.5),
-        )
+        Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: textColor.withOpacity(0.6), letterSpacing: 0.5))
       ],
     );
   }
 
-  Widget _buildSectionHeader(String title, Color textColor, Color actionColor) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: textColor, letterSpacing: -0.2),
-        ),
-        Text(
-          'view_all'.tr(), 
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: actionColor, letterSpacing: 0.8),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRecentlyViewedList(BuildContext context, Color priceColor, Color textColor) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
-    // جعلنا الـ Keys والمحتوى يقبل الترجمة ديناميكياً
-    final items = [
-      {'title': 'modern_glass_villa_title'.tr(), 'price': '\$2,400', 'unit': 'night_unit'.tr()},
-      {'title': "classic_67_edition_title".tr(), 'price': '\$650', 'unit': 'day_unit'.tr()},
-    ];
-
-    return SizedBox(
-      height: 195,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          final item = items[index];
-          return Container(
-            width: 170,
-            margin: const EdgeInsets.only(right: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: 125,
-                  width: 170,
-                  child: Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFEFF3F6),
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: isDarkMode ? Colors.white12 : const Color(0xFFD9E2E8), width: 1.2),
-                        ),
-                        child: Center(
-                          child: Icon(Icons.image_outlined, size: 30, color: isDarkMode ? Colors.white30 : const Color(0xFFB7C3CB)),
-                        ),
-                      ),
-                      Positioned(
-                        right: 10,
-                        top: 10,
-                        child: AnimatedBuilder(
-                          animation: FavoritesScope.of(context),
-                          builder: (context, _) {
-                            final id = item['title'] as String;
-                            final isFav = FavoritesScope.of(context).isFavorite(id);
-                            return InkWell(
-                              borderRadius: BorderRadius.circular(999),
-                              onTap: () {
-                                FavoritesScope.of(context).toggleFavorite(
-                                  FavoriteItem(
-                                    id: id,
-                                    title: id,
-                                    subtitle: id,
-                                    rating: '4.9',
-                                    fromText: '',
-                                    price: item['price'] as String,
-                                    ctaText: '',
-                                    imageAsset: '',
-                                    compactBadge: null,
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: isDarkMode ? 0.2 : 0.75),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  isFav ? Icons.favorite_rounded : Icons.favorite_border,
-                                  color: isFav ? const Color(0xFF0FA37A) : (isDarkMode ? Colors.white : const Color(0xFF0F4A42)),
-                                  size: 20,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  item['title']!,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: textColor),
-                ),
-                const SizedBox(height: 3),
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: item['price']!,
-                        style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: priceColor),
-                      ),
-                      TextSpan(
-                        text: ' ${item['unit']!}',
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11, color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildFeaturedCard(BuildContext context, Color cardColor, Color secondaryTextColor) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      width: double.infinity,
-      height: 340,
-      decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFE2E8F0), 
-        borderRadius: BorderRadius.circular(40),
-        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.white, width: 1.5),
-      ),
-      child: Stack(
-        children: [
-          Center(
-            child: Icon(
-              Icons.image_not_supported_outlined,
-              size: 75,
-              color: isDarkMode ? Colors.white24 : const Color(0xFF94A3B8),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF62CDFF),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    'trending_now'.tr(), 
-                    style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.6),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'glass_pavilion_title'.tr(),
-                            style: TextStyle(color: isDarkMode ? Colors.white : const Color(0xFF0F4A42), fontSize: 26, fontWeight: FontWeight.w900, height: 1.15),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(Icons.location_on, color: isDarkMode ? secondaryTextColor : const Color(0xFF557C7D), size: 16),
-                              const SizedBox(width: 4),
-                              Text('malibu_california'.tr(), style: TextStyle(color: isDarkMode ? secondaryTextColor : const Color(0xFF557C7D), fontSize: 13, fontWeight: FontWeight.w600)),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: cardColor.withValues(alpha: 0.85),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.white),
-                      ),
-                      child: Column(
-                        children: [
-                          Text('starting_from'.tr(), style: const TextStyle(color: Colors.grey, fontSize: 8, fontWeight: FontWeight.w900)),
-                          Text('\$2,400/${'night_unit_short'.tr()}', style: const TextStyle(color: Color(0xFF006653), fontSize: 14, fontWeight: FontWeight.w900)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
+  // 🌟 تم إضافة `required String id` هنا وتم تعديل الـ Navigation بالـ BlocProvider
   Widget _buildVerticalProductCard(
     BuildContext context, {
+    required String id,
     required String title,
-    required String subtitle,
-    required String price,
-    required String unit,
+    required String location,
+    required List<String> imageUrls,
     required String rating,
-    required Color primaryColor,
     required Color titleColor,
     required Color subColor,
   }) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(top: 20, bottom: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              Container(
-                height: 220,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFE2E8F0),
-                  borderRadius: BorderRadius.circular(35),
-                  border: Border.all(color: isDarkMode ? Colors.white10 : Colors.white, width: 1.5),
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.image_not_supported_outlined,
-                    size: 55,
-                    color: isDarkMode ? Colors.white24 : const Color(0xFF94A3B8),
-                  ),
-                ),
+    return HotelProductCard(
+      title: title,
+      location: location,
+      imageUrls: imageUrls,
+      rating: rating,
+      titleColor: titleColor,
+      subColor: subColor,
+      onAddClick: () => _showAddToCollectionSheet(
+        context,
+        hotelTitle: title,
+        imageUrl: imageUrls.isNotEmpty ? imageUrls.first : "",
+      ),
+      onTap: () {
+        addRecentlyViewedItem(RecentlyViewedItem(
+          id: id,
+          nameEn: title,
+          nameAr: title,
+          locationEn: location,
+          locationAr: location,
+          imageUrl: imageUrls.isNotEmpty ? imageUrls.first : "",
+          price: 150.0,
+          type: RecentlyItemType.hotel,
+        ));
+
+        // 🌟 تعديل الانتقال ليقوم بحقن الـ Cubit وتمرير الـ ID الحقيقي للباك-إند
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BlocProvider(
+              create: (context) => HotelDetailsCubit(HotelRepository())..getHotelDetails(id),
+              child: HotelDetailsScreen(
+                id: id,
+                title: title,    
+                imageUrl: imageUrls.isNotEmpty ? imageUrls.first : "", 
               ),
-              Positioned(
-                top: 15,
-                right: 15,
-                child: AnimatedBuilder(
-                  animation: FavoritesScope.of(context),
-                  builder: (context, _) {
-                    final isFav = FavoritesScope.of(context).isFavorite(title);
-                    return InkWell(
-                      borderRadius: BorderRadius.circular(999),
-                      onTap: () {
-                        FavoritesScope.of(context).toggleFavorite(
-                          FavoriteItem(
-                            id: title,
-                            title: title,
-                            subtitle: subtitle,
-                            rating: rating,
-                            fromText: '',
-                            price: price,
-                            ctaText: '',
-                            imageAsset: '',
-                            compactBadge: null,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// الـ Widget المستقل لعرض صور متعددة بشكل متحرك تلقائياً كل 3 ثوانٍ
+class HotelProductCard extends StatefulWidget {
+  final String title;
+  final String location;
+  final List<String> imageUrls;
+  final String rating;
+  final Color titleColor;
+  final Color subColor;
+  final VoidCallback onTap;
+  final VoidCallback onAddClick;
+
+  const HotelProductCard({
+    super.key,
+    required this.title,
+    required this.location,
+    required this.imageUrls,
+    required this.rating,
+    required this.titleColor,
+    required this.subColor,
+    required this.onTap,
+    required this.onAddClick,
+  });
+
+  @override
+  State<HotelProductCard> createState() => _HotelProductCardState();
+}
+
+class _HotelProductCardState extends State<HotelProductCard> {
+  late PageController _pageController;
+  Timer? _timer;
+  int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: 0);
+
+    if (widget.imageUrls.length > 1) {
+      _timer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
+        if (_currentPage < widget.imageUrls.length - 1) {
+          _currentPage++;
+        } else {
+          _currentPage = 0;
+        }
+
+        if (_pageController.hasClients) {
+          _pageController.animateToPage(
+            _currentPage,
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeInOutCubic,
+          );
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(top: 10, bottom: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(35),
+                  child: SizedBox(
+                    height: 220,
+                    width: double.infinity,
+                    child: PageView.builder(
+                      controller: _pageController,
+                      itemCount: widget.imageUrls.length,
+                      onPageChanged: (index) {
+                        _currentPage = index;
+                      },
+                      itemBuilder: (context, index) {
+                        return Container(
+                          color: isDarkMode ? Colors.white.withOpacity(0.05) : const Color(0xFFE2E8F0),
+                          child: Image.network(
+                            widget.imageUrls[index],
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Center(
+                                child: Icon(
+                                  Icons.image_not_supported_outlined,
+                                  size: 55,
+                                  color: isDarkMode ? Colors.white24 : const Color(0xFF94A3B8),
+                                ),
+                              );
+                            },
                           ),
                         );
                       },
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: isDarkMode ? 0.2 : 0.75),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          isFav ? Icons.favorite_rounded : Icons.favorite_border,
-                          color: isFav ? const Color(0xFF0FA37A) : (isDarkMode ? Colors.white : const Color(0xFF0F4A42)),
-                          size: 20,
+                    ),
+                  ),
+                ),
+                
+                Positioned(
+                  top: 15, right: 15,
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: widget.onAddClick,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          margin: const EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(isDarkMode ? 0.2 : 0.75),
+                            shape: BoxShape.circle
+                          ),
+                          child: Icon(
+                            Icons.add,
+                            color: isDarkMode ? Colors.white : const Color(0xFF0F4A42),
+                            size: 20,
+                          ),
                         ),
                       ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: TextStyle(fontSize: 19, fontWeight: FontWeight.w900, color: titleColor, letterSpacing: -0.2),
-              ),
-              Row(
-                children: [
-                  const Icon(Icons.star, color: Colors.amber, size: 18),
-                  const SizedBox(width: 4),
-                  Text(
-                    rating,
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: titleColor),
+                      
+                      AnimatedBuilder(
+                        animation: FavoritesScope.of(context),
+                        builder: (context, _) {
+                          final isFav = FavoritesScope.of(context).isFavorite(widget.title);
+                          return InkWell(
+                            onTap: () => FavoritesScope.of(context).toggleFavorite(
+                              FavoriteItem(
+                                id: widget.title,
+                                title: widget.title,
+                                subtitle: widget.location,
+                                rating: widget.rating,
+                                fromText: '', price: '', ctaText: '', imageAsset: '', compactBadge: null
+                              )
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(isDarkMode ? 0.2 : 0.75),
+                                shape: BoxShape.circle
+                              ),
+                              child: Icon(
+                                isFav ? Icons.favorite_rounded : Icons.favorite_border,
+                                color: isFav ? const Color(0xFF0FA37A) : (isDarkMode ? Colors.white : const Color(0xFF0F4A42)),
+                                size: 20,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                ],
-              )
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: TextStyle(fontSize: 13, color: subColor, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 6),
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: price,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: primaryColor),
-                ),
-                TextSpan(
-                  text: ' $unit',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: subColor),
                 ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 14),
+            
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(widget.title, style: TextStyle(fontSize: 19, fontWeight: FontWeight.w900, color: widget.titleColor, letterSpacing: -0.2)),
+                Row(
+                  children: [
+                    const Icon(Icons.star, color: Colors.amber, size: 18),
+                    const SizedBox(width: 4),
+                    Text(widget.rating, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: widget.titleColor))
+                  ],
+                )
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(widget.location, style: TextStyle(fontSize: 13, color: widget.subColor, fontWeight: FontWeight.w600)),
+          ],
+        ),
       ),
     );
   }

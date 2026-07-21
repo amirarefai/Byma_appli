@@ -1,10 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-// قم بتغيير هذه المسارات بناءً على بنية مشروعك
-// import 'package:pluto_ui/cubits/signup_cubit/signup_cubit.dart';
-// import 'package:pluto_ui/cubits/signup_cubit/signup_state.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -18,66 +14,46 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _phoneNumberController = TextEditingController();
-  final _dobController = TextEditingController(); 
   final _passwordController = TextEditingController();
 
-  String _gender = 'Male';
+  // متغيرات الصور (إجبارية)
+  XFile? _profileImage; 
   XFile? _idPhoto;
+  
+  // متغيرات لحفظ حالة الخطأ للصور لعرض إطار أحمر عند الخطأ
+  bool _profileImageHasError = false;
+  bool _idPhotoHasError = false;
+
   final ImagePicker _picker = ImagePicker();
 
   @override
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
+    _emailController.dispose();
     _phoneNumberController.dispose();
-    _dobController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime(2000),
-      firstDate: DateTime(1920),
-      lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFF0B6B5D),
-              onPrimary: Colors.white,
-              onSurface: Color(0xFF2E3E41),
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF0B6B5D),
-              ),
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null) {
-      setState(() {
-        _dobController.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
-      });
-    }
-  }
-
-  Future<void> _pickIdPhoto(ImageSource source) async {
+  Future<void> _pickImage(ImageSource source, bool isProfileImage) async {
     final XFile? picked = await _picker.pickImage(source: source);
     if (picked == null) return;
 
     setState(() {
-      _idPhoto = picked;
+      if (isProfileImage) {
+        _profileImage = picked;
+        _profileImageHasError = false; // إلغاء حالة الخطأ عند اختيار صورة
+      } else {
+        _idPhoto = picked;
+        _idPhotoHasError = false; // إلغاء حالة الخطأ عند اختيار صورة
+      }
     });
   }
 
-  Future<void> _openIdPhotoOptions() async {
+  Future<void> _showPhotoOptions({required bool isProfileImage}) async {
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -92,7 +68,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   title: const Text('Pick from Gallery'),
                   onTap: () {
                     Navigator.of(ctx).pop();
-                    _pickIdPhoto(ImageSource.gallery);
+                    _pickImage(ImageSource.gallery, isProfileImage);
                   },
                 ),
                 ListTile(
@@ -100,7 +76,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   title: const Text('Take a Photo'),
                   onTap: () {
                     Navigator.of(ctx).pop();
-                    _pickIdPhoto(ImageSource.camera);
+                    _pickImage(ImageSource.camera, isProfileImage);
                   },
                 ),
               ],
@@ -112,24 +88,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      if (_idPhoto == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please upload your ID photo Verification')),
-        );
-        return;
-      }
+    // إعادة تعيين أخطاء الصور قبل الفحص
+    setState(() {
+      _profileImageHasError = _profileImage == null;
+      _idPhotoHasError = _idPhoto == null;
+    });
 
-      // هنا يتم استدعاء دالة الـ Cubit لتسجيل الحساب وإرسال البيانات
-      // context.read<SignUpCubit>().signUp(
-      //   firstName: _firstNameController.text.trim(),
-      //   lastName: _lastNameController.text.trim(),
-      //   phone: _phoneNumberController.text.trim(),
-      //   dob: _dobController.text.trim(),
-      //   gender: _gender,
-      //   idPhotoPath: _idPhoto!.path,
-      //   password: _passwordController.text,
-      // );
+    // تحقق من حقول النص (Form Validation) وحالة الصور
+    bool isFormValid = _formKey.currentState!.validate();
+
+    if (isFormValid && !_profileImageHasError && !_idPhotoHasError) {
+      // إذا كان كل شيء تمام وسليم، يتم استدعاء الـ Cubit هنا
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Processing Registration...'),
+          backgroundColor: Color(0xFF0B6B5D),
+        ),
+      );
+      
+      // context.read<SignUpCubit>().signUp(...);
+    } else {
+      // إذا كان هناك أي نقص، تظهر رسالة تنبيه للمستخدم
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill all required fields and upload images'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
     }
   }
 
@@ -164,7 +149,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   child: ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: maxW),
                     child: Form(
-                      key: _formKey, // ربط الفورم بالمفتاح
+                      key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -213,8 +198,71 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // قسم صورة البروفايل الإلزامية
+                                Center(
+                                  child: Column(
+                                    children: [
+                                      Stack(
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () => _showPhotoOptions(isProfileImage: true),
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                border: Border.all(
+                                                  // تلوين الإطار بالأحمر في حال عدم رفع الصورة وضغط حفظ
+                                                  color: _profileImageHasError ? Colors.redAccent : teal.withOpacity(0.3),
+                                                  width: 3,
+                                                ),
+                                              ),
+                                              child: CircleAvatar(
+                                                radius: 50,
+                                                backgroundColor: teal.withOpacity(0.1),
+                                                backgroundImage: _profileImage != null
+                                                    ? FileImage(File(_profileImage!.path))
+                                                    : null,
+                                                child: _profileImage == null
+                                                    ? const Icon(
+                                                        Icons.person_outline,
+                                                        size: 50,
+                                                        color: teal,
+                                                      )
+                                                    : null,
+                                              ),
+                                            ),
+                                          ),
+                                          Positioned(
+                                            bottom: 0,
+                                            right: 0,
+                                            child: GestureDetector(
+                                              onTap: () => _showPhotoOptions(isProfileImage: true),
+                                              child: const CircleAvatar(
+                                                radius: 16,
+                                                backgroundColor: teal,
+                                                child: Icon(
+                                                  Icons.camera_alt_outlined,
+                                                  size: 16,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      if (_profileImageHasError) ...[
+                                        const SizedBox(height: 6),
+                                        const Text(
+                                          'Profile photo is required *',
+                                          style: TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                                        )
+                                      ]
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+
                                 // 1. First Name
-                                const _FieldLabel(label: 'FIRST NAME', color: labelColor),
+                                const _FieldLabel(label: 'FIRST NAME *', color: labelColor),
                                 const SizedBox(height: 8),
                                 _CustomFormField(
                                   hint: 'Enter your first name',
@@ -226,7 +274,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 const SizedBox(height: 14),
 
                                 // 2. Last Name
-                                const _FieldLabel(label: 'LAST NAME', color: labelColor),
+                                const _FieldLabel(label: 'LAST NAME *', color: labelColor),
                                 const SizedBox(height: 8),
                                 _CustomFormField(
                                   hint: 'Enter your last name',
@@ -237,8 +285,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                                 const SizedBox(height: 14),
 
-                                // 3. Phone Number
-                                const _FieldLabel(label: 'PHONE NUMBER', color: labelColor),
+                                // 3. Email Address
+                                const _FieldLabel(label: 'EMAIL ADDRESS *', color: labelColor),
+                                const SizedBox(height: 8),
+                                _CustomFormField(
+                                  hint: 'example@domain.com',
+                                  icon: Icons.email_outlined,
+                                  controller: _emailController,
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: (val) {
+                                    if (val == null || val.trim().isEmpty) return 'Email is required';
+                                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                                    if (!emailRegex.hasMatch(val.trim())) return 'Enter a valid email address';
+                                    return null;
+                                  },
+                                ),
+
+                                const SizedBox(height: 14),
+
+                                // 4. Phone Number (تم تعديل التحقق ليصبح إجباري وصارم)
+                                const _FieldLabel(label: 'PHONE NUMBER *', color: labelColor),
                                 const SizedBox(height: 8),
                                 _CustomFormField(
                                   hint: '+963 xxxxxxxxx',
@@ -246,69 +312,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   controller: _phoneNumberController,
                                   keyboardType: TextInputType.phone,
                                   validator: (val) {
-                                    if (val == null || val.trim().isEmpty) return 'Phone number is required';
-                                    if (val.length < 7) return 'Enter a valid phone number';
+                                    if (val == null || val.trim().isEmpty) {
+                                      return 'Phone number is required *';
+                                    }
+                                    if (val.trim().length < 9) {
+                                      return 'Please enter a valid complete phone number';
+                                    }
                                     return null;
                                   },
                                 ),
 
                                 const SizedBox(height: 14),
 
-                                // 4. Date of Birth
-                                const _FieldLabel(label: 'DATE OF BIRTH', color: labelColor),
-                                const SizedBox(height: 8),
-                                _CustomFormField(
-                                  hint: 'yyyy-mm-dd',
-                                  icon: Icons.calendar_today_outlined,
-                                  controller: _dobController,
-                                  readOnly: true,
-                                  onTap: () => _selectDate(context),
-                                  validator: (val) => val == null || val.isEmpty ? 'Please select your birth date' : null,
-                                ),
-
-                                const SizedBox(height: 14),
-
-                                // 5. Gender Identity
-                                const _FieldLabel(label: 'GENDER IDENTITY', color: labelColor),
-                                const SizedBox(height: 10),
-                                Wrap(
-                                  spacing: 14,
-                                  runSpacing: 12,
-                                  children: [
-                                    _GenderChip(
-                                      label: 'Male',
-                                      selected: _gender == 'Male',
-                                      onTap: () => setState(() => _gender = 'Male'),
-                                    ),
-                                    _GenderChip(
-                                      label: 'Female',
-                                      selected: _gender == 'Female',
-                                      onTap: () => setState(() => _gender = 'Female'),
-                                    ),
-                                    _GenderChip(
-                                      label: 'Other',
-                                      selected: _gender == 'Other',
-                                      onTap: () => setState(() => _gender = 'Other'),
-                                    ),
-                                  ],
-                                ),
-
-                                const SizedBox(height: 16),
-
-                                // 6. ID Photo
-                                const _FieldLabel(label: 'ID PHOTO VERIFICATION', color: labelColor),
+                                // 5. ID Photo (إجباري مع تغيير لون الحدود عند الخطأ)
+                                const _FieldLabel(label: 'ID PHOTO VERIFICATION *', color: labelColor),
                                 const SizedBox(height: 10),
                                 InkWell(
                                   borderRadius: BorderRadius.circular(22),
-                                  onTap: _openIdPhotoOptions,
-                                  child: Container(
+                                  onTap: () => _showPhotoOptions(isProfileImage: false),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
                                     width: double.infinity,
                                     padding: const EdgeInsets.all(14),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(22),
                                       border: Border.all(
-                                        color: tealLine.withOpacity(0.35),
-                                        width: 2,
+                                        color: _idPhotoHasError ? Colors.redAccent : tealLine.withOpacity(0.35),
+                                        width: _idPhotoHasError ? 2.5 : 2,
                                       ),
                                     ),
                                     child: Column(
@@ -329,31 +359,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             width: 56,
                                             height: 56,
                                             decoration: BoxDecoration(
-                                              color: const Color(0xFF79D7F8),
+                                              color: _idPhotoHasError ? Colors.redAccent.withOpacity(0.2) : const Color(0xFF79D7F8),
                                               shape: BoxShape.circle,
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  blurRadius: 18,
-                                                  offset: const Offset(0, 10),
-                                                  color: teal.withOpacity(0.12),
-                                                ),
-                                              ],
                                             ),
-                                            child: const Icon(
+                                            child: Icon(
                                               Icons.camera_alt_outlined,
                                               size: 26,
-                                              color: Colors.white,
+                                              color: _idPhotoHasError ? Colors.redAccent : Colors.white,
                                             ),
                                           ),
                                         const SizedBox(height: 10),
                                         Text(
                                           _idPhoto == null
-                                              ? 'Tap to upload Identification'
+                                              ? (_idPhotoHasError ? 'ID Photo is required *' : 'Tap to upload Identification')
                                               : 'Selected: ${_idPhoto!.name}',
                                           textAlign: TextAlign.center,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 14,
-                                            color: Color(0xFF2E3E41),
+                                            color: _idPhotoHasError ? Colors.redAccent : const Color(0xFF2E3E41),
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
@@ -375,8 +398,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                                 const SizedBox(height: 14),
 
-                                // 7. Password
-                                const _FieldLabel(label: 'SECURE PASSWORD', color: labelColor),
+                                // 6. Password
+                                const _FieldLabel(label: 'SECURE PASSWORD *', color: labelColor),
                                 const SizedBox(height: 8),
                                 _CustomFormField(
                                   hint: '••••••••••••',
@@ -392,7 +415,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                                 const SizedBox(height: 18),
 
-                                // زر إنشاء الحساب (يمكن لاحقاً لفه بـ BlocBuilder لتغيير الـ Loading تلقائياً)
+                                // زر الحفظ والتسجيل
                                 SizedBox(
                                   width: double.infinity,
                                   height: 62,
@@ -416,7 +439,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       ],
                                     ),
                                     child: TextButton(
-                                      onPressed: _submitForm, // استدعاء دالة التحقق والتسليم
+                                      onPressed: _submitForm,
                                       style: TextButton.styleFrom(
                                         foregroundColor: Colors.white,
                                         padding: EdgeInsets.zero,
@@ -476,7 +499,6 @@ class _FieldLabel extends StatelessWidget {
   }
 }
 
-// تحويل الـ Widget إلى FormField يدعم الـ Validation والأخطاء بشكل مريح بصرياً
 class _CustomFormField extends StatelessWidget {
   const _CustomFormField({
     required this.hint,
@@ -544,51 +566,7 @@ class _CustomFormField extends StatelessWidget {
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BoxConstraints() == null ? BorderSide.none : const BorderSide(color: Colors.red, width: 1.5),
-        ),
-      ),
-    );
-  }
-}
-
-class _GenderChip extends StatelessWidget {
-  const _GenderChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    const teal = Color(0xFF0B6B5D);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        height: 42,
-        padding: const EdgeInsets.symmetric(horizontal: 22),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(
-            color: teal.withOpacity(selected ? 1 : 0.45),
-            width: 2,
-          ),
-          color: selected ? teal.withOpacity(0.08) : Colors.transparent,
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w900,
-              color: teal,
-            ),
-          ),
+          borderSide: const BorderSide(color: Colors.red, width: 1.5),
         ),
       ),
     );

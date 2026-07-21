@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart'; // 🌟 1. استيراد حزمة الـ Bloc
+import '../business_logic/hotel_cubit/hotel_cubit.dart'; // 🌟 2. استيراد الكيوبيت الجديد
+import '../data/repositories/hotel_repository.dart'; // 🌟 3. استيراد الريبوستري
 import 'home_screen.dart';
 import 'bookings_screen.dart';
 import 'messages_final_navigation.dart';
@@ -26,13 +29,20 @@ class _MainLayoutScreenState extends State<MainLayoutScreen> {
       body: IndexedStack(
         index: _currentTab.index,
         children: [
-          HomeScreen(
-            onTabChanged: (tab) {
-              setState(() {
-                _currentTab = tab;
-              });
-            },
+          // 🌟 4. هنا قمنا بتغليف الـ HomeScreen بالـ BlocProvider واستدعاء دالة جلب البيانات فوراً
+          BlocProvider(
+            create: (context) => HotelCubit(
+              hotelRepository: HotelRepository(),
+            )..getHotels(), // النقطتان المزدوجتان تعني تشغيل الدالة فور الإنشاء
+            child: HomeScreen(
+              onTabChanged: (tab) {
+                setState(() {
+                  _currentTab = tab;
+                });
+              },
+            ),
           ), // index 0
+          
           const BookingsScreen(), // index 1
           const BymaChatScreen(), // index 2
           const SettingsRefinedScreen(), // index 3
