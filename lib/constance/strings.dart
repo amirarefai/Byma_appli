@@ -1,6 +1,6 @@
 
-final String localIp = '';
+final String localIp = '10.0.2.2';
 
-// final baseUrl = 'http://$localIp:8000/api/';
+ final baseUrl = 'http://$localIp:3000/';
 
-final baseUrl = "";
+//final baseUrl = "https://affectionately-exciting-rebbecca.ngrok-free.dev/api/";

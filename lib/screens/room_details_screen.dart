@@ -3,8 +3,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'payment_screen.dart';
 import 'conversation_screen.dart'; 
 
-import '../state/favorites_scope.dart';
-import '../state/favorites_store.dart';
 import 'collection.dart'; // 🌟 استدعاء ملف المجموعات لربط البيانات بشكل121e متطابق
 
 class RoomDetailsScreen extends StatelessWidget {
@@ -215,17 +213,17 @@ class RoomDetailsScreen extends StatelessWidget {
     final Color borderAndDivider = theme.dividerColor;
 
     // إعداد كائن البيانات الخاص بالمفضلة التقليدية (لزر القلب)
-    final currentRoomItem = FavoriteItem(
-      id: roomTitle,
-      title: roomTitle,
-      subtitle: 'room_details_title'.tr(),
-      rating: '4.9',
-      fromText: '',
-      price: '\$${pricePerNight.replaceAll(RegExp(r'[^0-9.]'), '')}/${'per_night_short'.tr()}',
-      ctaText: '',
-      imageAsset: '',
-      compactBadge: null,
-    );
+    // final currentRoomItem = FavoriteItem(
+    //   id: roomTitle,
+    //   title: roomTitle,
+    //   subtitle: 'room_details_title'.tr(),
+    //   rating: '4.9',
+    //   fromText: '',
+    //   price: '\$${pricePerNight.replaceAll(RegExp(r'[^0-9.]'), '')}/${'per_night_short'.tr()}',
+    //   ctaText: '',
+    //   imageAsset: '',
+    //   compactBadge: null,
+    // );
 
     return Scaffold(
       backgroundColor: scaffoldBg,
@@ -253,20 +251,20 @@ class RoomDetailsScreen extends StatelessWidget {
             ),
           ),
           // 2. زر المفضلة الديناميكي التقليدي
-          AnimatedBuilder(
-            animation: FavoritesScope.of(context),
-            builder: (context, _) {
-              final store = FavoritesScope.of(context);
-              final isFav = store.isFavorite(roomTitle);
-              return IconButton(
-                onPressed: () => store.toggleFavorite(currentRoomItem),
-                icon: Icon(
-                  isFav ? Icons.favorite_rounded : Icons.favorite_border,
-                  color: isFav ? (isHighContrast ? Colors.yellow : dynamicTeal) : theme.colorScheme.primary,
-                ),
-              );
-            },
-          ),
+          // AnimatedBuilder(
+          //   animation: FavoritesScope.of(context),
+          //   builder: (context, _) {
+          //     final store = FavoritesScope.of(context);
+          //     final isFav = store.isFavorite(roomTitle);
+          //     return IconButton(
+          //       onPressed: () => store.toggleFavorite(currentRoomItem),
+          //       icon: Icon(
+          //         isFav ? Icons.favorite_rounded : Icons.favorite_border,
+          //         color: isFav ? (isHighContrast ? Colors.yellow : dynamicTeal) : theme.colorScheme.primary,
+          //       ),
+          //     );
+          //   },
+          // ),
           const SizedBox(width: 8),
         ],
       ),

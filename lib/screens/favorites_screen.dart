@@ -1,10 +1,15 @@
+
+import 'package:byma_app/business_logic/toggle_favorite_hotels/cubit/toggle_favorite_hotels_cubit.dart';
+import 'package:byma_app/data/models/favorite_hotel_model.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../state/favorites_scope.dart';
-import '../state/favorites_store.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+// State Management & Models
+import 'package:byma_app/business_logic/favorite_hotels/cubit/favorite_hotels_cubit.dart';
+import 'package:byma_app/business_logic/favorite_hotels/cubit/favorite_hotels_state.dart';
 
-// استيراد شاشات التفاصيل الخاصة بك
+// Screens
 import '../screens/hotel_details_screen.dart';
 import '../screens/room_details_screen.dart';
 
@@ -21,7 +26,7 @@ class FavoritesScreen extends StatelessWidget {
         bottom: false,
         child: Column(
           children: [
-            // الهيدر العلوي
+            // ----- Header -----
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
               child: Row(
@@ -52,7 +57,8 @@ class FavoritesScreen extends StatelessWidget {
                             fontSize: 11,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 1.2,
-                            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+                            color: theme.textTheme.bodyMedium?.color
+                                ?.withValues(alpha: 0.6),
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -72,94 +78,159 @@ class FavoritesScreen extends StatelessWidget {
             ),
             const SizedBox(height: 4),
 
-            // قائمة العناصر المفضلة مقسمة أفقياً
+            // ----- Main Content Body -----
             Expanded(
-              child: AnimatedBuilder(
-                animation: FavoritesScope.of(context),
-                builder: (context, _) {
-                  final favorites = FavoritesScope.of(context).favorites;
+              child: ListView(
+                padding: const EdgeInsets.only(bottom: 24),
+                children: [
+                  // 1. Favorite Rooms Section (Local Scope)
+                  // AnimatedBuilder(
+                  //   animation: FavoritesScope.of(context),
+                  //   builder: (context, _) {
+                  //     final rooms = FavoritesScope.of(context).favorites
+                  //         .where(
+                  //           (item) => !item.id.toLowerCase().contains('hotel'),
+                  //         )
+                  //         .toList();
 
-                  if (favorites.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Text(
-                          'no_favorites_message'.tr(),
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                  //     if (rooms.isEmpty) return const SizedBox.shrink();
+
+                  //     return Column(
+                  //       crossAxisAlignment: CrossAxisAlignment.start,
+                  //       children: [
+                  //         _buildSectionHeader(
+                  //           theme,
+                  //           'favorite_rooms_label'.tr(),
+                  //         ),
+                  //         SizedBox(
+                  //           height: 340,
+                  //           child: ListView.separated(
+                  //             padding: const EdgeInsets.symmetric(
+                  //               horizontal: 16,
+                  //             ),
+                  //             scrollDirection: Axis.horizontal,
+                  //             itemCount: rooms.length,
+                  //             separatorBuilder: (_, __) =>
+                  //                 const SizedBox(width: 16),
+                  //             itemBuilder: (context, index) {
+                  //               return SizedBox(
+                  //                 width:
+                  //                     MediaQuery.of(context).size.width * 0.8,
+                  //                 child: _FavoriteRoomCard(
+                  //                   item: rooms[index],
+                  //                   theme: theme,
+                  //                 ),
+                  //               );
+                  //             },
+                  //           ),
+                  //         ),
+                  //         const SizedBox(height: 24),
+                  //       ],
+                  //     );
+                  //   },
+                  // ),
+
+                  // 2. Favorite Hotels Section (API via Cubit)
+                  BlocBuilder<FavoriteHotelsCubit, FavoriteHotelsState>(
+                    builder: (context, state) {
+                      return state.when(
+                        initial: () => const SizedBox.shrink(),
+
+                        loading: () => SizedBox(
+                          height: 200,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: theme.primaryColor,
+                            ),
                           ),
-                          textAlign: TextAlign.center,
                         ),
-                      ),
-                    );
-                  }
 
-                  // الفصل التام بناءً على المعرف ID
-                  final hotels = favorites.where((item) => 
-                    item.id.toLowerCase().contains('hotel') || (item.ctaText.isNotEmpty && item.ctaText != 'view_details')
-                  ).toList();
-                  
-                  final rooms = favorites.where((item) => 
-                    !hotels.contains(item)
-                  ).toList();
-
-                  return ListView(
-                    padding: const EdgeInsets.only(bottom: 24),
-                    children: [
-                      // ----- 1. قسم الغرف المفضلّة (سكرول عرضي علوي) -----
-                      if (rooms.isNotEmpty) ...[
-                        _buildSectionHeader(theme, 'favorite_rooms_label'.tr()),
-                        SizedBox(
-                          height: 340, 
-                          child: ListView.separated(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            scrollDirection: Axis.horizontal,
-                            itemCount: rooms.length,
-                            separatorBuilder: (_, __) => const SizedBox(width: 16),
-                            itemBuilder: (context, index) {
-                              return SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.8, 
-                                child: _FavoriteCard(
-                                  item: rooms[index],
-                                  theme: theme,
-                                  isHotel: false, // تحديد نوع الكرت كغرفة
+                        error: (message) => Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Center(
+                            child: Column(
+                              children: [
+                                Text(
+                                  message,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: theme.colorScheme.error,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-
-                      if (rooms.isNotEmpty && hotels.isNotEmpty) const SizedBox(height: 24),
-
-                      // ----- 2. قسم الفنادق المفضلّة (سكرول عرضي سفلي) -----
-                      if (hotels.isNotEmpty) ...[
-                        _buildSectionHeader(theme, 'favorite_hotels_label'.tr()),
-                        SizedBox(
-                          height: 380, 
-                          child: ListView.separated(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            scrollDirection: Axis.horizontal,
-                            itemCount: hotels.length,
-                            separatorBuilder: (_, __) => const SizedBox(width: 16),
-                            itemBuilder: (context, index) {
-                              return SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.8,
-                                child: _FavoriteCard(
-                                  item: hotels[index],
-                                  theme: theme,
-                                  isHotel: true, // تحديد نوع الكرت كفندق
+                                const SizedBox(height: 12),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    context
+                                        .read<FavoriteHotelsCubit>()
+                                        .getFavoriteHotels();
+                                  },
+                                  child: const Text('Retry'),
                                 ),
-                              );
-                            },
+                              ],
+                            ),
                           ),
                         ),
-                      ],
-                    ],
-                  );
-                },
+
+                        success: (favoriteHotels) {
+                          if (favoriteHotels.isEmpty) {
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 32,
+                                ),
+                                child: Text(
+                                  'no_favorites_message'.tr(),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                    color: theme.textTheme.bodyMedium?.color
+                                        ?.withValues(alpha: 0.5),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            );
+                          }
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildSectionHeader(
+                                theme,
+                                'favorite_hotels_label'.tr(),
+                              ),
+                              SizedBox(
+                                height: 300,
+                                child: ListView.separated(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: favoriteHotels.length,
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(width: 16),
+                                  itemBuilder: (context, index) {
+                                    return SizedBox(
+                                      width:
+                                          MediaQuery.of(context).size.width *
+                                          0.8,
+                                      child: _FavoriteHotelCard(
+                                        favoriteHotel: favoriteHotels[index],
+                                        theme: theme,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
           ],
@@ -183,39 +254,34 @@ class FavoritesScreen extends StatelessWidget {
   }
 }
 
-class _FavoriteCard extends StatelessWidget {
-  final FavoriteItem item;
+// ----- Dedicated Card for API Hotel Data -----
+class _FavoriteHotelCard extends StatelessWidget {
+  final FavoriteHotelModel favoriteHotel;
   final ThemeData theme;
-  final bool isHotel; 
 
-  const _FavoriteCard({
-    required this.item,
-    required this.theme,
-    required this.isHotel,
-  });
+  const _FavoriteHotelCard({required this.favoriteHotel, required this.theme});
 
   @override
   Widget build(BuildContext context) {
-    final isHighContrast = theme.colorScheme.primary == Colors.yellow;
+    final hotel = favoriteHotel.hotel;
+    final firstImageUrl = hotel.imageUrls.isNotEmpty
+        ? hotel.imageUrls.first
+        : '';
+    // Check if the image is a local fallback asset to prevent network errors
+    final isAsset = firstImageUrl.startsWith('assets/');
 
     return GestureDetector(
       onTap: () {
-        // الانتقال للشاشة الصحيحة بناءً على المتغير الممرر
-        if (isHotel) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HotelDetailsScreen(id: item.id, title: '', imageUrl: '',),
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HotelDetailsScreen(
+              id: hotel.id.toString(),
+              title: hotel.name,
+              imageUrl: firstImageUrl,
             ),
-          );
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => RoomDetailsScreen(id: item.id, roomTitle: '', pricePerNight: '',),
-            ),
-          );
-        }
+          ),
+        );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -227,7 +293,7 @@ class _FavoriteCard extends StatelessWidget {
               color: theme.shadowColor.withValues(alpha: 0.08),
               blurRadius: 18,
               offset: const Offset(0, 10),
-            )
+            ),
           ],
         ),
         child: Column(
@@ -243,115 +309,78 @@ class _FavoriteCard extends StatelessWidget {
                   child: AspectRatio(
                     aspectRatio: 1.55,
                     child: Container(
-                      decoration: BoxDecoration(
-                        color: theme.dividerColor.withValues(alpha: 0.2),
-                      ),
-                      child: item.imageAsset.isEmpty
-                          ? const SizedBox.shrink()
-                          : Image.asset(item.imageAsset, fit: BoxFit.cover),
+                      color: theme.dividerColor.withValues(alpha: 0.2),
+                      child: firstImageUrl.isEmpty
+                          ? Icon(
+                              Icons.hotel,
+                              size: 48,
+                              color: theme.disabledColor,
+                            )
+                          : (isAsset
+                                ? Image.asset(firstImageUrl, fit: BoxFit.cover)
+                                : Image.network(
+                                    firstImageUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Image.asset(
+                                      'assets/images/hotel-placeholder.jpg',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )),
                     ),
                   ),
                 ),
-                // زر إلغاء المفضلة
+                // 🌟 Interactive Favorite Toggle Button
                 Positioned(
                   right: 14,
                   top: 14,
-                  child: GestureDetector(
-                    onTap: () {
-                      FavoritesScope.of(context).toggleFavorite(item);
-                    },
-                    child: Container(
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: theme.cardColor.withValues(alpha: 0.85),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: theme.dividerColor),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.favorite_rounded,
-                          color: theme.primaryColor,
-                          size: 18,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: () {
+                        // 1. Remove instantly from UI state (Optimistic Update)
+                        context
+                            .read<FavoriteHotelsCubit>()
+                            .removeHotelOptimistically(favoriteHotel.id);
+
+                        // 2. Send delete request to backend in the background
+                        context
+                            .read<ToggleFavoriteHotelsCubit>()
+                            .removeFavorite(favoriteHotel.id);
+                      },
+                      child: Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: theme.cardColor.withValues(alpha: 0.85),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: theme.dividerColor),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons
+                                .favorite_rounded, // Always filled because it's in the favorites list
+                            color: theme.primaryColor,
+                            size: 18,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-                if (item.compactBadge != null)
-                  Positioned(
-                    left: 14,
-                    top: 14,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: theme.primaryColor.withValues(alpha: 0.95),
-                        borderRadius: BorderRadius.circular(999),
-                        border: isHighContrast ? Border.all(color: Colors.black) : null,
-                      ),
-                      child: Text(
-                        item.compactBadge!.tr(),
-                        style: TextStyle(
-                          color: theme.colorScheme.onPrimary,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 12,
-                          letterSpacing: 0.4,
-                        ),
-                      ),
-                    ),
-                  ),
-                if (isHotel)
-                  Positioned(
-                    left: 14,
-                    bottom: 14,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 26,
-                            height: 26,
-                            decoration: BoxDecoration(
-                              color: theme.cardColor.withValues(alpha: 0.9),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              Icons.star_rounded,
-                              size: 16,
-                              color: theme.primaryColor,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            item.rating,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 12,
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
               ],
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-              child: Column(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item.title.tr(),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          hotel.name,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w900,
@@ -360,99 +389,52 @@ class _FavoriteCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      if (!isHotel)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: theme.scaffoldBackgroundColor,
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(color: theme.dividerColor),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.star_rounded, size: 16, color: theme.primaryColor),
-                              const SizedBox(width: 6),
-                              Text(
-                                item.rating,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  color: theme.textTheme.titleLarge?.color,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    item.subtitle.tr(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
-                      fontSize: 13,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      if (item.fromText.isNotEmpty)
+                        const SizedBox(height: 6),
                         Text(
-                          '${item.fromText.tr()} ',
+                          hotel.address,
                           style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5),
+                            fontWeight: FontWeight.w800,
+                            color: theme.textTheme.bodyMedium?.color
+                                ?.withValues(alpha: 0.6),
                             fontSize: 13,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      Text(
-                        item.price.tr(),
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          color: theme.textTheme.titleLarge?.color,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  if (isHotel && item.ctaText.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 44,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => HotelDetailsScreen(id: item.id, title: '', imageUrl: '',),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.primaryColor,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.cardColor,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: theme.dividerColor, width: 1),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.star_rounded,
+                          size: 18,
+                          color: theme.primaryColor,
                         ),
-                        child: Text(
-                          item.ctaText.tr(),
+                        const SizedBox(width: 4),
+                        Text(
+                          hotel.rating.toString(),
                           style: TextStyle(
+                            color: theme.textTheme.titleLarge?.color,
                             fontWeight: FontWeight.w900,
                             fontSize: 14,
-                            color: theme.colorScheme.onPrimary,
-                            letterSpacing: 0.2,
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),
@@ -462,3 +444,64 @@ class _FavoriteCard extends StatelessWidget {
     );
   }
 }
+
+// // ----- Dedicated Card for Local Room Items -----
+// class _FavoriteRoomCard extends StatelessWidget {
+//   final dynamic item;
+//   final ThemeData theme;
+
+//   const _FavoriteRoomCard({required this.item, required this.theme});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTap: () {
+//         Navigator.push(
+//           context,
+//           MaterialPageRoute(
+//             builder: (context) => RoomDetailsScreen(
+//               id: item.id,
+//               roomTitle: item.title,
+//               pricePerNight: item.price,
+//             ),
+//           ),
+//         );
+//       },
+//       child: Container(
+//         decoration: BoxDecoration(
+//           color: theme.cardColor,
+//           borderRadius: BorderRadius.circular(26),
+//           border: Border.all(color: theme.dividerColor),
+//         ),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.stretch,
+//           children: [
+//             ClipRRect(
+//               borderRadius: const BorderRadius.only(
+//                 topLeft: Radius.circular(25),
+//                 topRight: Radius.circular(25),
+//               ),
+//               child: AspectRatio(
+//                 aspectRatio: 1.55,
+//                 child: item.imageAsset.isEmpty
+//                     ? const SizedBox.shrink()
+//                     : Image.asset(item.imageAsset, fit: BoxFit.cover),
+//               ),
+//             ),
+//             Padding(
+//               padding: const EdgeInsets.all(14),
+//               child: Text(
+//                 item.title.toString().tr(),
+//                 style: TextStyle(
+//                   fontSize: 16,
+//                   fontWeight: FontWeight.w900,
+//                   color: theme.textTheme.titleLarge?.color,
+//                 ),
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }

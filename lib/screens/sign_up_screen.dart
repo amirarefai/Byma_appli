@@ -1,5 +1,9 @@
 import 'dart:io';
+import 'package:byma_app/business_logic/customer_register/cubit/customer_register_cubit.dart';
+import 'package:byma_app/business_logic/customer_register/cubit/customer_register_state.dart';
+import 'package:byma_app/data/models/customer_register_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -19,9 +23,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _passwordController = TextEditingController();
 
   // متغيرات الصور (إجبارية)
-  XFile? _profileImage; 
+  XFile? _profileImage;
   XFile? _idPhoto;
-  
+
   // متغيرات لحفظ حالة الخطأ للصور لعرض إطار أحمر عند الخطأ
   bool _profileImageHasError = false;
   bool _idPhotoHasError = false;
@@ -88,34 +92,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _submitForm() {
-    // إعادة تعيين أخطاء الصور قبل الفحص
     setState(() {
       _profileImageHasError = _profileImage == null;
       _idPhotoHasError = _idPhoto == null;
     });
 
-    // تحقق من حقول النص (Form Validation) وحالة الصور
-    bool isFormValid = _formKey.currentState!.validate();
-
-    if (isFormValid && !_profileImageHasError && !_idPhotoHasError) {
-      // إذا كان كل شيء تمام وسليم، يتم استدعاء الـ Cubit هنا
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Processing Registration...'),
-          backgroundColor: Color(0xFF0B6B5D),
-        ),
-      );
-      
-      // context.read<SignUpCubit>().signUp(...);
-    } else {
-      // إذا كان هناك أي نقص، تظهر رسالة تنبيه للمستخدم
+    if (!_formKey.currentState!.validate() ||
+        _profileImageHasError ||
+        _idPhotoHasError) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill all required fields and upload images'),
           backgroundColor: Colors.redAccent,
         ),
       );
+      return;
     }
+
+    final model = CustomerRegisterModel(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      firstName: _firstNameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      phone: _phoneNumberController.text.trim(),
+      profileImage: File(_profileImage!.path),
+      idImage: File(_idPhoto!.path),
+    );
+
+    context.read<CustomerRegisterCubit>().registerCustomer(model);
   }
 
   @override
@@ -145,329 +149,453 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
               return Center(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 18,
+                  ),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: maxW),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const SizedBox(height: 12),
-                          Center(
-                            child: RichText(
-                              textAlign: TextAlign.center,
-                              text: const TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: 'Join ',
-                                    style: TextStyle(
-                                      fontSize: 40,
-                                      fontWeight: FontWeight.w800,
-                                      color: Color(0xFF35484B),
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: 'BYMA',
-                                    style: TextStyle(
-                                      fontSize: 40,
-                                      fontWeight: FontWeight.w900,
-                                      color: teal,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                ],
+                    child: BlocConsumer<CustomerRegisterCubit, CustomerRegisterState>(
+                      listener: (context, state) {
+                        state.when(
+                          initial: () {},
+                          loading: () {},
+                          success: (message) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(message),
+                                backgroundColor: Colors.green,
                               ),
-                            ),
-                          ),
-                          const SizedBox(height: 22),
+                            );
+                            Navigator.of(context).pop();
+                          },
+                          error: (message) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(message),
+                                backgroundColor: Colors.redAccent,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      builder: (context, state) {
+                        final isLoading = state.maybeWhen(
+                          loading: () => true,
+                          orElse: () => false,
+                        );
 
-                          Container(
-                            padding: const EdgeInsets.all(18),
-                            decoration: BoxDecoration(
-                              color: cardColor,
-                              borderRadius: BorderRadius.circular(26),
-                              boxShadow: [
-                                BoxShadow(
-                                  blurRadius: 26,
-                                  offset: const Offset(0, 12),
-                                  color: Colors.black.withOpacity(0.06),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // قسم صورة البروفايل الإلزامية
-                                Center(
-                                  child: Column(
+                        return Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(height: 12),
+                              Center(
+                                child: RichText(
+                                  textAlign: TextAlign.center,
+                                  text: const TextSpan(
                                     children: [
-                                      Stack(
-                                        children: [
-                                          GestureDetector(
-                                            onTap: () => _showPhotoOptions(isProfileImage: true),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                border: Border.all(
-                                                  // تلوين الإطار بالأحمر في حال عدم رفع الصورة وضغط حفظ
-                                                  color: _profileImageHasError ? Colors.redAccent : teal.withOpacity(0.3),
-                                                  width: 3,
-                                                ),
-                                              ),
-                                              child: CircleAvatar(
-                                                radius: 50,
-                                                backgroundColor: teal.withOpacity(0.1),
-                                                backgroundImage: _profileImage != null
-                                                    ? FileImage(File(_profileImage!.path))
-                                                    : null,
-                                                child: _profileImage == null
-                                                    ? const Icon(
-                                                        Icons.person_outline,
-                                                        size: 50,
-                                                        color: teal,
-                                                      )
-                                                    : null,
-                                              ),
-                                            ),
-                                          ),
-                                          Positioned(
-                                            bottom: 0,
-                                            right: 0,
-                                            child: GestureDetector(
-                                              onTap: () => _showPhotoOptions(isProfileImage: true),
-                                              child: const CircleAvatar(
-                                                radius: 16,
-                                                backgroundColor: teal,
-                                                child: Icon(
-                                                  Icons.camera_alt_outlined,
-                                                  size: 16,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                      TextSpan(
+                                        text: 'Join ',
+                                        style: TextStyle(
+                                          fontSize: 40,
+                                          fontWeight: FontWeight.w800,
+                                          color: Color(0xFF35484B),
+                                        ),
                                       ),
-                                      if (_profileImageHasError) ...[
-                                        const SizedBox(height: 6),
-                                        const Text(
-                                          'Profile photo is required *',
-                                          style: TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold),
-                                        )
-                                      ]
+                                      TextSpan(
+                                        text: 'BYMA',
+                                        style: TextStyle(
+                                          fontSize: 40,
+                                          fontWeight: FontWeight.w900,
+                                          color: teal,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
-                                const SizedBox(height: 20),
+                              ),
+                              const SizedBox(height: 22),
 
-                                // 1. First Name
-                                const _FieldLabel(label: 'FIRST NAME *', color: labelColor),
-                                const SizedBox(height: 8),
-                                _CustomFormField(
-                                  hint: 'Enter your first name',
-                                  icon: Icons.person_outline,
-                                  controller: _firstNameController,
-                                  validator: (val) => val == null || val.trim().isEmpty ? 'First name is required' : null,
-                                ),
-
-                                const SizedBox(height: 14),
-
-                                // 2. Last Name
-                                const _FieldLabel(label: 'LAST NAME *', color: labelColor),
-                                const SizedBox(height: 8),
-                                _CustomFormField(
-                                  hint: 'Enter your last name',
-                                  icon: Icons.person_outline,
-                                  controller: _lastNameController,
-                                  validator: (val) => val == null || val.trim().isEmpty ? 'Last name is required' : null,
-                                ),
-
-                                const SizedBox(height: 14),
-
-                                // 3. Email Address
-                                const _FieldLabel(label: 'EMAIL ADDRESS *', color: labelColor),
-                                const SizedBox(height: 8),
-                                _CustomFormField(
-                                  hint: 'example@domain.com',
-                                  icon: Icons.email_outlined,
-                                  controller: _emailController,
-                                  keyboardType: TextInputType.emailAddress,
-                                  validator: (val) {
-                                    if (val == null || val.trim().isEmpty) return 'Email is required';
-                                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                                    if (!emailRegex.hasMatch(val.trim())) return 'Enter a valid email address';
-                                    return null;
-                                  },
-                                ),
-
-                                const SizedBox(height: 14),
-
-                                // 4. Phone Number (تم تعديل التحقق ليصبح إجباري وصارم)
-                                const _FieldLabel(label: 'PHONE NUMBER *', color: labelColor),
-                                const SizedBox(height: 8),
-                                _CustomFormField(
-                                  hint: '+963 xxxxxxxxx',
-                                  icon: Icons.phone_outlined,
-                                  controller: _phoneNumberController,
-                                  keyboardType: TextInputType.phone,
-                                  validator: (val) {
-                                    if (val == null || val.trim().isEmpty) {
-                                      return 'Phone number is required *';
-                                    }
-                                    if (val.trim().length < 9) {
-                                      return 'Please enter a valid complete phone number';
-                                    }
-                                    return null;
-                                  },
-                                ),
-
-                                const SizedBox(height: 14),
-
-                                // 5. ID Photo (إجباري مع تغيير لون الحدود عند الخطأ)
-                                const _FieldLabel(label: 'ID PHOTO VERIFICATION *', color: labelColor),
-                                const SizedBox(height: 10),
-                                InkWell(
-                                  borderRadius: BorderRadius.circular(22),
-                                  onTap: () => _showPhotoOptions(isProfileImage: false),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.all(14),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(22),
-                                      border: Border.all(
-                                        color: _idPhotoHasError ? Colors.redAccent : tealLine.withOpacity(0.35),
-                                        width: _idPhotoHasError ? 2.5 : 2,
-                                      ),
+                              Container(
+                                padding: const EdgeInsets.all(18),
+                                decoration: BoxDecoration(
+                                  color: cardColor,
+                                  borderRadius: BorderRadius.circular(26),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      blurRadius: 26,
+                                      offset: const Offset(0, 12),
+                                      color: Colors.black.withOpacity(0.06),
                                     ),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        if (_idPhoto != null)
-                                          ClipRRect(
-                                            borderRadius: BorderRadius.circular(14),
-                                            child: Image.file(
-                                              File(_idPhoto!.path),
-                                              width: 140,
-                                              height: 140,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          )
-                                        else
-                                          Container(
-                                            width: 56,
-                                            height: 56,
-                                            decoration: BoxDecoration(
-                                              color: _idPhotoHasError ? Colors.redAccent.withOpacity(0.2) : const Color(0xFF79D7F8),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Icon(
-                                              Icons.camera_alt_outlined,
-                                              size: 26,
-                                              color: _idPhotoHasError ? Colors.redAccent : Colors.white,
-                                            ),
-                                          ),
-                                        const SizedBox(height: 10),
-                                        Text(
-                                          _idPhoto == null
-                                              ? (_idPhotoHasError ? 'ID Photo is required *' : 'Tap to upload Identification')
-                                              : 'Selected: ${_idPhoto!.name}',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: _idPhotoHasError ? Colors.redAccent : const Color(0xFF2E3E41),
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 10),
-                                        const Text(
-                                          'Choose from Gallery or Camera',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Color(0xFF6B7A7E),
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 6),
-                                      ],
-                                    ),
-                                  ),
+                                  ],
                                 ),
-
-                                const SizedBox(height: 14),
-
-                                // 6. Password
-                                const _FieldLabel(label: 'SECURE PASSWORD *', color: labelColor),
-                                const SizedBox(height: 8),
-                                _CustomFormField(
-                                  hint: '••••••••••••',
-                                  icon: Icons.lock_outline,
-                                  obscureText: true,
-                                  controller: _passwordController,
-                                  validator: (val) {
-                                    if (val == null || val.isEmpty) return 'Password is required';
-                                    if (val.length < 6) return 'Password must be at least 6 characters';
-                                    return null;
-                                  },
-                                ),
-
-                                const SizedBox(height: 18),
-
-                                // زر الحفظ والتسجيل
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 62,
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: [
-                                          Color(0xFF075A4C),
-                                          Color(0xFF79D7F8),
-                                        ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(999),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          blurRadius: 18,
-                                          offset: const Offset(0, 10),
-                                          color: teal.withOpacity(0.22),
-                                        ),
-                                      ],
-                                    ),
-                                    child: TextButton(
-                                      onPressed: _submitForm,
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: Colors.white,
-                                        padding: EdgeInsets.zero,
-                                      ),
-                                      child: const Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // قسم صورة البروفايل الإلزامية
+                                    Center(
+                                      child: Column(
                                         children: [
-                                          Text(
-                                            'Signup',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w900,
-                                              letterSpacing: 0.2,
-                                            ),
+                                          Stack(
+                                            children: [
+                                              GestureDetector(
+                                                onTap: () => _showPhotoOptions(
+                                                  isProfileImage: true,
+                                                ),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    border: Border.all(
+                                                      // تلوين الإطار بالأحمر في حال عدم رفع الصورة وضغط حفظ
+                                                      color:
+                                                          _profileImageHasError
+                                                          ? Colors.redAccent
+                                                          : teal.withOpacity(
+                                                              0.3,
+                                                            ),
+                                                      width: 3,
+                                                    ),
+                                                  ),
+                                                  child: CircleAvatar(
+                                                    radius: 50,
+                                                    backgroundColor: teal
+                                                        .withOpacity(0.1),
+                                                    backgroundImage:
+                                                        _profileImage != null
+                                                        ? FileImage(
+                                                            File(
+                                                              _profileImage!
+                                                                  .path,
+                                                            ),
+                                                          )
+                                                        : null,
+                                                    child: _profileImage == null
+                                                        ? const Icon(
+                                                            Icons
+                                                                .person_outline,
+                                                            size: 50,
+                                                            color: teal,
+                                                          )
+                                                        : null,
+                                                  ),
+                                                ),
+                                              ),
+                                              Positioned(
+                                                bottom: 0,
+                                                right: 0,
+                                                child: GestureDetector(
+                                                  onTap: () =>
+                                                      _showPhotoOptions(
+                                                        isProfileImage: true,
+                                                      ),
+                                                  child: const CircleAvatar(
+                                                    radius: 16,
+                                                    backgroundColor: teal,
+                                                    child: Icon(
+                                                      Icons.camera_alt_outlined,
+                                                      size: 16,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          SizedBox(width: 10),
-                                          Icon(Icons.flash_on, size: 20),
+                                          if (_profileImageHasError) ...[
+                                            const SizedBox(height: 6),
+                                            const Text(
+                                              'Profile photo is required *',
+                                              style: TextStyle(
+                                                color: Colors.redAccent,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
                                         ],
                                       ),
                                     ),
-                                  ),
+                                    const SizedBox(height: 20),
+
+                                    // 1. First Name
+                                    const _FieldLabel(
+                                      label: 'FIRST NAME *',
+                                      color: labelColor,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    _CustomFormField(
+                                      hint: 'Enter your first name',
+                                      icon: Icons.person_outline,
+                                      controller: _firstNameController,
+                                      validator: (val) =>
+                                          val == null || val.trim().isEmpty
+                                          ? 'First name is required'
+                                          : null,
+                                    ),
+
+                                    const SizedBox(height: 14),
+
+                                    // 2. Last Name
+                                    const _FieldLabel(
+                                      label: 'LAST NAME *',
+                                      color: labelColor,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    _CustomFormField(
+                                      hint: 'Enter your last name',
+                                      icon: Icons.person_outline,
+                                      controller: _lastNameController,
+                                      validator: (val) =>
+                                          val == null || val.trim().isEmpty
+                                          ? 'Last name is required'
+                                          : null,
+                                    ),
+
+                                    const SizedBox(height: 14),
+
+                                    // 3. Email Address
+                                    const _FieldLabel(
+                                      label: 'EMAIL ADDRESS *',
+                                      color: labelColor,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    _CustomFormField(
+                                      hint: 'example@domain.com',
+                                      icon: Icons.email_outlined,
+                                      controller: _emailController,
+                                      keyboardType: TextInputType.emailAddress,
+                                      validator: (val) {
+                                        if (val == null || val.trim().isEmpty)
+                                          return 'Email is required';
+                                        final emailRegex = RegExp(
+                                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                        );
+                                        if (!emailRegex.hasMatch(val.trim()))
+                                          return 'Enter a valid email address';
+                                        return null;
+                                      },
+                                    ),
+
+                                    const SizedBox(height: 14),
+
+                                    // 4. Phone Number (تم تعديل التحقق ليصبح إجباري وصارم)
+                                    const _FieldLabel(
+                                      label: 'PHONE NUMBER *',
+                                      color: labelColor,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    _CustomFormField(
+                                      hint: '+963 xxxxxxxxx',
+                                      icon: Icons.phone_outlined,
+                                      controller: _phoneNumberController,
+                                      keyboardType: TextInputType.phone,
+                                      validator: (val) {
+                                        if (val == null || val.trim().isEmpty) {
+                                          return 'Phone number is required *';
+                                        }
+                                        if (val.trim().length < 9) {
+                                          return 'Please enter a valid complete phone number';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+
+                                    const SizedBox(height: 14),
+
+                                    // 5. ID Photo (إجباري مع تغيير لون الحدود عند الخطأ)
+                                    const _FieldLabel(
+                                      label: 'ID PHOTO VERIFICATION *',
+                                      color: labelColor,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    InkWell(
+                                      borderRadius: BorderRadius.circular(22),
+                                      onTap: () => _showPhotoOptions(
+                                        isProfileImage: false,
+                                      ),
+                                      child: AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 200,
+                                        ),
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.all(14),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            22,
+                                          ),
+                                          border: Border.all(
+                                            color: _idPhotoHasError
+                                                ? Colors.redAccent
+                                                : tealLine.withOpacity(0.35),
+                                            width: _idPhotoHasError ? 2.5 : 2,
+                                          ),
+                                        ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            if (_idPhoto != null)
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(14),
+                                                child: Image.file(
+                                                  File(_idPhoto!.path),
+                                                  width: 140,
+                                                  height: 140,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              )
+                                            else
+                                              Container(
+                                                width: 56,
+                                                height: 56,
+                                                decoration: BoxDecoration(
+                                                  color: _idPhotoHasError
+                                                      ? Colors.redAccent
+                                                            .withOpacity(0.2)
+                                                      : const Color(0xFF79D7F8),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Icon(
+                                                  Icons.camera_alt_outlined,
+                                                  size: 26,
+                                                  color: _idPhotoHasError
+                                                      ? Colors.redAccent
+                                                      : Colors.white,
+                                                ),
+                                              ),
+                                            const SizedBox(height: 10),
+                                            Text(
+                                              _idPhoto == null
+                                                  ? (_idPhotoHasError
+                                                        ? 'ID Photo is required *'
+                                                        : 'Tap to upload Identification')
+                                                  : 'Selected: ${_idPhoto!.name}',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: _idPhotoHasError
+                                                    ? Colors.redAccent
+                                                    : const Color(0xFF2E3E41),
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 10),
+                                            const Text(
+                                              'Choose from Gallery or Camera',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Color(0xFF6B7A7E),
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 6),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 14),
+
+                                    // 6. Password
+                                    const _FieldLabel(
+                                      label: 'SECURE PASSWORD *',
+                                      color: labelColor,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    _CustomFormField(
+                                      hint: '••••••••••••',
+                                      icon: Icons.lock_outline,
+                                      obscureText: true,
+                                      controller: _passwordController,
+                                      validator: (val) {
+                                        if (val == null || val.isEmpty)
+                                          return 'Password is required';
+                                        if (val.length < 6)
+                                          return 'Password must be at least 6 characters';
+                                        return null;
+                                      },
+                                    ),
+
+                                    const SizedBox(height: 18),
+
+                                    // زر الحفظ والتسجيل
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 62,
+                                      child: DecoratedBox(
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: [
+                                              Color(0xFF075A4C),
+                                              Color(0xFF79D7F8),
+                                            ],
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            999,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              blurRadius: 18,
+                                              offset: const Offset(0, 10),
+                                              color: teal.withOpacity(0.22),
+                                            ),
+                                          ],
+                                        ),
+                                        child: TextButton(
+                                          onPressed: isLoading
+                                              ? null
+                                              : _submitForm,
+                                          style: TextButton.styleFrom(
+                                            foregroundColor: Colors.white,
+                                            padding: EdgeInsets.zero,
+                                          ),
+                                          child: isLoading
+                                              ? const SizedBox(
+                                                  width: 24,
+                                                  height: 24,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        color: Colors.white,
+                                                        strokeWidth: 2,
+                                                      ),
+                                                )
+                                              : const Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      'Signup',
+                                                      style: TextStyle(
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        letterSpacing: 0.2,
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 10),
+                                                    Icon(
+                                                      Icons.flash_on,
+                                                      size: 20,
+                                                    ),
+                                                  ],
+                                                ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 14),
+                                  ],
                                 ),
-                                const SizedBox(height: 14),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -536,7 +664,10 @@ class _CustomFormField extends StatelessWidget {
         filled: true,
         fillColor: Colors.white.withOpacity(0.65),
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 20,
+          horizontal: 16,
+        ),
         prefixIcon: Padding(
           padding: const EdgeInsets.only(left: 16, right: 12),
           child: Icon(icon, size: 20, color: const Color(0xFF0B6B5D)),
@@ -550,11 +681,17 @@ class _CustomFormField extends StatelessWidget {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: borderColor.withOpacity(0.15), width: 1),
+          borderSide: BorderSide(
+            color: borderColor.withOpacity(0.15),
+            width: 1,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: borderColor.withOpacity(0.15), width: 1),
+          borderSide: BorderSide(
+            color: borderColor.withOpacity(0.15),
+            width: 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
