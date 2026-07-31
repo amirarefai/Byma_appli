@@ -1,0 +1,4 @@
+- [ ] Update filtered_results_updated_screen.dart: add heart/favorite button inside hotel image Stack
+- [ ] Update room_details_screen.dart: add heart/favorite button inside room image Stack
+- [ ] Run flutter analyze to ensure no compile errors
+- [ ] Smoke test: open pages and verify heart appears on image areas

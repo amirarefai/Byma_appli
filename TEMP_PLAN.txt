@@ -1,0 +1,6 @@
+تم التحديث المطلوب:
+1) في lib/screens/main_layout_screen.dart استبدال:
+   Center(child: Text('Profile Screen'))
+   بـ:
+   const SettingsRefinedScreen()
+2) إضافة import ل SettingsRefinedScreen

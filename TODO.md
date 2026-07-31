@@ -1,0 +1,6 @@
+- [ ] Update `pubspec.yaml` name from `hotel_app` -> `byma_app`
+- [ ] Inspect and update Android `AndroidManifest.xml` labels/package-related values to match Byma_app
+- [ ] Inspect and update iOS `Info.plist` display name/bundle name to match Byma_app
+- [ ] Inspect and update Web `manifest.json` / `index.html` app name to match Byma_app
+- [ ] Run `flutter clean && flutter pub get`
+- [ ] Run `flutter run` (or build) to verify
