@@ -45,15 +45,15 @@ class FilteredResultsUpdatedScreen extends StatelessWidget {
             InkWell(
               borderRadius: BorderRadius.circular(26),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => HotelDetailsScreen(
-                      title: title,
-                      imageUrl: imageUrl, id: '',
-                    ),
-                  ),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (_) => HotelDetailsScreen(
+                //       title: title,
+                //       imageUrl: imageUrl, id: '',
+                //     ),
+                //   ),
+                // );
               },
               child: SizedBox(
                 height: 165,

@@ -893,15 +893,15 @@ class _PerfectMatchCard extends StatelessWidget {
                 InkWell(
                   borderRadius: BorderRadius.circular(999),
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => RoomDetailsScreen(
-                          roomTitle: title.replaceAll('\n', ' '),
-                          pricePerNight: '\$450', id: '',
-                        ),
-                      ),
-                    );
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (_) => RoomDetailsScreen(
+                    //       roomTitle: title.replaceAll('\n', ' '),
+                    //       pricePerNight: '\$450', id: '',
+                    //     ),
+                    //   ),
+                    // );
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),

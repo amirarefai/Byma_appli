@@ -8,4 +8,8 @@ class HotelsApi {
   Future<Response> getAllHotels() async {
     return await dio.get('hotels');
   }
+
+  Future<Response> getHotelDetails(int hotelId) async {
+    return await dio.get('hotels/$hotelId');
+  }
 }

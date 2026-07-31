@@ -1,6 +1,6 @@
 
-final String localIp = '10.0.2.2';
+final String localIp = '192.168.1.104';
 
  final baseUrl = 'http://$localIp:3000/';
 
-//final baseUrl = "https://affectionately-exciting-rebbecca.ngrok-free.dev/api/";
+// final baseUrl = "https://spied-wifi-specked.ngrok-free.dev/";

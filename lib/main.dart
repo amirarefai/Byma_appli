@@ -1,14 +1,18 @@
 import 'package:byma_app/business_logic/customer_register/cubit/customer_register_cubit.dart';
 import 'package:byma_app/business_logic/favorite_hotels/cubit/favorite_hotels_cubit.dart';
+import 'package:byma_app/business_logic/hotel_details/cubit/hotel_details_cubit.dart';
 import 'package:byma_app/business_logic/hotels/cubit/hotels_cubit.dart';
+import 'package:byma_app/business_logic/room_details/cubit/room_details_cubit.dart';
 import 'package:byma_app/business_logic/toggle_favorite_hotels/cubit/toggle_favorite_hotels_cubit.dart';
 import 'package:byma_app/data/network/dio_factory.dart';
 import 'package:byma_app/data/repositories/customer_register_repo.dart';
 import 'package:byma_app/data/repositories/favorite_hotels_repo.dart';
 import 'package:byma_app/data/repositories/hotels_repo.dart';
+import 'package:byma_app/data/repositories/room_details_repo.dart';
 import 'package:byma_app/data/web_services/customer_register_api.dart';
 import 'package:byma_app/data/web_services/favorite_hotels_api.dart';
 import 'package:byma_app/data/web_services/hotels_api.dart';
+import 'package:byma_app/data/web_services/room_details_api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -47,24 +51,25 @@ class _BymaAppState extends State<BymaApp> {
   final FavoriteHotelsApi favoriteHotelsApi = FavoriteHotelsApi(
     DioFactory.getDio(),
   );
-  final HotelsApi hotelsApi = HotelsApi(
-    DioFactory.getDio(),
-  );
+  final HotelsApi hotelsApi = HotelsApi(DioFactory.getDio());
   final CustomerRegisterApi customerRegisterApi = CustomerRegisterApi(
     DioFactory.getDio(),
   );
-
+  final RoomDetailsApi roomDetailsApi = RoomDetailsApi(
+    DioFactory.getDio(),
+  );
 
   //REPOs
 
   late final FavoriteHotelsRepo favoriteHotelsRepo = FavoriteHotelsRepo(
     favoriteHotelsApi,
   );
-  late final HotelsRepo hotelsRepo = HotelsRepo(
-    hotelsApi,
-  );
+  late final HotelsRepo hotelsRepo = HotelsRepo(hotelsApi);
   late final CustomerRegisterRepo customerRegisterRepo = CustomerRegisterRepo(
     customerRegisterApi,
+  );
+  late final RoomDetailsRepo roomDetailsRepo = RoomDetailsRepo(
+    roomDetailsApi,
   );
 
   String _currentThemeMode = 'light';
@@ -135,27 +140,50 @@ class _BymaAppState extends State<BymaApp> {
     }
 
     // Use MultiBlocProvider to inject multiple Cubits into the app
-    return MultiBlocProvider(
+    return MultiRepositoryProvider(
       providers: [
-        BlocProvider<ToggleFavoriteHotelsCubit>(
-          //keep this exact cubit at the top of the list to ensure it initializes first
-          create: (context) => ToggleFavoriteHotelsCubit(favoriteHotelsRepo),
-        ),
-        
-        BlocProvider<FavoriteHotelsCubit>(
-          create: (_) =>
-              FavoriteHotelsCubit(favoriteHotelsRepo)..getFavoriteHotels(),
-          // Note: Adding ..getFavoriteHotels() here ensures it fetches data on app startup.
-          // If you'd rather fetch it only when opening the screen, remove the cascade operator.
-        ),
-        BlocProvider<CustomerRegisterCubit>(
-          create: (_) => CustomerRegisterCubit(customerRegisterRepo),
-        ),
-        BlocProvider<HotelCubit>(
-          create: (_) => HotelCubit(hotelsRepo)..fetchAllHotels(),
-        ),
+        RepositoryProvider<FavoriteHotelsRepo>.value(value: favoriteHotelsRepo),
+        RepositoryProvider<HotelsRepo>.value(value: hotelsRepo),
+        RepositoryProvider<CustomerRegisterRepo>.value(value: customerRegisterRepo),
+        RepositoryProvider<RoomDetailsRepo>.value(value: roomDetailsRepo),
       ],
-      
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<ToggleFavoriteHotelsCubit>(
+            lazy: false,
+            create: (context) => ToggleFavoriteHotelsCubit(
+              context.read<FavoriteHotelsRepo>(),
+            ),
+          ),
+          BlocProvider<FavoriteHotelsCubit>(
+            lazy: false,
+            create: (context) => FavoriteHotelsCubit(
+              context.read<FavoriteHotelsRepo>(),
+            )..getFavoriteHotels(),
+          ),
+          BlocProvider<CustomerRegisterCubit>(
+            create: (context) => CustomerRegisterCubit(
+              context.read<CustomerRegisterRepo>(),
+            ),
+          ),
+          BlocProvider<HotelCubit>(
+            lazy: false,
+            create: (context) => HotelCubit(
+              context.read<HotelsRepo>(),
+            )..fetchAllHotels(),
+          ),
+          BlocProvider<HotelDetailsCubit>(
+            create: (context) => HotelDetailsCubit(
+              context.read<HotelsRepo>(),
+            ),
+          ),
+          BlocProvider<RoomDetailsCubit>(
+            create: (context) => RoomDetailsCubit(
+              context.read<RoomDetailsRepo>(),
+            ),
+          ),
+        ],
+
         child: MaterialApp(
           navigatorKey: navigatorKey, // Attached global key here
           title: 'BYMA',
@@ -164,17 +192,12 @@ class _BymaAppState extends State<BymaApp> {
           localizationsDelegates: context.localizationDelegates,
           supportedLocales: context.supportedLocales,
           locale: context.locale,
-
           theme: activeTheme,
-
           // Defined routes for named navigation from interceptor
           routes: {'/login': (context) => const LoginScreen()},
-
           home: const SplashScreen(nextScreen: LoginScreen()),
-        
+        ),
       ),
     );
   }
 }
-
-
