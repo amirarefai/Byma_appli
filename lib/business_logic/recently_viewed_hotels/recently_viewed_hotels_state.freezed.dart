@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'favorite_rooms_cubit.dart';
+part of 'recently_viewed_hotels_state.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -16,26 +16,31 @@ final _privateConstructorUsedError = UnsupportedError(
 );
 
 /// @nodoc
-mixin _$FavoriteRoomsState {
+mixin _$RecentlyViewedHotelsState {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(List<FavoriteRoomModel> favoriteRooms) success,
+    required TResult Function(
+      List<RecentlyViewedHotelModel> recentlyViewedHotels,
+    )
+    success,
     required TResult Function(String message) error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(List<FavoriteRoomModel> favoriteRooms)? success,
+    TResult? Function(List<RecentlyViewedHotelModel> recentlyViewedHotels)?
+    success,
     TResult? Function(String message)? error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(List<FavoriteRoomModel> favoriteRooms)? success,
+    TResult Function(List<RecentlyViewedHotelModel> recentlyViewedHotels)?
+    success,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
@@ -64,24 +69,27 @@ mixin _$FavoriteRoomsState {
 }
 
 /// @nodoc
-abstract class $FavoriteRoomsStateCopyWith<$Res> {
-  factory $FavoriteRoomsStateCopyWith(
-    FavoriteRoomsState value,
-    $Res Function(FavoriteRoomsState) then,
-  ) = _$FavoriteRoomsStateCopyWithImpl<$Res, FavoriteRoomsState>;
+abstract class $RecentlyViewedHotelsStateCopyWith<$Res> {
+  factory $RecentlyViewedHotelsStateCopyWith(
+    RecentlyViewedHotelsState value,
+    $Res Function(RecentlyViewedHotelsState) then,
+  ) = _$RecentlyViewedHotelsStateCopyWithImpl<$Res, RecentlyViewedHotelsState>;
 }
 
 /// @nodoc
-class _$FavoriteRoomsStateCopyWithImpl<$Res, $Val extends FavoriteRoomsState>
-    implements $FavoriteRoomsStateCopyWith<$Res> {
-  _$FavoriteRoomsStateCopyWithImpl(this._value, this._then);
+class _$RecentlyViewedHotelsStateCopyWithImpl<
+  $Res,
+  $Val extends RecentlyViewedHotelsState
+>
+    implements $RecentlyViewedHotelsStateCopyWith<$Res> {
+  _$RecentlyViewedHotelsStateCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of FavoriteRoomsState
+  /// Create a copy of RecentlyViewedHotelsState
   /// with the given fields replaced by the non-null parameter values.
 }
 
@@ -95,14 +103,14 @@ abstract class _$$InitialImplCopyWith<$Res> {
 
 /// @nodoc
 class __$$InitialImplCopyWithImpl<$Res>
-    extends _$FavoriteRoomsStateCopyWithImpl<$Res, _$InitialImpl>
+    extends _$RecentlyViewedHotelsStateCopyWithImpl<$Res, _$InitialImpl>
     implements _$$InitialImplCopyWith<$Res> {
   __$$InitialImplCopyWithImpl(
     _$InitialImpl _value,
     $Res Function(_$InitialImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of FavoriteRoomsState
+  /// Create a copy of RecentlyViewedHotelsState
   /// with the given fields replaced by the non-null parameter values.
 }
 
@@ -113,7 +121,7 @@ class _$InitialImpl implements _Initial {
 
   @override
   String toString() {
-    return 'FavoriteRoomsState.initial()';
+    return 'RecentlyViewedHotelsState.initial()';
   }
 
   @override
@@ -130,7 +138,10 @@ class _$InitialImpl implements _Initial {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(List<FavoriteRoomModel> favoriteRooms) success,
+    required TResult Function(
+      List<RecentlyViewedHotelModel> recentlyViewedHotels,
+    )
+    success,
     required TResult Function(String message) error,
   }) {
     return initial();
@@ -141,7 +152,8 @@ class _$InitialImpl implements _Initial {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(List<FavoriteRoomModel> favoriteRooms)? success,
+    TResult? Function(List<RecentlyViewedHotelModel> recentlyViewedHotels)?
+    success,
     TResult? Function(String message)? error,
   }) {
     return initial?.call();
@@ -152,7 +164,8 @@ class _$InitialImpl implements _Initial {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(List<FavoriteRoomModel> favoriteRooms)? success,
+    TResult Function(List<RecentlyViewedHotelModel> recentlyViewedHotels)?
+    success,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -200,7 +213,7 @@ class _$InitialImpl implements _Initial {
   }
 }
 
-abstract class _Initial implements FavoriteRoomsState {
+abstract class _Initial implements RecentlyViewedHotelsState {
   const factory _Initial() = _$InitialImpl;
 }
 
@@ -214,14 +227,14 @@ abstract class _$$LoadingImplCopyWith<$Res> {
 
 /// @nodoc
 class __$$LoadingImplCopyWithImpl<$Res>
-    extends _$FavoriteRoomsStateCopyWithImpl<$Res, _$LoadingImpl>
+    extends _$RecentlyViewedHotelsStateCopyWithImpl<$Res, _$LoadingImpl>
     implements _$$LoadingImplCopyWith<$Res> {
   __$$LoadingImplCopyWithImpl(
     _$LoadingImpl _value,
     $Res Function(_$LoadingImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of FavoriteRoomsState
+  /// Create a copy of RecentlyViewedHotelsState
   /// with the given fields replaced by the non-null parameter values.
 }
 
@@ -232,13 +245,51 @@ class _$LoadingImpl implements _Loading {
 
   @override
   String toString() {
-    return 'FavoriteRoomsState.loading()';
+    return 'RecentlyViewedHotelsState.loading()';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-    TResult Function(List<FavoriteRoomModel> favoriteRooms)? success,
+        (other.runtimeType == runtimeType && other is _$LoadingImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(
+      List<RecentlyViewedHotelModel> recentlyViewedHotels,
+    )
+    success,
+    required TResult Function(String message) error,
+  }) {
+    return loading();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(List<RecentlyViewedHotelModel> recentlyViewedHotels)?
+    success,
+    TResult? Function(String message)? error,
+  }) {
+    return loading?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(List<RecentlyViewedHotelModel> recentlyViewedHotels)?
+    success,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -286,7 +337,7 @@ class _$LoadingImpl implements _Loading {
   }
 }
 
-abstract class _Loading implements FavoriteRoomsState {
+abstract class _Loading implements RecentlyViewedHotelsState {
   const factory _Loading() = _$LoadingImpl;
 }
 
@@ -297,29 +348,29 @@ abstract class _$$SuccessImplCopyWith<$Res> {
     $Res Function(_$SuccessImpl) then,
   ) = __$$SuccessImplCopyWithImpl<$Res>;
   @useResult
-  $Res call({List<FavoriteRoomModel> favoriteRooms});
+  $Res call({List<RecentlyViewedHotelModel> recentlyViewedHotels});
 }
 
 /// @nodoc
 class __$$SuccessImplCopyWithImpl<$Res>
-    extends _$FavoriteRoomsStateCopyWithImpl<$Res, _$SuccessImpl>
+    extends _$RecentlyViewedHotelsStateCopyWithImpl<$Res, _$SuccessImpl>
     implements _$$SuccessImplCopyWith<$Res> {
   __$$SuccessImplCopyWithImpl(
     _$SuccessImpl _value,
     $Res Function(_$SuccessImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of FavoriteRoomsState
+  /// Create a copy of RecentlyViewedHotelsState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? favoriteRooms = null}) {
+  $Res call({Object? recentlyViewedHotels = null}) {
     return _then(
       _$SuccessImpl(
-        null == favoriteRooms
-            ? _value._favoriteRooms
-            : favoriteRooms // ignore: cast_nullable_to_non_nullable
-                  as List<FavoriteRoomModel>,
+        null == recentlyViewedHotels
+            ? _value._recentlyViewedHotels
+            : recentlyViewedHotels // ignore: cast_nullable_to_non_nullable
+                  as List<RecentlyViewedHotelModel>,
       ),
     );
   }
@@ -328,20 +379,21 @@ class __$$SuccessImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$SuccessImpl implements _Success {
-  const _$SuccessImpl(final List<FavoriteRoomModel> favoriteRooms)
-    : _favoriteRooms = favoriteRooms;
+  const _$SuccessImpl(final List<RecentlyViewedHotelModel> recentlyViewedHotels)
+    : _recentlyViewedHotels = recentlyViewedHotels;
 
-  final List<FavoriteRoomModel> _favoriteRooms;
+  final List<RecentlyViewedHotelModel> _recentlyViewedHotels;
   @override
-  List<FavoriteRoomModel> get favoriteRooms {
-    if (_favoriteRooms is EqualUnmodifiableListView) return _favoriteRooms;
+  List<RecentlyViewedHotelModel> get recentlyViewedHotels {
+    if (_recentlyViewedHotels is EqualUnmodifiableListView)
+      return _recentlyViewedHotels;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_favoriteRooms);
+    return EqualUnmodifiableListView(_recentlyViewedHotels);
   }
 
   @override
   String toString() {
-    return 'FavoriteRoomsState.success(favoriteRooms: $favoriteRooms)';
+    return 'RecentlyViewedHotelsState.success(recentlyViewedHotels: $recentlyViewedHotels)';
   }
 
   @override
@@ -350,18 +402,18 @@ class _$SuccessImpl implements _Success {
         (other.runtimeType == runtimeType &&
             other is _$SuccessImpl &&
             const DeepCollectionEquality().equals(
-              other._favoriteRooms,
-              _favoriteRooms,
+              other._recentlyViewedHotels,
+              _recentlyViewedHotels,
             ));
   }
 
   @override
   int get hashCode => Object.hash(
     runtimeType,
-    const DeepCollectionEquality().hash(_favoriteRooms),
+    const DeepCollectionEquality().hash(_recentlyViewedHotels),
   );
 
-  /// Create a copy of FavoriteRoomsState
+  /// Create a copy of RecentlyViewedHotelsState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
@@ -374,10 +426,13 @@ class _$SuccessImpl implements _Success {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(List<FavoriteRoomModel> favoriteRooms) success,
+    required TResult Function(
+      List<RecentlyViewedHotelModel> recentlyViewedHotels,
+    )
+    success,
     required TResult Function(String message) error,
   }) {
-    return success(favoriteRooms);
+    return success(recentlyViewedHotels);
   }
 
   @override
@@ -385,10 +440,11 @@ class _$SuccessImpl implements _Success {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(List<FavoriteRoomModel> favoriteRooms)? success,
+    TResult? Function(List<RecentlyViewedHotelModel> recentlyViewedHotels)?
+    success,
     TResult? Function(String message)? error,
   }) {
-    return success?.call(favoriteRooms);
+    return success?.call(recentlyViewedHotels);
   }
 
   @override
@@ -396,12 +452,13 @@ class _$SuccessImpl implements _Success {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(List<FavoriteRoomModel> favoriteRooms)? success,
+    TResult Function(List<RecentlyViewedHotelModel> recentlyViewedHotels)?
+    success,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
     if (success != null) {
-      return success(favoriteRooms);
+      return success(recentlyViewedHotels);
     }
     return orElse();
   }
@@ -444,13 +501,14 @@ class _$SuccessImpl implements _Success {
   }
 }
 
-abstract class _Success implements FavoriteRoomsState {
-  const factory _Success(final List<FavoriteRoomModel> favoriteRooms) =
-      _$SuccessImpl;
+abstract class _Success implements RecentlyViewedHotelsState {
+  const factory _Success(
+    final List<RecentlyViewedHotelModel> recentlyViewedHotels,
+  ) = _$SuccessImpl;
 
-  List<FavoriteRoomModel> get favoriteRooms;
+  List<RecentlyViewedHotelModel> get recentlyViewedHotels;
 
-  /// Create a copy of FavoriteRoomsState
+  /// Create a copy of RecentlyViewedHotelsState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$SuccessImplCopyWith<_$SuccessImpl> get copyWith =>
@@ -469,14 +527,14 @@ abstract class _$$ErrorImplCopyWith<$Res> {
 
 /// @nodoc
 class __$$ErrorImplCopyWithImpl<$Res>
-    extends _$FavoriteRoomsStateCopyWithImpl<$Res, _$ErrorImpl>
+    extends _$RecentlyViewedHotelsStateCopyWithImpl<$Res, _$ErrorImpl>
     implements _$$ErrorImplCopyWith<$Res> {
   __$$ErrorImplCopyWithImpl(
     _$ErrorImpl _value,
     $Res Function(_$ErrorImpl) _then,
   ) : super(_value, _then);
 
-  /// Create a copy of FavoriteRoomsState
+  /// Create a copy of RecentlyViewedHotelsState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -502,7 +560,7 @@ class _$ErrorImpl implements _Error {
 
   @override
   String toString() {
-    return 'FavoriteRoomsState.error(message: $message)';
+    return 'RecentlyViewedHotelsState.error(message: $message)';
   }
 
   @override
@@ -516,7 +574,7 @@ class _$ErrorImpl implements _Error {
   @override
   int get hashCode => Object.hash(runtimeType, message);
 
-  /// Create a copy of FavoriteRoomsState
+  /// Create a copy of RecentlyViewedHotelsState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
@@ -529,7 +587,10 @@ class _$ErrorImpl implements _Error {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(List<FavoriteRoomModel> favoriteRooms) success,
+    required TResult Function(
+      List<RecentlyViewedHotelModel> recentlyViewedHotels,
+    )
+    success,
     required TResult Function(String message) error,
   }) {
     return error(message);
@@ -540,7 +601,8 @@ class _$ErrorImpl implements _Error {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(List<FavoriteRoomModel> favoriteRooms)? success,
+    TResult? Function(List<RecentlyViewedHotelModel> recentlyViewedHotels)?
+    success,
     TResult? Function(String message)? error,
   }) {
     return error?.call(message);
@@ -551,7 +613,8 @@ class _$ErrorImpl implements _Error {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(List<FavoriteRoomModel> favoriteRooms)? success,
+    TResult Function(List<RecentlyViewedHotelModel> recentlyViewedHotels)?
+    success,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -599,12 +662,12 @@ class _$ErrorImpl implements _Error {
   }
 }
 
-abstract class _Error implements FavoriteRoomsState {
+abstract class _Error implements RecentlyViewedHotelsState {
   const factory _Error(final String message) = _$ErrorImpl;
 
   String get message;
 
-  /// Create a copy of FavoriteRoomsState
+  /// Create a copy of RecentlyViewedHotelsState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$ErrorImplCopyWith<_$ErrorImpl> get copyWith =>

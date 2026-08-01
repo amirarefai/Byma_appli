@@ -3,6 +3,7 @@ import 'package:byma_app/business_logic/favorite_hotels/cubit/favorite_hotels_cu
 import 'package:byma_app/business_logic/hotel_details/cubit/hotel_details_cubit.dart';
 import 'package:byma_app/business_logic/hotels/cubit/hotels_cubit.dart';
 import 'package:byma_app/business_logic/room_details/cubit/room_details_cubit.dart';
+import 'package:byma_app/business_logic/favorite_rooms/cubit/favorite_rooms_cubit.dart';
 import 'package:byma_app/business_logic/toggle_favorite_hotels/cubit/toggle_favorite_hotels_cubit.dart';
 import 'package:byma_app/data/network/dio_factory.dart';
 import 'package:byma_app/data/repositories/customer_register_repo.dart';
@@ -11,8 +12,11 @@ import 'package:byma_app/data/repositories/hotels_repo.dart';
 import 'package:byma_app/data/repositories/room_details_repo.dart';
 import 'package:byma_app/data/web_services/customer_register_api.dart';
 import 'package:byma_app/data/web_services/favorite_hotels_api.dart';
+import 'package:byma_app/data/web_services/favorite_rooms_api.dart';
 import 'package:byma_app/data/web_services/hotels_api.dart';
 import 'package:byma_app/data/web_services/room_details_api.dart';
+import 'package:byma_app/data/repositories/favorite_rooms_repo.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -58,6 +62,9 @@ class _BymaAppState extends State<BymaApp> {
   final RoomDetailsApi roomDetailsApi = RoomDetailsApi(
     DioFactory.getDio(),
   );
+  final FavoriteRoomsApi favoriteRoomsApi= FavoriteRoomsApi(
+    DioFactory.getDio(),
+  );
 
   //REPOs
 
@@ -70,6 +77,9 @@ class _BymaAppState extends State<BymaApp> {
   );
   late final RoomDetailsRepo roomDetailsRepo = RoomDetailsRepo(
     roomDetailsApi,
+  );
+  late final FavoriteRoomsRepo favoriteRoomsRepo= FavoriteRoomsRepo(
+    favoriteRoomsApi,
   );
 
   String _currentThemeMode = 'light';
@@ -146,6 +156,7 @@ class _BymaAppState extends State<BymaApp> {
         RepositoryProvider<HotelsRepo>.value(value: hotelsRepo),
         RepositoryProvider<CustomerRegisterRepo>.value(value: customerRegisterRepo),
         RepositoryProvider<RoomDetailsRepo>.value(value: roomDetailsRepo),
+        RepositoryProvider<FavoriteRoomsRepo>.value(value: favoriteRoomsRepo),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -181,6 +192,12 @@ class _BymaAppState extends State<BymaApp> {
             create: (context) => RoomDetailsCubit(
               context.read<RoomDetailsRepo>(),
             ),
+          ),
+          BlocProvider<FavoriteRoomsCubit>(
+            lazy: false,
+            create: (context) => FavoriteRoomsCubit(
+              context.read<FavoriteRoomsRepo>(),
+            )..getFavoriteRooms(),
           ),
         ],
 
