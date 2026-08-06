@@ -9,7 +9,7 @@ class FavoriteRoomsApi {
     return await dio.get('favorites/rooms');
   }
 
-  Future<Response> addFavoriteRooms(int roomId) async {
+  Future<Response> addFavoriteRoom(int roomId) async {
     return await dio.post(
       'favorites/rooms',
       data: {
@@ -18,7 +18,7 @@ class FavoriteRoomsApi {
     );
   }
 
-  Future<Response> removeFavoriteRooms(int favoriteRoomId) async {
+  Future<Response> removeFavoriteRoom(int favoriteRoomId) async {
     return await dio.delete('favorites/rooms/$favoriteRoomId');
   }
 }

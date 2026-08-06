@@ -34,14 +34,4 @@ class RecentlyViewedHotelRepo {
       throw errorMessage;
     }
   }
-
-  Future<void> removeRecentlyViewedHotel(int recordId) async {
-    try {
-      await recentlyViewedHotelApi.removeRecentlyViewedHotel(recordId);
-    } catch (error) {
-      final networkException = NetworkExceptions.getDioException(error);
-      final errorMessage = NetworkExceptions.getErrorMessage(networkException);
-      throw errorMessage;
-    }
-  }
 }

@@ -1,9 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:byma_app/data/repositories/favorite_rooms_repo.dart' show FavoriteRoomsRepo;
 import 'package:freezed_annotation/freezed_annotation.dart';
-// أو المسار الفعلي للملف حسب مكان وجوده
 import 'package:byma_app/data/models/favorite_room_model.dart';
-
 part 'favorite_rooms_state.dart';
 part 'favorite_rooms_cubit.freezed.dart';
 

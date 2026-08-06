@@ -1,4 +1,4 @@
-import 'package:byma_app/data/models/favorite_room_model.dart'; // تأكد من استيراد ملف الموديل الصحيح
+import 'package:byma_app/data/models/favorite_room_model.dart'; 
 import 'package:byma_app/data/network/network_exceptions.dart';
 import 'package:byma_app/data/web_services/favorite_rooms_api.dart';
 
@@ -18,6 +18,26 @@ class FavoriteRoomsRepo {
           .toList();
 
       return favoriteRooms;
+    } catch (error) {
+      final networkException = NetworkExceptions.getDioException(error);
+      final errorMessage = NetworkExceptions.getErrorMessage(networkException);
+      throw errorMessage;
+    }
+  }
+
+   Future<void> addFavoriteRoom(int roomId) async {
+    try {
+      await favoriteRoomsApi.addFavoriteRoom(roomId);
+    } catch (error) {
+      final networkException = NetworkExceptions.getDioException(error);
+      final errorMessage = NetworkExceptions.getErrorMessage(networkException);
+      throw errorMessage;
+    }
+  }
+
+  Future<void> removeFavoriteRoom(int favoriteRoomId) async {
+    try {
+      await favoriteRoomsApi.removeFavoriteRoom(favoriteRoomId);
     } catch (error) {
       final networkException = NetworkExceptions.getDioException(error);
       final errorMessage = NetworkExceptions.getErrorMessage(networkException);

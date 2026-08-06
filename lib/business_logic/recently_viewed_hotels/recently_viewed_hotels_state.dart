@@ -1,4 +1,4 @@
-import 'package:byma_app/data/models/recently_viewed_hotel_model.dart'; // مسار الموديل الخاص بك
+import 'package:byma_app/data/models/recently_viewed_hotel_model.dart'; 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'recently_viewed_hotels_state.freezed.dart';

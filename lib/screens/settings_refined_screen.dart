@@ -8,15 +8,15 @@ import 'bookings_screen.dart';
 import 'messages_final_navigation.dart';
 import 'main_layout_screen.dart';
 import 'profile_security_updated.dart';
-import 'favorites_screen.dart'; 
+import 'favorites_screen.dart';
 import '../widgets/byma_bottom_nav.dart';
 
 // استيراد الشاشات المطلوبة بعد تعديل أسمائها
-import 'notifications_screen.dart'; 
-import 'login_screen.dart'; 
+import 'notifications_screen.dart';
+import 'login_screen.dart';
 // استيراد الشاشات الجديدة للاتصال بالأزرار
-import 'recently_viewed.dart';
-import 'collection.dart';
+import 'recently_viewed_screen.dart';
+import 'collections_screen.dart';
 
 class SettingsRefinedScreen extends StatefulWidget {
   const SettingsRefinedScreen({super.key});
@@ -95,13 +95,15 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                       color: theme.colorScheme.primary,
                     ),
                   ),
-                  
+
                   // زر الجرس بعد التفعيل وربطه بـ NotificationsScreen
                   InkWell(
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationsScreen(),
+                        ),
                       );
                     },
                     borderRadius: BorderRadius.circular(12),
@@ -204,7 +206,11 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                               color: theme.scaffoldBackgroundColor,
                             ),
                           ),
-                          child: const Icon(Icons.edit, size: 18, color: Color(0xFF08313F)),
+                          child: const Icon(
+                            Icons.edit,
+                            size: 18,
+                            color: Color(0xFF08313F),
+                          ),
                         ),
                       ),
                     ),
@@ -268,7 +274,9 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                     trailingIcon: Icons.chevron_right,
                     onTap: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const FavoritesScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const FavoritesScreen(),
+                        ),
                       );
                     },
                   ),
@@ -282,10 +290,12 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                     title: 'recently_viewed_title'.tr(),
                     trailingIcon: Icons.chevron_right,
                     onTap: () {
-  Navigator.of(context).push(
-    MaterialPageRoute(builder: (_) => const RecentlyViewed()),
-  );
-},
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const RecentlyViewedScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const _SettingDivider(),
                   _SettingRow(
@@ -296,11 +306,11 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                     ),
                     title: 'collections_title'.tr(),
                     trailingIcon: Icons.chevron_right,
-                   onTap: () {
-  Navigator.of(context).push(
-    MaterialPageRoute(builder: (_) => const Collection()),
-  );
-},
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const CollectionsScreen()),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -319,7 +329,9 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                     trailingIcon: Icons.chevron_right,
                     onTap: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const ProfileSecurityUpdated()),
+                        MaterialPageRoute(
+                          builder: (_) => const ProfileSecurityUpdated(),
+                        ),
                       );
                     },
                   ),
@@ -349,7 +361,11 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                           ),
                         ),
                         const SizedBox(width: 10),
-                        Icon(Icons.swap_horiz, size: 18, color: theme.colorScheme.primary),
+                        Icon(
+                          Icons.swap_horiz,
+                          size: 18,
+                          color: theme.colorScheme.primary,
+                        ),
                       ],
                     ),
                     onTap: () {
@@ -378,25 +394,47 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                             children: [
                               ListTile(
                                 leading: const Icon(Icons.wb_sunny_outlined),
-                                title: Text('theme_light'.tr(), style: TextStyle(color: theme.colorScheme.primary)),
+                                title: Text(
+                                  'theme_light'.tr(),
+                                  style: TextStyle(
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
                                 onTap: () {
                                   BymaApp.of(context)?.changeTheme('light');
                                   Navigator.pop(ctx);
                                 },
                               ),
                               ListTile(
-                                leading: const Icon(Icons.nightlight_round_outlined),
-                                title: Text('theme_dark'.tr(), style: TextStyle(color: theme.colorScheme.primary)),
+                                leading: const Icon(
+                                  Icons.nightlight_round_outlined,
+                                ),
+                                title: Text(
+                                  'theme_dark'.tr(),
+                                  style: TextStyle(
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
                                 onTap: () {
                                   BymaApp.of(context)?.changeTheme('dark');
                                   Navigator.pop(ctx);
                                 },
                               ),
                               ListTile(
-                                leading: const Icon(Icons.visibility_outlined, color: Colors.yellow),
-                                title: Text('theme_high_contrast'.tr(), style: TextStyle(color: theme.colorScheme.primary)),
+                                leading: const Icon(
+                                  Icons.visibility_outlined,
+                                  color: Colors.yellow,
+                                ),
+                                title: Text(
+                                  'theme_high_contrast'.tr(),
+                                  style: TextStyle(
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
                                 onTap: () {
-                                  BymaApp.of(context)?.changeTheme('high_contrast');
+                                  BymaApp.of(
+                                    context,
+                                  )?.changeTheme('high_contrast');
                                   Navigator.pop(ctx);
                                 },
                               ),
@@ -473,7 +511,11 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.logout, size: 18, color: Color(0xFFEF3A2D)),
+                        const Icon(
+                          Icons.logout,
+                          size: 18,
+                          color: Color(0xFFEF3A2D),
+                        ),
                         const SizedBox(width: 10),
                         Text(
                           'logout_button_text'.tr(),
@@ -502,7 +544,11 @@ class _StatCard extends StatelessWidget {
   final String value;
   final IconData icon;
 
-  const _StatCard({required this.title, required this.value, required this.icon});
+  const _StatCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -599,7 +645,11 @@ class _SettingDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Divider(height: 1, thickness: 1, color: Theme.of(context).dividerColor);
+    return Divider(
+      height: 1,
+      thickness: 1,
+      color: Theme.of(context).dividerColor,
+    );
   }
 }
 
@@ -623,7 +673,11 @@ class _SettingRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final Widget trailing = trailingWidget ?? (trailingIcon != null ? Icon(trailingIcon, size: 18, color: theme.colorScheme.primary) : const SizedBox.shrink());
+    final Widget trailing =
+        trailingWidget ??
+        (trailingIcon != null
+            ? Icon(trailingIcon, size: 18, color: theme.colorScheme.primary)
+            : const SizedBox.shrink());
 
     return InkWell(
       onTap: onTap,
@@ -640,11 +694,22 @@ class _SettingRow extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: theme.colorScheme.primary),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w900,
+                      color: theme.colorScheme.primary,
+                    ),
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 4),
-                    Text(subtitle!, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF7C8FA0))),
+                    Text(
+                      subtitle!,
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF7C8FA0),
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -662,7 +727,11 @@ class _CircleIcon extends StatelessWidget {
   final Color iconBg;
   final IconData icon;
 
-  const _CircleIcon({required this.bg, required this.iconBg, required this.icon});
+  const _CircleIcon({
+    required this.bg,
+    required this.iconBg,
+    required this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {

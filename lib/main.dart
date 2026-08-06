@@ -1,19 +1,43 @@
+import 'package:byma_app/business_logic/add_hotel_to_collection/cubit/add_hotel_to_collection_cubit.dart';
+import 'package:byma_app/business_logic/add_recently_viewed_hotel/cubit/add_recently_viewed_hotel_cubit.dart';
+import 'package:byma_app/business_logic/add_recently_viewed_room/cubit/add_recently_viewed_room_cubit.dart';
+import 'package:byma_app/business_logic/add_room_to_collection/cubit/add_room_to_collection_cubit.dart';
+import 'package:byma_app/business_logic/collection/cubit/collection_cubit.dart';
+import 'package:byma_app/business_logic/create_collection/cubit/create_collection_cubit.dart';
 import 'package:byma_app/business_logic/customer_register/cubit/customer_register_cubit.dart';
+import 'package:byma_app/business_logic/delete_collection/cubit/delete_collection_cubit.dart';
+import 'package:byma_app/business_logic/delete_hotel_from_collection/cubit/delete_hotel_from_collection_cubit.dart';
+import 'package:byma_app/business_logic/delete_room_from_collection/cubit/delete_room_from_collection_cubit.dart';
 import 'package:byma_app/business_logic/favorite_hotels/cubit/favorite_hotels_cubit.dart';
+import 'package:byma_app/business_logic/hotel_collection/cubit/hotel_collection_cubit.dart';
 import 'package:byma_app/business_logic/hotel_details/cubit/hotel_details_cubit.dart';
 import 'package:byma_app/business_logic/hotels/cubit/hotels_cubit.dart';
+import 'package:byma_app/business_logic/recently_viewed_hotels/recently_viewed_hotels_cubit.dart';
+import 'package:byma_app/business_logic/recently_viewed_rooms/cubit/recently_viewed_rooms_cubit.dart';
+import 'package:byma_app/business_logic/room_collection/cubit/room_collection_cubit.dart';
 import 'package:byma_app/business_logic/room_details/cubit/room_details_cubit.dart';
 import 'package:byma_app/business_logic/favorite_rooms/cubit/favorite_rooms_cubit.dart';
 import 'package:byma_app/business_logic/toggle_favorite_hotels/cubit/toggle_favorite_hotels_cubit.dart';
+import 'package:byma_app/business_logic/toggle_favorite_rooms/cubit/toggle_favorite_rooms_cubit.dart';
 import 'package:byma_app/data/network/dio_factory.dart';
+import 'package:byma_app/data/repositories/collection_repo.dart';
 import 'package:byma_app/data/repositories/customer_register_repo.dart';
 import 'package:byma_app/data/repositories/favorite_hotels_repo.dart';
+import 'package:byma_app/data/repositories/hotel_collection_repo.dart';
 import 'package:byma_app/data/repositories/hotels_repo.dart';
+import 'package:byma_app/data/repositories/recently_viewed_hotel_repo.dart';
+import 'package:byma_app/data/repositories/recently_viewed_room_repo.dart';
+import 'package:byma_app/data/repositories/room_collection_repo.dart';
 import 'package:byma_app/data/repositories/room_details_repo.dart';
+import 'package:byma_app/data/web_services/collection_api.dart';
 import 'package:byma_app/data/web_services/customer_register_api.dart';
 import 'package:byma_app/data/web_services/favorite_hotels_api.dart';
 import 'package:byma_app/data/web_services/favorite_rooms_api.dart';
+import 'package:byma_app/data/web_services/hotel_collection_api.dart';
 import 'package:byma_app/data/web_services/hotels_api.dart';
+import 'package:byma_app/data/web_services/recently_viewed_hotel_api.dart';
+import 'package:byma_app/data/web_services/recently_viewed_room_api.dart';
+import 'package:byma_app/data/web_services/room_collection_api.dart';
 import 'package:byma_app/data/web_services/room_details_api.dart';
 import 'package:byma_app/data/repositories/favorite_rooms_repo.dart';
 
@@ -65,9 +89,24 @@ class _BymaAppState extends State<BymaApp> {
   final FavoriteRoomsApi favoriteRoomsApi= FavoriteRoomsApi(
     DioFactory.getDio(),
   );
+  final RecentlyViewedHotelApi recentlyViewedHotelApi = RecentlyViewedHotelApi(
+    DioFactory.getDio(),
+  );
+  final RecentlyViewedRoomApi recentlyViewedRoomApi = RecentlyViewedRoomApi(
+    DioFactory.getDio(),
+  );
+  final CollectionApi collectionApi = CollectionApi(
+    DioFactory.getDio(),
+  );
+  final HotelCollectionApi hotelCollectionApi = HotelCollectionApi(
+    DioFactory.getDio(),
+  );
+  final RoomCollectionApi roomCollectionApi = RoomCollectionApi(
+    DioFactory.getDio(),
+  );
+
 
   //REPOs
-
   late final FavoriteHotelsRepo favoriteHotelsRepo = FavoriteHotelsRepo(
     favoriteHotelsApi,
   );
@@ -80,6 +119,21 @@ class _BymaAppState extends State<BymaApp> {
   );
   late final FavoriteRoomsRepo favoriteRoomsRepo= FavoriteRoomsRepo(
     favoriteRoomsApi,
+  );
+  late final RecentlyViewedHotelRepo recentlyViewedHotelRepo = RecentlyViewedHotelRepo(
+    recentlyViewedHotelApi,
+  );
+  late final RecentlyViewedRoomRepo recentlyViewedRoomRepo = RecentlyViewedRoomRepo(
+    recentlyViewedRoomApi,
+  );
+  late final CollectionRepo collectionRepo = CollectionRepo(
+    collectionApi,
+  );
+  late final HotelCollectionRepo hotelCollectionRepo = HotelCollectionRepo(
+    hotelCollectionApi,
+  );
+  late final RoomCollectionRepo roomCollectionRepo = RoomCollectionRepo(
+    roomCollectionApi,
   );
 
   String _currentThemeMode = 'light';
@@ -157,6 +211,11 @@ class _BymaAppState extends State<BymaApp> {
         RepositoryProvider<CustomerRegisterRepo>.value(value: customerRegisterRepo),
         RepositoryProvider<RoomDetailsRepo>.value(value: roomDetailsRepo),
         RepositoryProvider<FavoriteRoomsRepo>.value(value: favoriteRoomsRepo),
+        RepositoryProvider<RecentlyViewedHotelRepo>.value(value: recentlyViewedHotelRepo),
+        RepositoryProvider<RecentlyViewedRoomRepo>.value(value: recentlyViewedRoomRepo),
+        RepositoryProvider<CollectionRepo>.value(value: collectionRepo),
+        RepositoryProvider<HotelCollectionRepo>.value(value: hotelCollectionRepo),
+        RepositoryProvider<RoomCollectionRepo>.value(value: roomCollectionRepo),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -164,6 +223,12 @@ class _BymaAppState extends State<BymaApp> {
             lazy: false,
             create: (context) => ToggleFavoriteHotelsCubit(
               context.read<FavoriteHotelsRepo>(),
+            ),
+          ),
+          BlocProvider<ToggleFavoriteRoomsCubit>(
+            lazy: false,
+            create: (context) => ToggleFavoriteRoomsCubit(
+              context.read<FavoriteRoomsRepo>(),
             ),
           ),
           BlocProvider<FavoriteHotelsCubit>(
@@ -199,13 +264,88 @@ class _BymaAppState extends State<BymaApp> {
               context.read<FavoriteRoomsRepo>(),
             )..getFavoriteRooms(),
           ),
+          BlocProvider<RecentlyViewedHotelsCubit>(
+            lazy: false,
+            create: (context) => RecentlyViewedHotelsCubit(
+              context.read<RecentlyViewedHotelRepo>(),
+            )..getRecentlyViewedHotels(),
+          ),
+          BlocProvider<AddRecentlyViewedHotelsCubit>(
+            create: (context) => AddRecentlyViewedHotelsCubit(
+              context.read<RecentlyViewedHotelRepo>(),
+            ),
+          ),
+          BlocProvider<RecentlyViewedRoomsCubit>(
+            lazy: false,
+            create: (context) => RecentlyViewedRoomsCubit(
+              context.read<RecentlyViewedRoomRepo>(),
+            )..getRecentlyViewedRooms(),
+          ),
+           BlocProvider<AddRecentlyViewedRoomsCubit>(
+            create: (context) => AddRecentlyViewedRoomsCubit(
+              context.read<RecentlyViewedRoomRepo>(),
+            ),
+          ),
+          BlocProvider<CollectionCubit>(
+            lazy: false,
+            create: (context) => CollectionCubit(
+              context.read<CollectionRepo>(),
+            )..fetchAllCollections(),
+          ),
+          BlocProvider<HotelCollectionCubit>(
+            lazy: false,
+            create: (context) => HotelCollectionCubit(
+              context.read<HotelCollectionRepo>(),
+            ),
+          ),
+          BlocProvider<RoomCollectionCubit>(
+            lazy: false,
+            create: (context) => RoomCollectionCubit(
+              context.read<RoomCollectionRepo>(),
+            ),
+          ),
+          BlocProvider<DeleteCollectionCubit>(
+            lazy: false,
+            create: (context) => DeleteCollectionCubit(
+              context.read<CollectionRepo>(),
+            ),
+          ),
+          BlocProvider<DeleteHotelFromCollectionCubit>(
+            lazy: false,
+            create: (context) => DeleteHotelFromCollectionCubit(
+              context.read<HotelCollectionRepo>(),
+            ),
+          ),
+          BlocProvider<DeleteRoomFromCollectionCubit>(
+            lazy: false,
+            create: (context) => DeleteRoomFromCollectionCubit(
+              context.read<RoomCollectionRepo>(),
+            ),
+          ),
+          BlocProvider<CreateCollectionCubit>(
+            lazy: false,
+            create: (context) => CreateCollectionCubit(
+              context.read<CollectionRepo>(),
+            ),
+          ),
+          BlocProvider<AddHotelToCollectionCubit>(
+            lazy: false,
+            create: (context) => AddHotelToCollectionCubit(
+              context.read<HotelCollectionRepo>(),
+            ),
+          ),
+          BlocProvider<AddRoomToCollectionCubit>(
+            lazy: false,
+            create: (context) => AddRoomToCollectionCubit(
+              context.read<RoomCollectionRepo>(),
+            ),
+          ),
         ],
 
         child: MaterialApp(
           navigatorKey: navigatorKey, // Attached global key here
           title: 'BYMA',
           debugShowCheckedModeBanner: false,
-
           localizationsDelegates: context.localizationDelegates,
           supportedLocales: context.supportedLocales,
           locale: context.locale,
