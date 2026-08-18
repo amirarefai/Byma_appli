@@ -1,9 +1,9 @@
+import 'package:byma_app/business_logic/reports/cubit/reports_cubit.dart';
+import 'package:byma_app/business_logic/reviews/cubit/reviews_cubit.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';  
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';  
 import '../widgets/byma_bottom_nav.dart';
-import 'main_layout_screen.dart';
-import 'messages_final_navigation.dart'; 
-import 'settings_refined_screen.dart';
 
 class BookingsScreen extends StatefulWidget {
   const BookingsScreen({super.key});
@@ -23,7 +23,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
-      builder: (context) {
+      builder: (sheetContext) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Column(
@@ -44,12 +44,12 @@ class _BookingsScreenState extends State<BookingsScreen> {
                 trailing: const Icon(Icons.arrow_forward_ios, size: 14),
                 onTap: () async {
                   final picked = await showDateRangePicker(
-                    context: context,
+                    context: sheetContext,
                     firstDate: DateTime.now(),
                     lastDate: DateTime.now().add(const Duration(days: 365)),
                   );
                   if (picked != null) {
-                    Navigator.pop(context); // إغلاق آمن
+                    Navigator.pop(sheetContext); // إغلاق آمن
                     messenger.showSnackBar(SnackBar(content: Text('date_updated_success'.tr())));
                   }
                 },
@@ -62,7 +62,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                 title: Text('cancel_booking_label'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent)),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.redAccent),
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(sheetContext);
                   messenger.showSnackBar(SnackBar(content: Text('cancel_request_sent'.tr())));
                 },
               ),
@@ -74,10 +74,16 @@ class _BookingsScreenState extends State<BookingsScreen> {
     );
   }
 
-  // 2️⃣ واجهة التقييم والبلاغات المارنة - للحجوزات المكتملة
-  void _showReviewAndReportSheet(BuildContext context, String title, ThemeData theme, bool isYellowTheme) {
+  // 2️⃣ واجهة التقييم والبلاغات - للحجوزات المكتملة ومربوطة بالـ Cubits مباشرة
+  void _showReviewAndReportSheet(
+    BuildContext context, 
+    String title, 
+    ThemeData theme, 
+    bool isYellowTheme,
+    int hotelId,
+  ) {
     int currentRating = 5;
-    bool isReporting = false; // التحكم في ظهور حقل الوصف
+    bool isReporting = false; 
     final reportController = TextEditingController();
     final messenger = ScaffoldMessenger.of(context);
 
@@ -85,13 +91,13 @@ class _BookingsScreenState extends State<BookingsScreen> {
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
-      builder: (context) {
+      builder: (sheetContext) {
         return StatefulBuilder(
-          builder: (context, setSheetState) {
+          builder: (builderContext, setSheetState) {
             return Padding(
               padding: EdgeInsets.only(
                 left: 24, right: 24, top: 24,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                bottom: MediaQuery.of(builderContext).viewInsets.bottom + 24,
               ),
               child: SingleChildScrollView(
                 child: Column(
@@ -130,26 +136,27 @@ class _BookingsScreenState extends State<BookingsScreen> {
                         label: Text('report_issue_btn'.tr(), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
                       ),
 
-                    // حقل الديسكربشن (يظهر فقط إذا كبس إبلاغ)
-                    if (isReporting) ...[
-                      const SizedBox(height: 10),
-                      Text('report_hint'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller: reportController,
-                        maxLines: 3,
-                        style: TextStyle(color: theme.colorScheme.secondary),
-                        decoration: InputDecoration(
-                          hintText: 'report_field_hint'.tr(),
-                          hintStyle: TextStyle(color: theme.colorScheme.tertiary.withOpacity(0.5), fontSize: 13),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: theme.colorScheme.primary), borderRadius: BorderRadius.circular(16)),
-                        ),
+                    // حقل النص للتقرير أو للـ Comment الاختياري
+                    const SizedBox(height: 10),
+                    Text(
+                      isReporting ? 'report_hint'.tr() : 'add_comment_optional'.tr(), 
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: reportController,
+                      maxLines: 3,
+                      style: TextStyle(color: theme.colorScheme.secondary),
+                      decoration: InputDecoration(
+                        hintText: isReporting ? 'report_field_hint'.tr() : 'comment_field_hint'.tr(),
+                        hintStyle: TextStyle(color: theme.colorScheme.tertiary.withOpacity(0.5), fontSize: 13),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                        focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: theme.colorScheme.primary), borderRadius: BorderRadius.circular(16)),
                       ),
-                    ],
+                    ),
                     const SizedBox(height: 24),
                     
-                    // زر الإرسال الديناميكي
+                    // زر الإرسال المربوط بالـ Cubit
                     Container(
                       width: double.infinity,
                       height: 50,
@@ -159,15 +166,33 @@ class _BookingsScreenState extends State<BookingsScreen> {
                       ),
                       child: ElevatedButton(
                         onPressed: () {
-                          final rText = reportController.text;
-                          Navigator.pop(context);
-                          if (isReporting && rText.isNotEmpty) {
-                            messenger.showSnackBar(SnackBar(content: Text('report_sent_success'.tr())));
+                          final inputText = reportController.text.trim();
+                          Navigator.pop(sheetContext);
+
+                          if (isReporting) {
+                            // إرسال بلاغ عبر ReportsCubit
+                            if (inputText.isNotEmpty) {
+                              context.read<ReportsCubit>().createReport(
+                                hotelId: hotelId,
+                                reason: inputText,
+                              );
+                              messenger.showSnackBar(SnackBar(content: Text('report_sent_success'.tr())));
+                            }
                           } else {
+                            // إرسال تقييم عبر ReviewsCubit
+                            context.read<ReviewsCubit>().createReview(
+                              rate: currentRating,
+                              hotelId: hotelId,
+                              comment: inputText.isNotEmpty ? inputText : null,
+                            );
                             messenger.showSnackBar(SnackBar(content: Text('thanks_for_rating'.tr(args: [currentRating.toString()]))));
                           }
                         },
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent, 
+                          shadowColor: Colors.transparent, 
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
                         child: Text(
                           isReporting ? 'submit_report'.tr() : 'submit_rating'.tr(),
                           style: TextStyle(fontWeight: FontWeight.bold, color: isYellowTheme ? Colors.black : Colors.white, fontSize: 15),
@@ -195,7 +220,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // الهيدر العلوي (تمت إزالة زر الجرس وإبقاء مساحة فارغة للتوازن)
+            // الهيدر العلوي
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
@@ -209,7 +234,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                     'BYMA', 
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: theme.colorScheme.primary, letterSpacing: 1.2)
                   ),
-                  const SizedBox(width: 48), // مساحة بديلة لزر الجرس الملغي للحفاظ على توسط كلمة BYMA
+                  const SizedBox(width: 48), 
                 ],
               ),
             ),
@@ -255,6 +280,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                   if (_selectedTab == 'All Stays' || _selectedTab == 'Upcoming') ...[
                     _buildBookingCard(
                       context: context,
+                      hotelId: 101, // تم تعيين ID الفندق
                       imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
                       tag: 'upcoming_tag'.tr(),
                       location: 'santorini_greece'.tr(),
@@ -268,6 +294,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                   if (_selectedTab == 'All Stays' || _selectedTab == 'Completed') ...[
                     _buildBookingCard(
                       context: context,
+                      hotelId: 102, // تم تعيين ID الفندق
                       imageUrl: 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=800&q=80',
                       tag: 'completed_tag'.tr(),
                       location: 'oslo_norway'.tr(),
@@ -287,9 +314,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
       ),
       bottomNavigationBar: BymaBottomNav(
         activeTab: BymaBottomNavTab.bookings,
-        onTabSelected: (tab) {
-          // أضف منطق التنقل هنا عند الحاجة
-        },
+        onTabSelected: (tab) {},
       ),
     );
   }
@@ -312,6 +337,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
 
   Widget _buildBookingCard({
     required BuildContext context,
+    required int hotelId,
     required String imageUrl,
     required String tag,
     required String location,
@@ -355,7 +381,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                 ] else ...[
                   const SizedBox(height: 14),
                   GestureDetector(
-                    onTap: () => _showReviewAndReportSheet(context, title, theme, isYellowTheme),
+                    onTap: () => _showReviewAndReportSheet(context, title, theme, isYellowTheme, hotelId),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

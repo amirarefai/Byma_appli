@@ -14,6 +14,8 @@ import 'package:byma_app/business_logic/hotel_details/cubit/hotel_details_cubit.
 import 'package:byma_app/business_logic/hotels/cubit/hotels_cubit.dart';
 import 'package:byma_app/business_logic/recently_viewed_hotels/recently_viewed_hotels_cubit.dart';
 import 'package:byma_app/business_logic/recently_viewed_rooms/cubit/recently_viewed_rooms_cubit.dart';
+import 'package:byma_app/business_logic/reports/cubit/reports_cubit.dart';
+import 'package:byma_app/business_logic/reviews/cubit/reviews_cubit.dart';
 import 'package:byma_app/business_logic/room_collection/cubit/room_collection_cubit.dart';
 import 'package:byma_app/business_logic/room_details/cubit/room_details_cubit.dart';
 import 'package:byma_app/business_logic/favorite_rooms/cubit/favorite_rooms_cubit.dart';
@@ -27,6 +29,8 @@ import 'package:byma_app/data/repositories/hotel_collection_repo.dart';
 import 'package:byma_app/data/repositories/hotels_repo.dart';
 import 'package:byma_app/data/repositories/recently_viewed_hotel_repo.dart';
 import 'package:byma_app/data/repositories/recently_viewed_room_repo.dart';
+import 'package:byma_app/data/repositories/reports_repo.dart';
+import 'package:byma_app/data/repositories/reviews_repo.dart';
 import 'package:byma_app/data/repositories/room_collection_repo.dart';
 import 'package:byma_app/data/repositories/room_details_repo.dart';
 import 'package:byma_app/data/web_services/collection_api.dart';
@@ -37,6 +41,8 @@ import 'package:byma_app/data/web_services/hotel_collection_api.dart';
 import 'package:byma_app/data/web_services/hotels_api.dart';
 import 'package:byma_app/data/web_services/recently_viewed_hotel_api.dart';
 import 'package:byma_app/data/web_services/recently_viewed_room_api.dart';
+import 'package:byma_app/data/web_services/reports_api.dart';
+import 'package:byma_app/data/web_services/reviews_api.dart';
 import 'package:byma_app/data/web_services/room_collection_api.dart';
 import 'package:byma_app/data/web_services/room_details_api.dart';
 import 'package:byma_app/data/repositories/favorite_rooms_repo.dart';
@@ -104,6 +110,12 @@ class _BymaAppState extends State<BymaApp> {
   final RoomCollectionApi roomCollectionApi = RoomCollectionApi(
     DioFactory.getDio(),
   );
+    final ReportsApi  reportsApi = ReportsApi(
+    DioFactory.getDio(),
+  );
+    final ReviewsApi  reviewsApi = ReviewsApi(
+    DioFactory.getDio(),
+  );
 
 
   //REPOs
@@ -134,6 +146,12 @@ class _BymaAppState extends State<BymaApp> {
   );
   late final RoomCollectionRepo roomCollectionRepo = RoomCollectionRepo(
     roomCollectionApi,
+  );
+  late final ReportsRepo reportsRepo = ReportsRepo(
+    reportsApi,
+  );
+  late final ReviewsRepo  reviewsRepo= ReviewsRepo(
+    reviewsApi,
   );
 
   String _currentThemeMode = 'light';
@@ -216,6 +234,8 @@ class _BymaAppState extends State<BymaApp> {
         RepositoryProvider<CollectionRepo>.value(value: collectionRepo),
         RepositoryProvider<HotelCollectionRepo>.value(value: hotelCollectionRepo),
         RepositoryProvider<RoomCollectionRepo>.value(value: roomCollectionRepo),
+        RepositoryProvider<ReportsRepo>.value(value: reportsRepo),
+    RepositoryProvider<ReviewsRepo>.value(value: reviewsRepo),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -340,6 +360,19 @@ class _BymaAppState extends State<BymaApp> {
               context.read<RoomCollectionRepo>(),
             ),
           ),
+           BlocProvider<ReportsCubit>(
+            lazy: false,
+            create: (context) => ReportsCubit(
+              context.read<ReportsRepo>(),
+            ),
+          ),
+          BlocProvider<ReviewsCubit>(
+            lazy: false,
+            create: (context) => ReviewsCubit(
+              context.read<ReviewsRepo>(),
+            ),
+          ),
+          
         ],
 
         child: MaterialApp(
