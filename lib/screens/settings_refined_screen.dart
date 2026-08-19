@@ -17,6 +17,12 @@ import 'login_screen.dart';
 // استيراد الشاشات الجديدة للاتصال بالأزرار
 import 'recently_viewed_screen.dart';
 import 'collections_screen.dart';
+import 'withdrawa_screen.dart';
+import 'deposit_request_screen.dart';
+import 'withdrawa_history_screen.dart';
+import 'deposit_history_screen.dart';
+import 'convert_points_screen.dart';
+
 
 class SettingsRefinedScreen extends StatefulWidget {
   const SettingsRefinedScreen({super.key});
@@ -243,9 +249,9 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                 children: [
                   Expanded(
                     child: _StatCard(
-                      title: 'active_rentals_label'.tr(),
+                      title: 'Balance'.tr(),
                       value: '03',
-                      icon: Icons.home_outlined,
+                     icon: Icons.payments_outlined,
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -449,18 +455,18 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
 
               const SizedBox(height: 22),
 
-              _SectionTitle(title: 'policies_legal_section'.tr()),
+              _SectionTitle(title: 'Financial'.tr()),
               const SizedBox(height: 10),
 
               _ActionGroup(
                 items: [
-                  _SettingRow(
+                 _SettingRow(
                     leading: const _CircleIcon(
                       bg: Color(0xFFD8E2E6),
                       iconBg: Color(0xFF576E7C),
-                      icon: Icons.description_outlined,
+                      icon: Icons.calendar_today_outlined,
                     ),
-                    title: 'compensation_policy_title'.tr(),
+                    title: 'reservations'.tr(),
                     trailingIcon: Icons.chevron_right,
                     onTap: () {},
                   ),
@@ -469,22 +475,90 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                     leading: const _CircleIcon(
                       bg: Color(0xFFD8E2E6),
                       iconBg: Color(0xFF576E7C),
-                      icon: Icons.event_note_outlined,
+                      icon: Icons.stars_outlined,
                     ),
-                    title: 'cancellation_terms_title'.tr(),
+                    title: 'points transformation'.tr(),
                     trailingIcon: Icons.chevron_right,
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ConvertPointsScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const _SettingDivider(),
                   _SettingRow(
                     leading: const _CircleIcon(
                       bg: Color(0xFFD8E2E6),
                       iconBg: Color(0xFF576E7C),
-                      icon: Icons.gavel_outlined,
+                      icon: Icons.upload_outlined,
                     ),
-                    title: 'legal_accountability_title'.tr(),
+                    title: 'withdraw request'.tr(),
                     trailingIcon: Icons.chevron_right,
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const WithdrawaScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const _SettingDivider(),
+                  _SettingRow(
+                    leading: const _CircleIcon(
+                      bg: Color(0xFFD8E2E6),
+                      iconBg: Color(0xFF576E7C),
+                      icon: Icons.download_outlined,
+                    ),
+                    title: 'deposit request'.tr(),
+                    trailingIcon: Icons.chevron_right,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const DepositRequestScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const _SettingDivider(),
+                  _SettingRow(
+                    leading: const _CircleIcon(
+                      bg: Color(0xFFD8E2E6),
+                      iconBg: Color(0xFF576E7C),
+                      icon: Icons.history,
+                    ),
+                    title: 'withdraw transformation history'.tr(),
+                    trailingIcon: Icons.chevron_right,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const WithdrawaHistoryScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const _SettingDivider(),
+                  _SettingRow(
+                    leading: const _CircleIcon(
+                      bg: Color(0xFFD8E2E6),
+                      iconBg: Color(0xFF576E7C),
+                      icon: Icons.receipt_long_outlined,
+                    ),
+                    title: 'deposit transformation history'.tr(),
+                    trailingIcon: Icons.chevron_right,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const DepositHistoryScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
