@@ -5,8 +5,8 @@ class HotelsApi {
 
   HotelsApi(this.dio);
 
-  Future<Response> getAllHotels() async {
-    return await dio.get('hotels');
+  Future<Response> getAllHotels({Map<String, dynamic>? queryParameters}) async {
+    return await dio.get('hotels', queryParameters: queryParameters);
   }
 
   Future<Response> getHotelDetails(int hotelId) async {

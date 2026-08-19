@@ -1,4 +1,5 @@
 import 'package:byma_app/data/models/hotel_details_model.dart';
+import 'package:byma_app/data/models/hotel_filter_model.dart';
 import 'package:byma_app/data/models/hotel_model.dart';
 import 'package:byma_app/data/network/network_exceptions.dart';
 import 'package:byma_app/data/web_services/hotels_api.dart';
@@ -8,9 +9,11 @@ class HotelsRepo {
 
   HotelsRepo(this.hotelsApi);
 
-  Future<List<HotelModel>> fetchAllHotels() async {
+  Future<List<HotelModel>> fetchAllHotels({HotelFilterModel? filter}) async {
     try {
-      final response = await hotelsApi.getAllHotels();
+      final response = await hotelsApi.getAllHotels(
+        queryParameters: filter?.toJson(),
+      );
       
       final List<dynamic> data = response.data;
       
