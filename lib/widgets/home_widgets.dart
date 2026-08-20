@@ -7,7 +7,9 @@ import 'package:byma_app/business_logic/create_collection/cubit/create_collectio
 import 'package:byma_app/business_logic/create_collection/cubit/create_collection_state.dart';
 import 'package:byma_app/business_logic/favorite_hotels/cubit/favorite_hotels_cubit.dart';
 import 'package:byma_app/business_logic/favorite_hotels/cubit/favorite_hotels_state.dart';
+import 'package:byma_app/business_logic/hotels/cubit/hotels_cubit.dart';
 import 'package:byma_app/business_logic/toggle_favorite_hotels/cubit/toggle_favorite_hotels_cubit.dart';
+import 'package:byma_app/data/models/hotel_filter_model.dart';
 import 'package:byma_app/data/models/hotel_model.dart';
 import 'package:byma_app/screens/conversation_screen.dart';
 import 'package:byma_app/screens/hotel_filter_screen.dart';
@@ -15,7 +17,6 @@ import 'package:byma_app/screens/soon_splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-
 
 // ==========================================
 // 1. HOME HEADER WIDGET
@@ -257,10 +258,12 @@ class _CategoryItem extends StatelessWidget {
   }
 }
 
+
 // ==========================================
 // 3. SEARCH BAR WIDGET
 // ==========================================
-class HomeSearchBar extends StatelessWidget {
+
+class HomeSearchBar extends StatefulWidget {
   final Color filterBgColor;
   final Color textColor;
   final Color cardColor;
@@ -273,6 +276,42 @@ class HomeSearchBar extends StatelessWidget {
   });
 
   @override
+  State<HomeSearchBar> createState() => _HomeSearchBarState();
+}
+
+class _HomeSearchBarState extends State<HomeSearchBar> {
+  HotelFilterModel? _activeFilter;
+  
+  // 1. Add a controller and a timer
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
+
+  @override
+  void dispose() {
+    // 2. Clean up memory
+    _searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  // 3. Create the search function with a 500ms delay
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      setState(() {
+        // Update the search query inside the active filter
+        _activeFilter = (_activeFilter ?? HotelFilterModel()).copyWith(search: query);
+      });
+      
+      // Trigger the API call
+      if (mounted) {
+        context.read<HotelCubit>().fetchAllHotels(filter: _activeFilter);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Row(
       children: [
@@ -280,7 +319,7 @@ class HomeSearchBar extends StatelessWidget {
           child: Container(
             height: 55,
             decoration: BoxDecoration(
-              color: cardColor,
+              color: widget.cardColor,
               borderRadius: BorderRadius.circular(30),
               boxShadow: [
                 BoxShadow(
@@ -291,10 +330,18 @@ class HomeSearchBar extends StatelessWidget {
               ],
             ),
             child: TextField(
+              controller: _searchController, // 4. Attach the controller
+              onChanged: _onSearchChanged,   // 5. Attach the typing event
+              onSubmitted: (query) {
+                // Optional: Instantly search if they press 'Enter/Done' on keyboard
+                if (_debounce?.isActive ?? false) _debounce!.cancel();
+                _onSearchChanged(query);
+              },
+              textInputAction: TextInputAction.search, // Changes keyboard enter button to a search icon
               decoration: InputDecoration(
                 hintText: 'search_hotels_hint'.tr(),
                 hintStyle: TextStyle(
-                  color: textColor.withOpacity(0.5),
+                  color: widget.textColor.withOpacity(0.5),
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
                 ),
@@ -302,10 +349,20 @@ class HomeSearchBar extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 12.0, right: 8.0),
                   child: Icon(
                     Icons.search,
-                    color: textColor.withOpacity(0.7),
+                    color: widget.textColor.withOpacity(0.7),
                     size: 22,
                   ),
                 ),
+                // Add a clear button when text is typed
+                suffixIcon: _searchController.text.isNotEmpty 
+                  ? IconButton(
+                      icon: Icon(Icons.clear, color: widget.textColor.withOpacity(0.5), size: 20),
+                      onPressed: () {
+                        _searchController.clear();
+                        _onSearchChanged('');
+                      },
+                    ) 
+                  : null,
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 16),
               ),
@@ -314,17 +371,30 @@ class HomeSearchBar extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         GestureDetector(
-          onTap: () {
-            Navigator.push(
+          onTap: () async {
+            final appliedFilter = await Navigator.push<HotelFilterModel>(
               context,
-              MaterialPageRoute(builder: (_) => const HotelFilterScreen()),
+              MaterialPageRoute(
+                builder: (_) => HotelFilterScreen(initialFilter: _activeFilter),
+              ),
             );
+
+            if (appliedFilter != null) {
+              setState(() {
+                // 6. Merge the returned filter with the currently typed search text
+                _activeFilter = appliedFilter.copyWith(search: _searchController.text);
+              });
+
+              if (mounted) {
+                context.read<HotelCubit>().fetchAllHotels(filter: _activeFilter);
+              }
+            }
           },
           child: Container(
             height: 55,
             width: 55,
             decoration: BoxDecoration(
-              color: filterBgColor,
+              color: widget.filterBgColor,
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.tune, color: Colors.white, size: 22),
@@ -334,7 +404,6 @@ class HomeSearchBar extends StatelessWidget {
     );
   }
 }
-
 // ==========================================
 // 4. ADD TO COLLECTION BOTTOM SHEET
 // ==========================================
@@ -347,9 +416,8 @@ void showAddToCollectionSheet(BuildContext context, int hotelId) {
       return MultiBlocProvider(
         providers: [
           BlocProvider(
-            create: (context) => CollectionCubit(
-              context.read(),
-            )..fetchAllCollections(),
+            create: (context) =>
+                CollectionCubit(context.read())..fetchAllCollections(),
           ),
           BlocProvider(
             create: (context) => CreateCollectionCubit(context.read()),
@@ -532,28 +600,30 @@ class AddToCollectionSheetBody extends StatelessWidget {
                                 fontSize: 16,
                               ),
                             ),
-                            trailing: BlocBuilder<
-                                AddHotelToCollectionCubit,
-                                AddHotelToCollectionState>(
-                              builder: (context, addState) {
-                                final isLoading = addState.maybeWhen(
-                                  loading: () => true,
-                                  orElse: () => false,
-                                );
-                                return isLoading
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : Icon(
-                                        Icons.chevron_right_rounded,
-                                        color: textColor.withOpacity(0.5),
-                                      );
-                              },
-                            ),
+                            trailing:
+                                BlocBuilder<
+                                  AddHotelToCollectionCubit,
+                                  AddHotelToCollectionState
+                                >(
+                                  builder: (context, addState) {
+                                    final isLoading = addState.maybeWhen(
+                                      loading: () => true,
+                                      orElse: () => false,
+                                    );
+                                    return isLoading
+                                        ? const SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : Icon(
+                                            Icons.chevron_right_rounded,
+                                            color: textColor.withOpacity(0.5),
+                                          );
+                                  },
+                                ),
                             onTap: () {
                               context
                                   .read<AddHotelToCollectionCubit>()
@@ -584,10 +654,7 @@ class AddToCollectionSheetBody extends StatelessWidget {
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('New Collection'),
-          content: TextField(
-            controller: textController,
-            autofocus: true,
-          ),
+          content: TextField(controller: textController, autofocus: true),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
@@ -597,9 +664,9 @@ class AddToCollectionSheetBody extends StatelessWidget {
               onPressed: () {
                 final name = textController.text.trim();
                 if (name.isNotEmpty) {
-                  parentContext
-                      .read<CreateCollectionCubit>()
-                      .createCollection(name);
+                  parentContext.read<CreateCollectionCubit>().createCollection(
+                    name,
+                  );
                   Navigator.pop(dialogContext);
                 }
               },
@@ -867,5 +934,3 @@ class _HotelProductCardState extends State<HotelProductCard> {
     );
   }
 }
-
-

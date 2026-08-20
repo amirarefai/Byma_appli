@@ -132,6 +132,7 @@ class _HotelFilterScreenState extends State<HotelFilterScreen> {
   Widget _buildStateDropdown(BuildContext context, String hintText, {bool isError = false}) {
     final theme = Theme.of(context);
     return DropdownButtonFormField<CityModel>(
+      isExpanded: true,
       value: null,
       items: const [],
       onChanged: null, // Disables the dropdown

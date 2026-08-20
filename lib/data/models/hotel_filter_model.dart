@@ -11,6 +11,20 @@ class HotelFilterModel {
     this.maxPrice,
   });
 
+  HotelFilterModel copyWith({
+    String? city,
+    String? search,
+    num? minPrice,
+    num? maxPrice,
+  }) {
+    return HotelFilterModel(
+      city: city ?? this.city,
+      search: search ?? this.search,
+      minPrice: minPrice ?? this.minPrice,
+      maxPrice: maxPrice ?? this.maxPrice,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     
