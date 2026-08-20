@@ -22,6 +22,7 @@ import 'deposit_request_screen.dart';
 import 'withdrawa_history_screen.dart';
 import 'deposit_history_screen.dart';
 import 'convert_points_screen.dart';
+import 'reservations_screen.dart';
 
 
 class SettingsRefinedScreen extends StatefulWidget {
@@ -468,7 +469,14 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                     ),
                     title: 'reservations'.tr(),
                     trailingIcon: Icons.chevron_right,
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ReservationsScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const _SettingDivider(),
                   _SettingRow(
