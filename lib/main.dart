@@ -4,6 +4,7 @@ import 'package:byma_app/business_logic/add_recently_viewed_room/cubit/add_recen
 import 'package:byma_app/business_logic/add_room_to_collection/cubit/add_room_to_collection_cubit.dart';
 import 'package:byma_app/business_logic/booking_history/cubit/booking_history_cubit.dart';
 import 'package:byma_app/business_logic/cancel_booking/cubit/cancel_booking_cubit.dart';
+import 'package:byma_app/business_logic/cities/cubit/cities_cubit.dart';
 import 'package:byma_app/business_logic/collection/cubit/collection_cubit.dart';
 import 'package:byma_app/business_logic/create_collection/cubit/create_collection_cubit.dart';
 import 'package:byma_app/business_logic/customer_register/cubit/customer_register_cubit.dart';
@@ -25,6 +26,7 @@ import 'package:byma_app/business_logic/toggle_favorite_hotels/cubit/toggle_favo
 import 'package:byma_app/business_logic/toggle_favorite_rooms/cubit/toggle_favorite_rooms_cubit.dart';
 import 'package:byma_app/data/network/dio_factory.dart';
 import 'package:byma_app/data/repositories/booking-repo.dart';
+import 'package:byma_app/data/repositories/cities_repo.dart';
 import 'package:byma_app/data/repositories/collection_repo.dart';
 import 'package:byma_app/data/repositories/customer_register_repo.dart';
 import 'package:byma_app/data/repositories/favorite_hotels_repo.dart';
@@ -37,6 +39,7 @@ import 'package:byma_app/data/repositories/reviews_repo.dart';
 import 'package:byma_app/data/repositories/room_collection_repo.dart';
 import 'package:byma_app/data/repositories/room_details_repo.dart';
 import 'package:byma_app/data/web_services/booking_api.dart';
+import 'package:byma_app/data/web_services/cities_api.dart';
 import 'package:byma_app/data/web_services/collection_api.dart';
 import 'package:byma_app/data/web_services/customer_register_api.dart';
 import 'package:byma_app/data/web_services/favorite_hotels_api.dart';
@@ -113,7 +116,7 @@ class _BymaAppState extends State<BymaApp> {
   final ReportsApi reportsApi = ReportsApi(DioFactory.getDio());
   final ReviewsApi reviewsApi = ReviewsApi(DioFactory.getDio());
   final BookingApi bookingApi = BookingApi(DioFactory.getDio());
-  
+  final CitiesApi citiesApi = CitiesApi(DioFactory.getDio());
 
   //REPOs
   late final FavoriteHotelsRepo favoriteHotelsRepo = FavoriteHotelsRepo(
@@ -141,6 +144,7 @@ class _BymaAppState extends State<BymaApp> {
   late final ReportsRepo reportsRepo = ReportsRepo(reportsApi);
   late final ReviewsRepo reviewsRepo = ReviewsRepo(reviewsApi);
   late final BookingRepo bookingRepo = BookingRepo(bookingApi);
+  late final CitiesRepo citiesRepo = CitiesRepo(citiesApi);
 
   String _currentThemeMode = 'light';
 
@@ -233,6 +237,7 @@ class _BymaAppState extends State<BymaApp> {
         RepositoryProvider<ReportsRepo>.value(value: reportsRepo),
         RepositoryProvider<ReviewsRepo>.value(value: reviewsRepo),
         RepositoryProvider<BookingRepo>.value(value: bookingRepo),
+        RepositoryProvider<CitiesRepo>.value(value: citiesRepo),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -359,6 +364,10 @@ class _BymaAppState extends State<BymaApp> {
           BlocProvider<BookingHistoryCubit>(
             create: (context) =>
                 BookingHistoryCubit(context.read<BookingRepo>()),
+          ),
+          BlocProvider<CitiesCubit>(
+            create: (context) =>
+                CitiesCubit(context.read<CitiesRepo>())..fetchAllCities(),
           ),
         ],
 

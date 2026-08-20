@@ -10,7 +10,7 @@ import 'package:byma_app/business_logic/favorite_hotels/cubit/favorite_hotels_st
 import 'package:byma_app/business_logic/toggle_favorite_hotels/cubit/toggle_favorite_hotels_cubit.dart';
 import 'package:byma_app/data/models/hotel_model.dart';
 import 'package:byma_app/screens/conversation_screen.dart';
-import 'package:byma_app/screens/filters_advanced_screen.dart';
+import 'package:byma_app/screens/hotel_filter_screen.dart';
 import 'package:byma_app/screens/soon_splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -317,7 +317,7 @@ class HomeSearchBar extends StatelessWidget {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const FiltersAdvancedScreen()),
+              MaterialPageRoute(builder: (_) => const HotelFilterScreen()),
             );
           },
           child: Container(
