@@ -1,3 +1,4 @@
+import 'package:byma_app/data/models/hotel_filter_model.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -111,6 +112,11 @@ class HomeScreen extends StatelessWidget {
                         filterBgColor: darkGreenColor,
                         textColor: secondaryTextColor,
                         cardColor: cardColor,
+                        onSearchChanged: (String query) {
+                          context.read<HotelCubit>().fetchAllHotels(
+                            filter: HotelFilterModel(search: query),
+                          );
+                        },
                       ),
                       const SizedBox(height: 25),
                     ],

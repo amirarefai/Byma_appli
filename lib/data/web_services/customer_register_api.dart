@@ -27,7 +27,7 @@ class CustomerRegisterApi {
 
     // The DioInterceptor already handles the base URL and tokens
     return await dio.post(
-      '/auth/customer/register',
+      'auth/customer/register',
       data: formData,
     );
   }

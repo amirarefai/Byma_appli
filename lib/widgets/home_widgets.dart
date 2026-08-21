@@ -267,12 +267,14 @@ class HomeSearchBar extends StatefulWidget {
   final Color filterBgColor;
   final Color textColor;
   final Color cardColor;
+  final ValueChanged<String>? onSearchChanged;
 
   const HomeSearchBar({
     super.key,
     required this.filterBgColor,
     required this.textColor,
     required this.cardColor,
+    this.onSearchChanged,
   });
 
   @override

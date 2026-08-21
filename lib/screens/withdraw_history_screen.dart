@@ -1,24 +1,24 @@
-import 'package:byma_app/business_logic/deposit_history/cubit/deposit_history_cubit.dart';
+import 'package:byma_app/business_logic/withdraw_history/cubit/withdraw_history_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:byma_app/data/models/deposit_history_model.dart';
+import 'package:byma_app/data/models/withdraw_history_model.dart';
 
-class DepositHistoryScreen extends StatefulWidget {
-  const DepositHistoryScreen({super.key});
+class WithdrawHistoryScreen extends StatefulWidget {
+  const WithdrawHistoryScreen({super.key});
 
   @override
-  State<DepositHistoryScreen> createState() => _DepositHistoryScreenState();
+  State<WithdrawHistoryScreen> createState() => _WithdrawHistoryScreenState();
 }
 
-class _DepositHistoryScreenState extends State<DepositHistoryScreen> {
+class _WithdrawHistoryScreenState extends State<WithdrawHistoryScreen> {
   @override
   void initState() {
     super.initState();
-    _loadDepositHistory();
+    _loadWithdrawHistory();
   }
 
-  void _loadDepositHistory() {
-    context.read<DepositHistoryCubit>().fetchDepositHistory();
+  void _loadWithdrawHistory() {
+    context.read<WithdrawHistoryCubit>().fetchWithdrawHistory();
   }
 
   @override
@@ -54,7 +54,7 @@ class _DepositHistoryScreenState extends State<DepositHistoryScreen> {
                     ),
                     const Expanded(
                       child: Text(
-                        'Deposit History',
+                        'Withdraw History',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 20,
@@ -63,7 +63,7 @@ class _DepositHistoryScreenState extends State<DepositHistoryScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 48),
+                    const SizedBox(width: 48), // To balance the back button
                   ],
                 ),
               ),
@@ -71,7 +71,7 @@ class _DepositHistoryScreenState extends State<DepositHistoryScreen> {
 
               // API Content Body
               Expanded(
-                child: BlocBuilder<DepositHistoryCubit, DepositHistoryState>(
+                child: BlocBuilder<WithdrawHistoryCubit, WithdrawHistoryState>(
                   builder: (context, state) {
                     return state.when(
                       initial: () => const Center(
@@ -86,13 +86,13 @@ class _DepositHistoryScreenState extends State<DepositHistoryScreen> {
                           return _buildEmptyWidget();
                         }
                         return RefreshIndicator(
-                          onRefresh: () async => _loadDepositHistory(),
+                          onRefresh: () async => _loadWithdrawHistory(),
                           color: primaryDarkTeal,
                           child: ListView.builder(
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                             itemCount: historyList.length,
                             itemBuilder: (context, index) {
-                              return _buildDepositCard(historyList[index]);
+                              return _buildWithdrawCard(historyList[index]);
                             },
                           ),
                         );
@@ -116,7 +116,7 @@ class _DepositHistoryScreenState extends State<DepositHistoryScreen> {
           Icon(Icons.history, size: 64, color: Color(0xFF8C98A4)),
           SizedBox(height: 12),
           Text(
-            'No deposit records found',
+            'No withdraw records found',
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
@@ -145,7 +145,7 @@ class _DepositHistoryScreenState extends State<DepositHistoryScreen> {
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: _loadDepositHistory,
+              onPressed: _loadWithdrawHistory,
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryDarkTeal,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -159,7 +159,7 @@ class _DepositHistoryScreenState extends State<DepositHistoryScreen> {
     );
   }
 
-  Widget _buildDepositCard(DepositHistoryModel item) {
+  Widget _buildWithdrawCard(WithdrawHistoryModel item) {
     // Format creation timestamp
     final formattedDate =
         '${item.createdAt.day.toString().padLeft(2, '0')}/${item.createdAt.month.toString().padLeft(2, '0')}/${item.createdAt.year} - ${item.createdAt.hour.toString().padLeft(2, '0')}:${item.createdAt.minute.toString().padLeft(2, '0')}';
