@@ -19,6 +19,7 @@ import 'deposit_request_screen.dart';
 import 'withdraw_history_screen.dart';
 import 'deposit_history_screen.dart';
 import 'convert_points_screen.dart';
+import 'reservations_screen.dart';
 
 class SettingsRefinedScreen extends StatefulWidget {
   const SettingsRefinedScreen({super.key});
@@ -28,7 +29,6 @@ class SettingsRefinedScreen extends StatefulWidget {
 }
 
 class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -353,7 +353,6 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
 
                 _SectionTitle(title: 'Financial'.tr()),
                 const SizedBox(height: 10),
-
                 _ActionGroup(
                   items: [
                     _SettingRow(
@@ -364,7 +363,14 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
                       ),
                       title: 'reservations'.tr(),
                       trailingIcon: Icons.chevron_right,
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ReservationsScreen(),
+                          ),
+                        );
+                      },
                     ),
                     const _SettingDivider(),
                     _SettingRow(
@@ -511,81 +517,85 @@ class _SettingsRefinedScreenState extends State<SettingsRefinedScreen> {
 }
 
 // --- Extracted Profile Header Widget for Cleanliness ---
-  Widget _buildProfileHeader(BuildContext context, ProfileModel profile, ThemeData theme) {
-    return Column(
-      children: [
-        // الصورة الشخصية (الأفاتار)
-        Center(
-          child: Container(
-            width: 130,
-            height: 100,
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFF072332).withOpacity(0.85),
-              borderRadius: BorderRadius.circular(22),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(18),
-              child: Image.network(
-                profile.formattedProfileImageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Color(0xFF0B2B3A), Color(0xFF0D3A4E)],
-                    ),
+Widget _buildProfileHeader(
+  BuildContext context,
+  ProfileModel profile,
+  ThemeData theme,
+) {
+  return Column(
+    children: [
+      // الصورة الشخصية (الأفاتار)
+      Center(
+        child: Container(
+          width: 130,
+          height: 100,
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: const Color(0xFF072332).withOpacity(0.85),
+            borderRadius: BorderRadius.circular(22),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: Image.network(
+              profile.formattedProfileImageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0xFF0B2B3A), Color(0xFF0D3A4E)],
                   ),
                 ),
               ),
             ),
           ),
         ),
+      ),
 
-        const SizedBox(height: 10),
+      const SizedBox(height: 10),
 
-        // الاسم
-        Center(
-          child: Column(
-            children: [
-              Text(
-                '${profile.firstName} ${profile.lastName}',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 26),
-
-        // الإحصائيات (الكرت الثنائي)
-        Row(
+      // الاسم
+      Center(
+        child: Column(
           children: [
-            Expanded(
-              child: _StatCard(
-                title: 'Balance'.tr(),
-                value: profile.balance.toString(),
-                icon: Icons.payments_outlined,
-              ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: _StatCard(
-                title: 'points_earned_label'.tr(),
-                value: profile.points.toString(),
-                icon: Icons.stars_outlined,
+            Text(
+              '${profile.firstName} ${profile.lastName}',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: theme.colorScheme.primary,
               ),
             ),
           ],
         ),
-      ],
-    );
-  }
+      ),
+
+      const SizedBox(height: 26),
+
+      // الإحصائيات (الكرت الثنائي)
+      Row(
+        children: [
+          Expanded(
+            child: _StatCard(
+              title: 'Balance'.tr(),
+              value: profile.balance.toString(),
+              icon: Icons.payments_outlined,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: _StatCard(
+              title: 'points_earned_label'.tr(),
+              value: profile.points.toString(),
+              icon: Icons.stars_outlined,
+            ),
+          ),
+        ],
+      ),
+    ],
+  );
+}
 
 class _StatCard extends StatelessWidget {
   final String title;
