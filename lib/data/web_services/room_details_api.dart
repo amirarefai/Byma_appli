@@ -8,4 +8,10 @@ class RoomDetailsApi {
   Future<Response> getRoomDetails(int roomId) async {
     return await dio.get('rooms/$roomId');
   }
+
+  Future<Response> getAllRoomCategories() async {
+    return await dio.get('rooms/categories');
+  }
+
+
 }

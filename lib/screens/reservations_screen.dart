@@ -1,37 +1,8 @@
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: ReservationsScreen(),
-    );
-  }
-}
-
-// نموذج بيانات الحجز
-class ReservationItem {
-  final String hotelName;
-  final String roomNumber;
-  final String price;
-  final String date;
-  final String status; // 'Booking', 'Update', 'Cancel'
-
-  ReservationItem({
-    required this.hotelName,
-    required this.roomNumber,
-    required this.price,
-    required this.date,
-    required this.status,
-  });
-}
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart'; 
+import 'package:byma_app/business_logic/bookings_transactions/cubit/bookings_transactions_cubit.dart';
+import 'package:byma_app/data/models/bookings_transactions_model.dart';
 
 class ReservationsScreen extends StatefulWidget {
   const ReservationsScreen({super.key});
@@ -41,37 +12,17 @@ class ReservationsScreen extends StatefulWidget {
 }
 
 class _ReservationsScreenState extends State<ReservationsScreen> {
-  // القائمة المطابقة للصورة
-  final List<ReservationItem> reservations = [
-    ReservationItem(
-      hotelName: 'Grand Palace Hotel',
-      roomNumber: 'Room 302',
-      price: '450.00',
-      date: 'Oct 25, 2023 - 11:00 AM',
-      status: 'Booking',
-    ),
-    ReservationItem(
-      hotelName: 'Seaside Resort & Spa',
-      roomNumber: 'Room 114',
-      price: '820.00',
-      date: 'Oct 22, 2023 - 09:15 AM',
-      status: 'Update',
-    ),
-    ReservationItem(
-      hotelName: 'Mountain View Lodge',
-      roomNumber: 'Room 45',
-      price: '120.00',
-      date: 'Oct 18, 2023 - 04:30 PM',
-      status: 'Cancel',
-    ),
-    ReservationItem(
-      hotelName: 'City Center Inn',
-      roomNumber: 'Room 901',
-      price: '285.50',
-      date: 'Oct 10, 2023 - 02:45 PM',
-      status: 'Booking',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Fetch data when the screen initializes
+    context.read<BookingsTransactionsCubit>().fetchBookingsTransactions();
+  }
+
+  // Method to allow manual pull-to-refresh
+  Future<void> _onRefresh() async {
+    await context.read<BookingsTransactionsCubit>().fetchBookingsTransactions();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +42,7 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              // الشريط العلوي (App Bar)
+              // App Bar
               Column(
                 children: [
                   Padding(
@@ -99,8 +50,8 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                     child: Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.menu, color: primaryDarkTeal, size: 26),
-                          onPressed: () {},
+                          icon: const Icon(Icons.arrow_back_ios_new, color: primaryDarkTeal, size: 22),
+                          onPressed: () => Navigator.maybePop(context),
                         ),
                         const Expanded(
                           child: Text(
@@ -113,7 +64,7 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 48), // لموازنة الأيقونة الجانبية
+                        const SizedBox(width: 48), // To balance the menu icon
                       ],
                     ),
                   ),
@@ -121,14 +72,34 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                 ],
               ),
 
-              // قائمة بطاقات الحجوزات
+              // Dynamic List View with State Management
               Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                  itemCount: reservations.length,
-                  itemBuilder: (context, index) {
-                    final item = reservations[index];
-                    return _buildReservationCard(item);
+                child: BlocBuilder<BookingsTransactionsCubit, BookingsTransactionsState>(
+                  builder: (context, state) {
+                    return state.when(
+                      initial: () => const Center(child: CircularProgressIndicator(color: primaryDarkTeal)),
+                      loading: () => const Center(child: CircularProgressIndicator(color: primaryDarkTeal)),
+                      error: (message) => _buildErrorState(message, primaryDarkTeal),
+                      success: (transactions) {
+                        if (transactions.isEmpty) {
+                          return _buildEmptyState(primaryDarkTeal);
+                        }
+
+                        // Pull to refresh implemented here
+                        return RefreshIndicator(
+                          onRefresh: _onRefresh,
+                          color: primaryDarkTeal,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                            itemCount: transactions.length,
+                            itemBuilder: (context, index) {
+                              final item = transactions[index];
+                              return _buildReservationCard(item);
+                            },
+                          ),
+                        );
+                      },
+                    );
                   },
                 ),
               ),
@@ -139,27 +110,90 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
     );
   }
 
-  // ودجت بناء كل بطاقة حجز
-  Widget _buildReservationCard(ReservationItem item) {
-    // تحديد لون الوسم (Badge) حسب الحالة
+  Widget _buildEmptyState(Color color) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.event_busy, size: 64, color: color.withOpacity(0.5)),
+          const SizedBox(height: 16),
+          Text(
+            'No reservations found.',
+            style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message, Color color) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, color: Colors.redAccent, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.redAccent, fontSize: 14),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: color,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => context.read<BookingsTransactionsCubit>().fetchBookingsTransactions(),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Updated to accept BookingsTransactionsModel instead of static model
+  Widget _buildReservationCard(BookingsTransactionsModel item) {
+    // Determine colors based on the backend API enum ('booking', 'update', 'cancel')
     Color statusBgColor;
     Color statusTextColor;
+    
+    // Using .toLowerCase() ensures safety against unexpected backend capitalization
+    final transactionType = item.type.toLowerCase();
 
-    switch (item.status) {
-      case 'Booking':
+    switch (transactionType) {
+      case 'booking':
         statusBgColor = const Color(0xFFBCEEE1);
         statusTextColor = const Color(0xFF0F7263);
         break;
-      case 'Update':
+      case 'update':
         statusBgColor = const Color(0xFFFDECDA);
         statusTextColor = const Color(0xFFC86E1B);
         break;
-      case 'Cancel':
+      case 'cancel':
       default:
         statusBgColor = const Color(0xFFFCD8DA);
         statusTextColor = const Color(0xFFD33947);
         break;
     }
+
+    // Capitalize the first letter for UI display (e.g., 'booking' -> 'Booking')
+    final displayStatus = transactionType.isNotEmpty 
+        ? '${transactionType[0].toUpperCase()}${transactionType.substring(1)}'
+        : 'Unknown';
+
+    // Format Date using intl package: 'Oct 25, 2023 - 11:00 AM'
+    final formattedDate = DateFormat(
+      'MMM dd, yyyy - hh:mm a',
+      'en',
+    ).format(item.createdAt);
+    
+    // Format Price to 2 decimal places
+    final formattedPrice = item.amount.toStringAsFixed(2);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -178,14 +212,13 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // السطر الأول: اسم الفندق والوسم
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Text(
-                  item.hotelName,
+                  item.hotelName.isNotEmpty ? item.hotelName : 'Unknown Hotel',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -201,7 +234,7 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  item.status,
+                  displayStatus,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -213,7 +246,6 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
           ),
           const SizedBox(height: 6),
 
-          // السطر الثاني: أيقونة الباب ورقم الغرفة
           Row(
             children: [
               const Icon(
@@ -223,7 +255,7 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
               ),
               const SizedBox(width: 6),
               Text(
-                item.roomNumber,
+                item.roomNumber.isNotEmpty ? item.roomNumber : 'TBD',
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -234,12 +266,10 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
           ),
           const SizedBox(height: 20),
 
-          // السطر الثالث: السعر والتاريخ
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // السعر مع رمز الدولار
               Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
@@ -253,7 +283,7 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                     ),
                   ),
                   Text(
-                    item.price,
+                    formattedPrice,
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -262,8 +292,6 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                   ),
                 ],
               ),
-
-              // أيقونة الساعة والتاريخ
               Row(
                 children: [
                   const Icon(
@@ -273,7 +301,7 @@ class _ReservationsScreenState extends State<ReservationsScreen> {
                   ),
                   const SizedBox(width: 5),
                   Text(
-                    item.date,
+                    formattedDate,
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,

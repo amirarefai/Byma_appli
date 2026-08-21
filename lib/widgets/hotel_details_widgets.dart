@@ -7,6 +7,7 @@ import 'package:byma_app/business_logic/create_collection/cubit/create_collectio
 import 'package:byma_app/business_logic/create_collection/cubit/create_collection_state.dart';
 import 'package:byma_app/business_logic/favorite_rooms/cubit/favorite_rooms_cubit.dart';
 import 'package:byma_app/business_logic/toggle_favorite_rooms/cubit/toggle_favorite_rooms_cubit.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:byma_app/data/models/hotel_amenity_model.dart';
@@ -608,12 +609,18 @@ class HotelRoomCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: isNetworkImage
-                    ? Image.network(
-                        imageUrl,
+                    ? CachedNetworkImage(
+                        imageUrl: imageUrl,
                         width: 100,
                         height: 100,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
+                        placeholder: (context, url) => Container(
+                          color: theme.dividerColor.withOpacity(0.1),
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) =>
                             _buildFallbackIcon(theme),
                       )
                     : Image.asset(
@@ -772,7 +779,7 @@ class HotelRoomCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         onTap: () {
           // final parsedRoomId = int.parse(room.id.toString());
-          
+
           // // Trigger the exact same Add-to-Collection Bottom Sheet used in the Home Screen
           // showModalBottomSheet(
           //   context: context,

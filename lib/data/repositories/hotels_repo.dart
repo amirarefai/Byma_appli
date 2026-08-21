@@ -1,6 +1,8 @@
 import 'package:byma_app/data/models/hotel_details_model.dart';
 import 'package:byma_app/data/models/hotel_filter_model.dart';
 import 'package:byma_app/data/models/hotel_model.dart';
+import 'package:byma_app/data/models/room_filter_model.dart';
+import 'package:byma_app/data/models/room_model.dart';
 import 'package:byma_app/data/network/network_exceptions.dart';
 import 'package:byma_app/data/web_services/hotels_api.dart';
 
@@ -36,6 +38,25 @@ class HotelsRepo {
       final Map<String, dynamic> data = response.data;
       
       return HotelDetailsModel.fromJson(data);
+    } catch (error) {
+      final networkException = NetworkExceptions.getDioException(error);
+      final errorMessage = NetworkExceptions.getErrorMessage(networkException);
+      throw errorMessage;
+    }
+  }
+
+  Future<List<RoomModel>> fetchHotelRooms(int hotelId, {RoomFilterModel? filter}) async {
+    try {
+      final response = await hotelsApi.getHotelRooms(
+        hotelId,
+        queryParameters: filter?.toJson(),
+      );
+      
+      final List<dynamic> data = response.data;
+      
+      return data
+          .map((item) => RoomModel.fromJson(item as Map<String, dynamic>))
+          .toList();
     } catch (error) {
       final networkException = NetworkExceptions.getDioException(error);
       final errorMessage = NetworkExceptions.getErrorMessage(networkException);

@@ -3,6 +3,7 @@ import 'package:byma_app/business_logic/add_recently_viewed_hotel/cubit/add_rece
 import 'package:byma_app/business_logic/add_recently_viewed_room/cubit/add_recently_viewed_room_cubit.dart';
 import 'package:byma_app/business_logic/add_room_to_collection/cubit/add_room_to_collection_cubit.dart';
 import 'package:byma_app/business_logic/booking_history/cubit/booking_history_cubit.dart';
+import 'package:byma_app/business_logic/bookings_transactions/cubit/bookings_transactions_cubit.dart';
 import 'package:byma_app/business_logic/cancel_booking/cubit/cancel_booking_cubit.dart';
 import 'package:byma_app/business_logic/cities/cubit/cities_cubit.dart';
 import 'package:byma_app/business_logic/collection/cubit/collection_cubit.dart';
@@ -18,12 +19,14 @@ import 'package:byma_app/business_logic/favorite_hotels/cubit/favorite_hotels_cu
 import 'package:byma_app/business_logic/get_profile/cubit/get_profile_cubit.dart';
 import 'package:byma_app/business_logic/hotel_collection/cubit/hotel_collection_cubit.dart';
 import 'package:byma_app/business_logic/hotel_details/cubit/hotel_details_cubit.dart';
+import 'package:byma_app/business_logic/hotel_rooms_filter/cubit/hotel_rooms_filter_cubit.dart';
 import 'package:byma_app/business_logic/hotels/cubit/hotels_cubit.dart';
 import 'package:byma_app/business_logic/points_transactions/cubit/points_transactions_cubit.dart';
 import 'package:byma_app/business_logic/recently_viewed_hotels/recently_viewed_hotels_cubit.dart';
 import 'package:byma_app/business_logic/recently_viewed_rooms/cubit/recently_viewed_rooms_cubit.dart';
 import 'package:byma_app/business_logic/reports/cubit/reports_cubit.dart';
 import 'package:byma_app/business_logic/reviews/cubit/reviews_cubit.dart';
+import 'package:byma_app/business_logic/room_category/cubit/room_category_cubit.dart';
 import 'package:byma_app/business_logic/room_collection/cubit/room_collection_cubit.dart';
 import 'package:byma_app/business_logic/room_details/cubit/room_details_cubit.dart';
 import 'package:byma_app/business_logic/favorite_rooms/cubit/favorite_rooms_cubit.dart';
@@ -427,6 +430,18 @@ class _BymaAppState extends State<BymaApp> {
           BlocProvider<UpdateProfileCubit>(
             create: (context) =>
                 UpdateProfileCubit(context.read<ProfileRepo>()),
+          ),
+          BlocProvider<BookingsTransactionsCubit>(
+            create: (context) =>
+                BookingsTransactionsCubit(context.read<BookingRepo>()),
+          ),
+          BlocProvider<HotelRoomsFilterCubit>(
+            create: (context) =>
+                HotelRoomsFilterCubit(context.read<HotelsRepo>()),
+          ),
+          BlocProvider<RoomCategoryCubit>(
+            create: (context) =>
+                RoomCategoryCubit(context.read<RoomDetailsRepo>()),
           ),
         ],
 

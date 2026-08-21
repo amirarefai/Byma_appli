@@ -1,4 +1,6 @@
 import 'package:byma_app/data/models/booking_history_model.dart';
+import 'package:byma_app/data/models/bookings_transactions_model.dart';
+import 'package:byma_app/data/models/update_booking_model.dart';
 import 'package:byma_app/data/network/network_exceptions.dart';
 import 'package:byma_app/data/web_services/booking_api.dart';
 
@@ -10,6 +12,19 @@ class BookingRepo {
    Future<void> cancelBooking(int bookingId) async {
     try {
       await bookingApi.cancelBooking(bookingId);
+    } catch (error) {
+      final networkException = NetworkExceptions.getDioException(error);
+      final errorMessage = NetworkExceptions.getErrorMessage(networkException);
+      throw errorMessage;
+    }
+  }
+
+  Future<void> updateBooking(
+    int bookingId,
+    UpdateBookingModel updateBookingModel,
+  ) async {
+    try {
+      await bookingApi.updateBooking(bookingId, updateBookingModel);
     } catch (error) {
       final networkException = NetworkExceptions.getDioException(error);
       final errorMessage = NetworkExceptions.getErrorMessage(networkException);
@@ -35,6 +50,20 @@ class BookingRepo {
           .map((json) => BookingHistoryModel.fromJson(json as Map<String, dynamic>))
           .toList();
           
+    } catch (error) {
+      final networkException = NetworkExceptions.getDioException(error);
+      final errorMessage = NetworkExceptions.getErrorMessage(networkException);
+      throw errorMessage;
+    }
+  }
+
+  Future<List<BookingsTransactionsModel>> fetchBookingTransactions() async {
+    try {
+      final response = await bookingApi.getBookingTransactions();
+      final List<dynamic> data = response.data;
+      return data
+          .map((e) => BookingsTransactionsModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     } catch (error) {
       final networkException = NetworkExceptions.getDioException(error);
       final errorMessage = NetworkExceptions.getErrorMessage(networkException);

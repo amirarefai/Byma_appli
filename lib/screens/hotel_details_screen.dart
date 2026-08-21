@@ -1,12 +1,15 @@
 import 'package:byma_app/business_logic/favorite_rooms/cubit/favorite_rooms_cubit.dart';
 import 'package:byma_app/business_logic/hotel_details/cubit/hotel_details_cubit.dart';
+import 'package:byma_app/business_logic/hotel_rooms_filter/cubit/hotel_rooms_filter_cubit.dart';
+import 'package:byma_app/data/models/room_filter_model.dart';
+import 'package:byma_app/data/models/room_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:byma_app/data/models/hotel_details_model.dart';
 import 'package:byma_app/widgets/hotel_details_widgets.dart';
-import 'reserve_your_stay_screen.dart';
+import 'room_filter_screen.dart';
 import 'conversation_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -37,12 +40,41 @@ class _HotelDetailsScreenState extends State<HotelDetailsScreen> {
     }
   }
 
+  Widget _buildRoomsList(
+    BuildContext context,
+    List<RoomModel> rooms,
+    Color secondaryTeal,
+    String hotelName,
+  ) {
+    if (rooms.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Text(context.tr('No Rooms Available')),
+      );
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: rooms.length,
+      itemBuilder: (context, index) {
+        return HotelRoomCard(
+          room: rooms[index],
+          secondaryTeal: secondaryTeal,
+          hotelName: hotelName,
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     // Dispatch API Call when screen opens
     context.read<HotelDetailsCubit>().getHotelDetails(widget.hotelId);
     context.read<FavoriteRoomsCubit>().getFavoriteRooms();
+    // Add this to ensure a clean slate when opening a new hotel
+    context.read<HotelRoomsFilterCubit>().resetFilter();
   }
 
   @override
@@ -251,26 +283,82 @@ class _HotelDetailsScreenState extends State<HotelDetailsScreen> {
               const SizedBox(height: 24),
 
               // 6. Rooms Section
-              HotelUnderlineTitle(titleKey: 'Rooms', color: secondaryTeal),
+              // HotelUnderlineTitle(titleKey: 'Rooms', color: secondaryTeal),
+              BlocBuilder<HotelRoomsFilterCubit, HotelRoomsFilterState>(
+                builder: (context, filterState) {
+                  // Check if a filter is currently successfully applied
+                  final isFilterApplied = filterState.maybeWhen(
+                    success: (_) => true,
+                    orElse: () => false,
+                  );
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      HotelUnderlineTitle(
+                        titleKey: 'Rooms',
+                        color: secondaryTeal,
+                      ),
+                      if (isFilterApplied)
+                        TextButton.icon(
+                          onPressed: () {
+                            // Reset the cubit state back to initial
+                            context.read<HotelRoomsFilterCubit>().resetFilter();
+                          },
+                          icon: Icon(
+                            Icons.clear,
+                            size: 18,
+                            color: secondaryTeal,
+                          ),
+                          label: Text(
+                            context.tr(
+                              'clear_filter',
+                            ), // Add this to your localization files
+                            style: TextStyle(
+                              color: secondaryTeal,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
               const SizedBox(height: 14),
-              if (hotel.rooms.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text(context.tr('No Rooms Available')),
-                )
-              else
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: hotel.rooms.length,
-                  itemBuilder: (context, index) {
-                    return HotelRoomCard(
-                      room: hotel.rooms[index],
-                      secondaryTeal: secondaryTeal,
-                      hotelName: hotel.name,
-                    );
-                  },
-                ),
+
+              // Wrap ONLY the rooms list in a BlocBuilder
+              BlocBuilder<HotelRoomsFilterCubit, HotelRoomsFilterState>(
+                builder: (context, filterState) {
+                  return filterState.maybeWhen(
+                    loading: () => const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                    error: (message) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Text(
+                        message,
+                        style: const TextStyle(color: Colors.redAccent),
+                      ),
+                    ),
+                    success: (filteredRooms) => _buildRoomsList(
+                      context,
+                      filteredRooms,
+                      secondaryTeal,
+                      hotel.name,
+                    ),
+                    // If no filter is applied yet (initial state), show default rooms
+                    orElse: () => _buildRoomsList(
+                      context,
+                      hotel.rooms,
+                      secondaryTeal,
+                      hotel.name,
+                    ),
+                  );
+                },
+              ),
               const SizedBox(height: 10),
 
               // 7. Guest Reviews Section
@@ -373,13 +461,36 @@ class _HotelDetailsScreenState extends State<HotelDetailsScreen> {
                         child: SizedBox(
                           height: 54,
                           child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const ReserveYourStayScreen(),
-                                ),
-                              );
+                            // onPressed: () {
+                            //   Navigator.push(
+                            //     context,
+                            //     MaterialPageRoute(
+                            //       builder: (_) => const ReserveYourStayScreen(),
+                            //     ),
+                            //   );
+                            // },
+                            onPressed: () async {
+                              // Await the filter result from the next screen/bottom sheet
+                              final selectedFilter =
+                                  await Navigator.push<RoomFilterModel>(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const RoomFilterScreen(
+                                        
+                                      ),
+                                      // Ensure this screen pops with: Navigator.pop(context, roomFilterModel);
+                                    ),
+                                  );
+
+                              // If the user applied a filter and didn't just swipe back
+                              if (selectedFilter != null && context.mounted) {
+                                context
+                                    .read<HotelRoomsFilterCubit>()
+                                    .fetchFilteredRooms(
+                                      hotel.id,
+                                      selectedFilter,
+                                    );
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: isHighContrast

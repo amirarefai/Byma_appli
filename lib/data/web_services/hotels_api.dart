@@ -12,4 +12,8 @@ class HotelsApi {
   Future<Response> getHotelDetails(int hotelId) async {
     return await dio.get('hotels/$hotelId');
   }
+
+  Future<Response> getHotelRooms(int hotelId, {Map<String, dynamic>? queryParameters}) async {
+    return await dio.get('hotels/$hotelId/rooms', queryParameters: queryParameters);
+  }
 }
