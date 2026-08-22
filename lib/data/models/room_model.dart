@@ -66,7 +66,7 @@ class RoomModel {
       id: json['id'] as int,
       price: (json['price'] ?? 0) as num,
       category: parsedCategory,
-      photos: (json['photos'] as List<dynamic>?)
+        photos: ((json['images'] ?? json['photos']) as List<dynamic>?)
               ?.map((photo) => photo.toString())
               .toList() ??
           [],

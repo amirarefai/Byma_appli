@@ -11,6 +11,7 @@ class BookingHistoryModel {
   final String cityName;
   final String countryName;
   final int roomId;
+  final int? reviewId;
   final String roomNumber;
   final List<String> roomImagesUrls;
 
@@ -25,6 +26,7 @@ class BookingHistoryModel {
     required this.cityName,
     required this.countryName,
     required this.roomId,
+    this.reviewId,
     required this.roomNumber,
     required this.roomImagesUrls,
   });
@@ -36,20 +38,29 @@ class BookingHistoryModel {
     }
 
     return roomImagesUrls.map((photo) {
-      if (photo.startsWith('/')) {
-        final cleanBaseUrl = baseUrl.endsWith('/')
-            ? baseUrl.substring(0, baseUrl.length - 1)
-            : baseUrl;
-        return '$cleanBaseUrl$photo';
+      final normalizedPhoto = photo.replaceAll('\\', '/');
+      final cleanBaseUrl = baseUrl.endsWith('/')
+          ? baseUrl.substring(0, baseUrl.length - 1)
+          : baseUrl;
+
+      if (!normalizedPhoto.startsWith('http')) {
+        final relativePath = normalizedPhoto.startsWith('/')
+            ? normalizedPhoto
+            : '/$normalizedPhoto';
+        return '$cleanBaseUrl$relativePath';
       }
 
-      return photo
+      return normalizedPhoto
           .replaceFirst('http://127.0.0.1:3000', 'http://$localIp:3000')
           .replaceFirst('http://localhost:3000', 'http://$localIp:3000');
     }).toList();
   }
 
   factory BookingHistoryModel.fromJson(Map<String, dynamic> json) {
+    final review = json['review'];
+    final reviewId = json['reviewId'] ??
+        (review is Map<String, dynamic> ? review['id'] : null);
+
     return BookingHistoryModel(
       id: json['id'] as int,
       startDate: json['startDate'] as String? ?? '',
@@ -61,6 +72,7 @@ class BookingHistoryModel {
       cityName: json['cityName'] as String? ?? '',
       countryName: json['countryName'] as String? ?? '',
       roomId: json['roomId'] as int,
+      reviewId: reviewId is int ? reviewId : int.tryParse('$reviewId'),
       roomNumber: json['roomNumber']?.toString() ?? '',
       
       // Safely parses the raw photos array

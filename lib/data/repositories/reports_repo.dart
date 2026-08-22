@@ -16,27 +16,4 @@ class ReportsRepo {
       throw errorMessage;
     }
   }
-
-  // جلب كافة التقارير كـ List مباشرة بدون موديل
-  Future<List<dynamic>> fetchAllReports() async {
-    try {
-      final response = await reportsApi.getAllReports();
-      return response.data as List<dynamic>;
-    } catch (error) {
-      final networkException = NetworkExceptions.getDioException(error);
-      final errorMessage = NetworkExceptions.getErrorMessage(networkException);
-      throw errorMessage;
-    }
-  }
-
-  // حذف تقرير
-  Future<void> removeReport(int reportId) async {
-    try {
-      await reportsApi.removeReport(reportId);
-    } catch (error) {
-      final networkException = NetworkExceptions.getDioException(error);
-      final errorMessage = NetworkExceptions.getErrorMessage(networkException);
-      throw errorMessage;
-    }
-  }
 }

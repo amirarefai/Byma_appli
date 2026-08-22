@@ -10,11 +10,17 @@ class HotelAmenityModel {
   });
 
   factory HotelAmenityModel.fromJson(Map<String, dynamic> json) {
+    final nestedAmenity = json['amenity'];
+
     return HotelAmenityModel(
-      id: json['id'] as int,
-      amenity: json['amenity'] != null
-          ? AmenityModel.fromJson(json['amenity'] as Map<String, dynamic>)
-          : AmenityModel(id: 0, name: '', type: ''),
+      id: json['id'] as int? ?? 0,
+      amenity: nestedAmenity is Map<String, dynamic>
+          ? AmenityModel.fromJson(nestedAmenity)
+          : AmenityModel(
+              id: json['id'] as int? ?? 0,
+              name: json['name'] as String? ?? '',
+              type: json['type'] as String? ?? '',
+            ),
     );
   }
 }

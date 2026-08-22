@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'reports_state.dart';
+part of 'update_review_cubit.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -12,7 +12,7 @@ part of 'reports_state.dart';
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
-mixin _$ReportsState {
+mixin _$UpdateReviewState {
 
 
 
@@ -20,7 +20,7 @@ mixin _$ReportsState {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReportsState);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdateReviewState);
 }
 
 
@@ -29,20 +29,20 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'ReportsState()';
+  return 'UpdateReviewState()';
 }
 
 
 }
 
 /// @nodoc
-class $ReportsStateCopyWith<$Res>  {
-$ReportsStateCopyWith(ReportsState _, $Res Function(ReportsState) __);
+class $UpdateReviewStateCopyWith<$Res>  {
+$UpdateReviewStateCopyWith(UpdateReviewState _, $Res Function(UpdateReviewState) __);
 }
 
 
-/// Adds pattern-matching-related methods to [ReportsState].
-extension ReportsStatePatterns on ReportsState {
+/// Adds pattern-matching-related methods to [UpdateReviewState].
+extension UpdateReviewStatePatterns on UpdateReviewState {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -192,7 +192,7 @@ return error(_that.message);case _:
 /// @nodoc
 
 
-class _Initial implements ReportsState {
+class _Initial implements UpdateReviewState {
   const _Initial();
   
 
@@ -212,7 +212,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'ReportsState.initial()';
+  return 'UpdateReviewState.initial()';
 }
 
 
@@ -224,7 +224,7 @@ String toString() {
 /// @nodoc
 
 
-class _Loading implements ReportsState {
+class _Loading implements UpdateReviewState {
   const _Loading();
   
 
@@ -244,7 +244,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'ReportsState.loading()';
+  return 'UpdateReviewState.loading()';
 }
 
 
@@ -256,7 +256,7 @@ String toString() {
 /// @nodoc
 
 
-class _Success implements ReportsState {
+class _Success implements UpdateReviewState {
   const _Success();
   
 
@@ -276,7 +276,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'ReportsState.success()';
+  return 'UpdateReviewState.success()';
 }
 
 
@@ -288,13 +288,13 @@ String toString() {
 /// @nodoc
 
 
-class _Error implements ReportsState {
+class _Error implements UpdateReviewState {
   const _Error(this.message);
   
 
  final  String message;
 
-/// Create a copy of ReportsState
+/// Create a copy of UpdateReviewState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
@@ -313,14 +313,14 @@ int get hashCode => Object.hash(runtimeType,message);
 
 @override
 String toString() {
-  return 'ReportsState.error(message: $message)';
+  return 'UpdateReviewState.error(message: $message)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$ErrorCopyWith<$Res> implements $ReportsStateCopyWith<$Res> {
+abstract mixin class _$ErrorCopyWith<$Res> implements $UpdateReviewStateCopyWith<$Res> {
   factory _$ErrorCopyWith(_Error value, $Res Function(_Error) _then) = __$ErrorCopyWithImpl;
 @useResult
 $Res call({
@@ -339,7 +339,7 @@ class __$ErrorCopyWithImpl<$Res>
   final _Error _self;
   final $Res Function(_Error) _then;
 
-/// Create a copy of ReportsState
+/// Create a copy of UpdateReviewState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
   return _then(_Error(

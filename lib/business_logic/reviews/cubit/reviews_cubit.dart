@@ -7,7 +7,6 @@ class ReviewsCubit extends Cubit<ReviewsState> {
 
   ReviewsCubit(this.reviewsRepo) : super(const ReviewsState.initial());
 
-  // إرسال تقييم جديد
   Future<void> createReview({
     required int rate,
     required int hotelId,
@@ -21,17 +20,6 @@ class ReviewsCubit extends Cubit<ReviewsState> {
         comment: comment,
       );
       emit(const ReviewsState.success());
-    } catch (errorMessage) {
-      emit(ReviewsState.error(errorMessage.toString()));
-    }
-  }
-
-  // جلب التقييمات
-  Future<void> fetchAllReviews() async {
-    emit(const ReviewsState.loading());
-    try {
-      final reviews = await reviewsRepo.fetchAllReviews();
-      emit(ReviewsState.loaded(reviews));
     } catch (errorMessage) {
       emit(ReviewsState.error(errorMessage.toString()));
     }

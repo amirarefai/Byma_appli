@@ -6,6 +6,6 @@ part 'reports_state.freezed.dart';
 class ReportsState with _$ReportsState {
   const factory ReportsState.initial() = _Initial;
   const factory ReportsState.loading() = _Loading;
-  const factory ReportsState.success(List<dynamic> reports) = _Success; // استبدل dynamic بـ Model التقارير لديك
+  const factory ReportsState.success() = _Success; 
   const factory ReportsState.error(String message) = _Error;
 }

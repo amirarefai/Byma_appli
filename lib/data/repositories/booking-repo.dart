@@ -1,5 +1,6 @@
 import 'package:byma_app/data/models/booking_history_model.dart';
 import 'package:byma_app/data/models/bookings_transactions_model.dart';
+import 'package:byma_app/data/models/create_booking_model.dart';
 import 'package:byma_app/data/models/update_booking_model.dart';
 import 'package:byma_app/data/network/network_exceptions.dart';
 import 'package:byma_app/data/web_services/booking_api.dart';
@@ -9,7 +10,17 @@ class BookingRepo {
 
   BookingRepo(this.bookingApi);
 
-   Future<void> cancelBooking(int bookingId) async {
+  Future<void> createBooking(CreateBookingModel createBookingModel) async {
+    try {
+      await bookingApi.createBooking(createBookingModel);
+    } catch (error) {
+      final networkException = NetworkExceptions.getDioException(error);
+      final errorMessage = NetworkExceptions.getErrorMessage(networkException);
+      throw errorMessage;
+    }
+  }
+
+  Future<void> cancelBooking(int bookingId) async {
     try {
       await bookingApi.cancelBooking(bookingId);
     } catch (error) {

@@ -34,10 +34,14 @@ class HotelsRepo {
   Future<HotelDetailsModel> fetchHotelDetails(int hotelId) async {
     try {
       final response = await hotelsApi.getHotelDetails(hotelId);
-      
       final Map<String, dynamic> data = response.data;
-      
-      return HotelDetailsModel.fromJson(data);
+      final roomsResponse = await hotelsApi.getHotelRooms(hotelId);
+      final roomsData = roomsResponse.data as List<dynamic>;
+
+      return HotelDetailsModel.fromJson({
+        ...data,
+        'rooms': roomsData,
+      });
     } catch (error) {
       final networkException = NetworkExceptions.getDioException(error);
       final errorMessage = NetworkExceptions.getErrorMessage(networkException);

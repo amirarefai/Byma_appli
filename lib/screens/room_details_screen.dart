@@ -2,7 +2,7 @@ import 'package:byma_app/business_logic/room_details/cubit/room_details_cubit.da
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'payment_screen.dart';
+import 'room_booking_screen.dart';
 import 'package:byma_app/widgets/room_details_widgets.dart';
 
 class RoomDetailsScreen extends StatefulWidget {
@@ -225,22 +225,19 @@ class _RoomDetailsScreenState extends State<RoomDetailsScreen> {
                     height: 54,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (_) => FinalizeReservationScreen(
-                        //       roomTitle: room.title,
-                        //       pricePerNight: room.pricePerNight,
-                        //     ),
-                        //   ),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => RoomBookingScreen(roomId: room.id),
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isHighContrast
                             ? Colors.yellow
                             : (isDarkMode
                                 ? const Color(0xFF2E97C9)
-                                : Colors.lightBlueAccent.withOpacity(0.75)),
+                            : Colors.lightBlueAccent.withValues(alpha: 0.75)),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(999),
                         ),

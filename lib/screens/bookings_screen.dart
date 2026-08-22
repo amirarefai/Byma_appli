@@ -1,412 +1,16 @@
-// import 'package:byma_app/business_logic/reports/cubit/reports_cubit.dart';
-// import 'package:byma_app/business_logic/reviews/cubit/reviews_cubit.dart';
-// import 'package:flutter/material.dart';
-// import 'package:easy_localization/easy_localization.dart';
-// import 'package:flutter_bloc/flutter_bloc.dart';
-// import '../widgets/byma_bottom_nav.dart';
-
-// class BookingsScreen extends StatefulWidget {
-//   const BookingsScreen({super.key});
-
-//   @override
-//   State<BookingsScreen> createState() => _BookingsScreenState();
-// }
-
-// class _BookingsScreenState extends State<BookingsScreen> {
-//   String _selectedTab = 'All Stays';
-
-//   // 1️⃣ واجهة إدارة الحجز (تعديل التاريخ أو الإلغاء) - للحجوزات القادمة
-//   void _showManageBookingSheet(BuildContext context, String title, ThemeData theme, bool isYellowTheme) {
-//     final messenger = ScaffoldMessenger.of(context);
-
-//     showModalBottomSheet(
-//       context: context,
-//       isScrollControlled: true,
-//       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
-//       builder: (sheetContext) {
-//         return Padding(
-//           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-//           child: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.dividerColor, borderRadius: BorderRadius.circular(2)))),
-//               const SizedBox(height: 20),
-//               Text('manage_booking_label'.tr(), style: TextStyle(fontSize: 12, color: theme.colorScheme.tertiary)),
-//               Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.colorScheme.secondary)),
-//               const SizedBox(height: 24),
-
-//               // خيار تعديل التاريخ
-//               ListTile(
-//                 contentPadding: EdgeInsets.zero,
-//                 leading: Icon(Icons.calendar_month, color: theme.colorScheme.primary),
-//                 title: Text('edit_date_label'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
-//                 trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-//                 onTap: () async {
-//                   final picked = await showDateRangePicker(
-//                     context: sheetContext,
-//                     firstDate: DateTime.now(),
-//                     lastDate: DateTime.now().add(const Duration(days: 365)),
-//                   );
-//                   if (picked != null) {
-//                     Navigator.pop(sheetContext); // إغلاق آمن
-//                     messenger.showSnackBar(SnackBar(content: Text('date_updated_success'.tr())));
-//                   }
-//                 },
-//               ),
-//               Divider(color: theme.dividerColor),
-//               // خيار إلغاء الحجز
-//               ListTile(
-//                 contentPadding: EdgeInsets.zero,
-//                 leading: const Icon(Icons.cancel_outlined, color: Colors.redAccent),
-//                 title: Text('cancel_booking_label'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent)),
-//                 trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.redAccent),
-//                 onTap: () {
-//                   Navigator.pop(sheetContext);
-//                   messenger.showSnackBar(SnackBar(content: Text('cancel_request_sent'.tr())));
-//                 },
-//               ),
-//               const SizedBox(height: 10),
-//             ],
-//           ),
-//         );
-//       },
-//     );
-//   }
-
-//   // 2️⃣ واجهة التقييم والبلاغات - للحجوزات المكتملة ومربوطة بالـ Cubits مباشرة
-//   void _showReviewAndReportSheet(
-//     BuildContext context,
-//     String title,
-//     ThemeData theme,
-//     bool isYellowTheme,
-//     int hotelId,
-//   ) {
-//     int currentRating = 5;
-//     bool isReporting = false;
-//     final reportController = TextEditingController();
-//     final messenger = ScaffoldMessenger.of(context);
-
-//     showModalBottomSheet(
-//       context: context,
-//       isScrollControlled: true,
-//       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
-//       builder: (sheetContext) {
-//         return StatefulBuilder(
-//           builder: (builderContext, setSheetState) {
-//             return Padding(
-//               padding: EdgeInsets.only(
-//                 left: 24, right: 24, top: 24,
-//                 bottom: MediaQuery.of(builderContext).viewInsets.bottom + 24,
-//               ),
-//               child: SingleChildScrollView(
-//                 child: Column(
-//                   mainAxisSize: MainAxisSize.min,
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.dividerColor, borderRadius: BorderRadius.circular(2)))),
-//                     const SizedBox(height: 20),
-//                     Text('rate_stay_title'.tr(), style: TextStyle(fontSize: 12, color: theme.colorScheme.tertiary)),
-//                     Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.colorScheme.secondary)),
-//                     const SizedBox(height: 24),
-
-//                     // اختيار النجوم
-//                     Text('how_was_stay'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-//                     const SizedBox(height: 8),
-//                     Row(
-//                       children: List.generate(5, (index) {
-//                         return IconButton(
-//                           padding: EdgeInsets.zero,
-//                           constraints: const BoxConstraints(),
-//                           icon: Icon(
-//                             index < currentRating ? Icons.star_rounded : Icons.star_border_rounded,
-//                             color: Colors.amber, size: 38,
-//                           ),
-//                           onPressed: () => setSheetState(() => currentRating = index + 1),
-//                         );
-//                       }),
-//                     ),
-//                     const SizedBox(height: 20),
-
-//                     // زر التبديل للإبلاغ
-//                     if (!isReporting)
-//                       TextButton.icon(
-//                         onPressed: () => setSheetState(() => isReporting = true),
-//                         icon: const Icon(Icons.report_problem_outlined, color: Colors.redAccent, size: 20),
-//                         label: Text('report_issue_btn'.tr(), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
-//                       ),
-
-//                     // حقل النص للتقرير أو للـ Comment الاختياري
-//                     const SizedBox(height: 10),
-//                     Text(
-//                       isReporting ? 'report_hint'.tr() : 'add_comment_optional'.tr(),
-//                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-//                     ),
-//                     const SizedBox(height: 10),
-//                     TextField(
-//                       controller: reportController,
-//                       maxLines: 3,
-//                       style: TextStyle(color: theme.colorScheme.secondary),
-//                       decoration: InputDecoration(
-//                         hintText: isReporting ? 'report_field_hint'.tr() : 'comment_field_hint'.tr(),
-//                         hintStyle: TextStyle(color: theme.colorScheme.tertiary.withOpacity(0.5), fontSize: 13),
-//                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-//                         focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: theme.colorScheme.primary), borderRadius: BorderRadius.circular(16)),
-//                       ),
-//                     ),
-//                     const SizedBox(height: 24),
-
-//                     // زر الإرسال المربوط بالـ Cubit
-//                     Container(
-//                       width: double.infinity,
-//                       height: 50,
-//                       decoration: BoxDecoration(
-//                         color: isYellowTheme ? Colors.yellow : theme.colorScheme.primary,
-//                         borderRadius: BorderRadius.circular(16),
-//                       ),
-//                       child: ElevatedButton(
-//                         onPressed: () {
-//                           final inputText = reportController.text.trim();
-//                           Navigator.pop(sheetContext);
-
-//                           if (isReporting) {
-//                             // إرسال بلاغ عبر ReportsCubit
-//                             if (inputText.isNotEmpty) {
-//                               context.read<ReportsCubit>().createReport(
-//                                 hotelId: hotelId,
-//                                 reason: inputText,
-//                               );
-//                               messenger.showSnackBar(SnackBar(content: Text('report_sent_success'.tr())));
-//                             }
-//                           } else {
-//                             // إرسال تقييم عبر ReviewsCubit
-//                             context.read<ReviewsCubit>().createReview(
-//                               rate: currentRating,
-//                               hotelId: hotelId,
-//                               comment: inputText.isNotEmpty ? inputText : null,
-//                             );
-//                             messenger.showSnackBar(SnackBar(content: Text('thanks_for_rating'.tr(args: [currentRating.toString()]))));
-//                           }
-//                         },
-//                         style: ElevatedButton.styleFrom(
-//                           backgroundColor: Colors.transparent,
-//                           shadowColor: Colors.transparent,
-//                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-//                         ),
-//                         child: Text(
-//                           isReporting ? 'submit_report'.tr() : 'submit_rating'.tr(),
-//                           style: TextStyle(fontWeight: FontWeight.bold, color: isYellowTheme ? Colors.black : Colors.white, fontSize: 15),
-//                         ),
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             );
-//           },
-//         );
-//       },
-//     );
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final theme = Theme.of(context);
-
-//     return Scaffold(
-//       backgroundColor: theme.scaffoldBackgroundColor,
-//       body: SafeArea(
-//         bottom: false,
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             // الهيدر العلوي
-//             Padding(
-//               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-//               child: Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 children: [
-//                   IconButton(
-//                     icon: Icon(Icons.arrow_back_ios_new, size: 20, color: theme.iconTheme.color),
-//                     onPressed: () => Navigator.maybePop(context)
-//                   ),
-//                   Text(
-//                     'BYMA',
-//                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: theme.colorScheme.primary, letterSpacing: 1.2)
-//                   ),
-//                   const SizedBox(width: 48),
-//                 ],
-//               ),
-//             ),
-
-//             // العناوين الترحيبية
-//             Padding(
-//               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Text('journey_history'.tr(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: theme.colorScheme.secondary, letterSpacing: 1.1)),
-//                   const SizedBox(height: 4),
-//                   Text('your_stays'.tr(), style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: theme.colorScheme.primary)),
-//                   const SizedBox(height: 6),
-//                   Text('stays_subtitle'.tr(), style: TextStyle(fontSize: 14, color: theme.colorScheme.tertiary, height: 1.4)),
-//                 ],
-//               ),
-//             ),
-
-//             // أزرار الفلترة الأفقية
-//             Padding(
-//               padding: const EdgeInsets.symmetric(vertical: 12),
-//               child: SingleChildScrollView(
-//                 scrollDirection: Axis.horizontal,
-//                 padding: const EdgeInsets.symmetric(horizontal: 24),
-//                 child: Row(
-//                   children: [
-//                     _buildTabButton('All Stays', 'all_stays'.tr(), theme),
-//                     const SizedBox(width: 10),
-//                     _buildTabButton('Upcoming', 'upcoming_tab'.tr(), theme),
-//                     const SizedBox(width: 10),
-//                     _buildTabButton('Completed', 'completed_tab'.tr(), theme),
-//                   ],
-//                 ),
-//               ),
-//             ),
-
-//             // قائمة البطاقات
-//             Expanded(
-//               child: ListView(
-//                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-//                 children: [
-//                   if (_selectedTab == 'All Stays' || _selectedTab == 'Upcoming') ...[
-//                     _buildBookingCard(
-//                       context: context,
-//                       hotelId: 101, // تم تعيين ID الفندق
-//                       imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
-//                       tag: 'upcoming_tag'.tr(),
-//                       location: 'santorini_greece'.tr(),
-//                       title: 'azure_horizon'.tr(),
-//                       checkIn: 'Oct 12, 2024',
-//                       nights: '5_nights'.tr(),
-//                       isUpcoming: true,
-//                       theme: theme,
-//                     ),
-//                   ],
-//                   if (_selectedTab == 'All Stays' || _selectedTab == 'Completed') ...[
-//                     _buildBookingCard(
-//                       context: context,
-//                       hotelId: 102, // تم تعيين ID الفندق
-//                       imageUrl: 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=800&q=80',
-//                       tag: 'completed_tag'.tr(),
-//                       location: 'oslo_norway'.tr(),
-//                       title: 'nordic_pine'.tr(),
-//                       checkIn: '',
-//                       nights: '',
-//                       isUpcoming: false,
-//                       theme: theme,
-//                     ),
-//                   ],
-//                   const SizedBox(height: 120),
-//                 ],
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//       bottomNavigationBar: BymaBottomNav(
-//         activeTab: BymaBottomNavTab.bookings,
-//         onTabSelected: (tab) {},
-//       ),
-//     );
-//   }
-
-//   Widget _buildTabButton(String key, String label, ThemeData theme) {
-//     final isActive = _selectedTab == key;
-//     return GestureDetector(
-//       onTap: () => setState(() => _selectedTab = key),
-//       child: Container(
-//         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-//         decoration: BoxDecoration(
-//           color: isActive ? theme.colorScheme.primary : theme.cardColor,
-//           borderRadius: BorderRadius.circular(30),
-//           border: Border.all(color: isActive ? Colors.transparent : theme.dividerColor),
-//         ),
-//         child: Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isActive ? Colors.white : theme.colorScheme.secondary)),
-//       ),
-//     );
-//   }
-
-//   Widget _buildBookingCard({
-//     required BuildContext context,
-//     required int hotelId,
-//     required String imageUrl,
-//     required String tag,
-//     required String location,
-//     required String title,
-//     required String checkIn,
-//     required String nights,
-//     required bool isUpcoming,
-//     required ThemeData theme,
-//   }) {
-//     final isYellowTheme = theme.colorScheme.primary == Colors.yellow;
-
-//     return Container(
-//       margin: const EdgeInsets.only(bottom: 20),
-//       decoration: BoxDecoration(color: theme.cardColor, borderRadius: BorderRadius.circular(28), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10)]),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           ClipRRect(
-//             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-//             child: Image.network(imageUrl, height: 180, width: double.infinity, fit: BoxFit.cover),
-//           ),
-//           Padding(
-//             padding: const EdgeInsets.all(20),
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Text(location.toUpperCase(), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: theme.colorScheme.primary)),
-//                 const SizedBox(height: 6),
-//                 Text(title, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: theme.colorScheme.secondary)),
-//                 if (isUpcoming) ...[
-//                   const SizedBox(height: 16),
-//                   SizedBox(
-//                     width: double.infinity,
-//                     height: 48,
-//                     child: ElevatedButton(
-//                       onPressed: () => _showManageBookingSheet(context, title, theme, isYellowTheme),
-//                       style: ElevatedButton.styleFrom(backgroundColor: theme.colorScheme.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-//                       child: Text('manage_booking'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-//                     ),
-//                   ),
-//                 ] else ...[
-//                   const SizedBox(height: 14),
-//                   GestureDetector(
-//                     onTap: () => _showReviewAndReportSheet(context, title, theme, isYellowTheme, hotelId),
-//                     child: Row(
-//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                       children: [
-//                         Text('rate_now'.tr(), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: theme.colorScheme.primary)),
-//                         const Icon(Icons.arrow_forward_ios, size: 12),
-//                       ],
-//                     ),
-//                   ),
-//                 ]
-//               ],
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
 import 'package:byma_app/business_logic/booking_history/cubit/booking_history_cubit.dart';
 import 'package:byma_app/business_logic/booking_history/cubit/booking_history_state.dart';
 import 'package:byma_app/business_logic/cancel_booking/cubit/cancel_booking_cubit.dart';
 import 'package:byma_app/business_logic/cancel_booking/cubit/cancel_booking_state.dart';
 import 'package:byma_app/business_logic/reports/cubit/reports_cubit.dart';
+import 'package:byma_app/business_logic/reports/cubit/reports_state.dart';
 import 'package:byma_app/business_logic/reviews/cubit/reviews_cubit.dart';
+import 'package:byma_app/business_logic/reviews/cubit/reviews_state.dart';
+import 'package:byma_app/business_logic/update_booking/cubit/update_booking_cubit.dart';
+import 'package:byma_app/business_logic/update_review/cubit/update_review_cubit.dart';
 import 'package:byma_app/data/models/booking_history_model.dart';
+import 'package:byma_app/data/models/update_booking_model.dart';
+import 'package:byma_app/data/models/update_review_model.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -420,6 +24,19 @@ class BookingsScreen extends StatefulWidget {
 }
 
 class _BookingsScreenState extends State<BookingsScreen> {
+
+  void _showLoadingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  void _hideLoadingDialog(BuildContext context) {
+    Navigator.of(context, rootNavigator: true).pop();
+  }
+
   // Default status mapping to your backend API expected values
   String _selectedTabStatus = 'confirmed';
   final ScrollController _scrollController = ScrollController();
@@ -454,10 +71,8 @@ class _BookingsScreenState extends State<BookingsScreen> {
     String title,
     ThemeData theme,
     bool isYellowTheme,
-    int bookingId
+    int bookingId,
   ) {
-    final messenger = ScaffoldMessenger.of(context);
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -517,25 +132,54 @@ class _BookingsScreenState extends State<BookingsScreen> {
                     firstDate: DateTime.now(),
                     lastDate: DateTime.now().add(const Duration(days: 365)),
                   );
+
                   if (picked != null) {
-                    Navigator.pop(sheetContext); // إغلاق آمن
-                    messenger.showSnackBar(
-                      SnackBar(content: Text('date_updated_success'.tr())),
+                    // 1. Close the bottom sheet safely
+                    if (sheetContext.mounted) {
+                      Navigator.pop(sheetContext);
+                    }
+
+                    // 2. Format the dates to match your backend expectations (e.g., yyyy-MM-dd)
+                    final DateFormat formatter = DateFormat('yyyy-MM-dd');
+                    final updateModel = UpdateBookingModel(
+                      startDate: formatter.format(picked.start),
+                      endDate: formatter.format(picked.end),
                     );
+
+                    // 3. Trigger the Update API Call via Cubit
+                    if (context.mounted) {
+                      context.read<UpdateBookingCubit>().updateBooking(
+                        bookingId,
+                        updateModel,
+                      );
+                    }
                   }
                 },
               ),
               Divider(color: theme.dividerColor),
               // خيار إلغاء الحجز
-             ListTile(
+              ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.cancel_outlined, color: Colors.redAccent),
-                title: Text('cancel_booking_label'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent)),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.redAccent),
+                leading: const Icon(
+                  Icons.cancel_outlined,
+                  color: Colors.redAccent,
+                ),
+                title: Text(
+                  'cancel_booking_label'.tr(),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.redAccent,
+                  ),
+                ),
+                trailing: const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 14,
+                  color: Colors.redAccent,
+                ),
                 onTap: () {
                   // 1. Close the Bottom Sheet
                   Navigator.pop(sheetContext);
-                  
+
                   // 2. Trigger the API call via Cubit
                   context.read<CancelBookingCubit>().cancelBooking(bookingId);
                 },
@@ -549,17 +193,128 @@ class _BookingsScreenState extends State<BookingsScreen> {
   }
 
   // 2️⃣ واجهة التقييم والبلاغات
-  void _showReviewAndReportSheet(
+  void _showReportSheet(
     BuildContext context,
-    String title,
     ThemeData theme,
     bool isYellowTheme,
     int hotelId,
   ) {
-    int currentRating = 5;
-    bool isReporting = false;
     final reportController = TextEditingController();
-    final messenger = ScaffoldMessenger.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (sheetContext) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 24,
+            bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 24,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: theme.dividerColor,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'What went wrong?',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.secondary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: reportController,
+                  maxLines: 5,
+                  autofocus: true,
+                  style: TextStyle(color: theme.colorScheme.secondary),
+                  decoration: InputDecoration(
+                    hintText: 'Tell us what went wrong...',
+                    hintStyle: TextStyle(
+                      color: theme.colorScheme.tertiary.withOpacity(0.5),
+                      fontSize: 13,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: theme.colorScheme.primary,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      final reason = reportController.text.trim();
+                      if (reason.isEmpty) return;
+
+                      Navigator.pop(sheetContext);
+                      context.read<ReportsCubit>().createReport(
+                        hotelId: hotelId,
+                        reason: reason,
+                      );
+                    },
+                    icon: const Icon(Icons.send_rounded),
+                    label: Text(
+                      'submit_report'.tr(),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isYellowTheme ? Colors.black : Colors.white,
+                        fontSize: 15,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isYellowTheme
+                          ? Colors.yellow
+                          : theme.colorScheme.primary,
+                      foregroundColor: isYellowTheme
+                          ? Colors.black
+                          : Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showReviewSheet(
+    BuildContext context,
+    ThemeData theme,
+    bool isYellowTheme,
+    int hotelId,
+  ) {
+    int rating = 0;
+    final commentController = TextEditingController();
 
     showModalBottomSheet(
       context: context,
@@ -569,13 +324,13 @@ class _BookingsScreenState extends State<BookingsScreen> {
       ),
       builder: (sheetContext) {
         return StatefulBuilder(
-          builder: (builderContext, setSheetState) {
+          builder: (context, setSheetState) {
             return Padding(
               padding: EdgeInsets.only(
                 left: 24,
                 right: 24,
                 top: 24,
-                bottom: MediaQuery.of(builderContext).viewInsets.bottom + 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
               ),
               child: SingleChildScrollView(
                 child: Column(
@@ -594,165 +349,81 @@ class _BookingsScreenState extends State<BookingsScreen> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'rate_stay_title'.tr(),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme.colorScheme.tertiary,
-                      ),
-                    ),
-                    Text(
-                      title,
+                      'Rate your stay',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: theme.colorScheme.secondary,
                       ),
                     ),
-                    const SizedBox(height: 24),
-
-                    // اختيار النجوم
+                    const SizedBox(height: 6),
                     Text(
-                      'how_was_stay'.tr(),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                      'How was your experience?',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: theme.colorScheme.tertiary,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 16),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(5, (index) {
                         return IconButton(
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
+                          tooltip: '${index + 1} stars',
+                          onPressed: () => setSheetState(() => rating = index + 1),
                           icon: Icon(
-                            index < currentRating
+                            index < rating
                                 ? Icons.star_rounded
                                 : Icons.star_border_rounded,
                             color: Colors.amber,
                             size: 38,
                           ),
-                          onPressed: () =>
-                              setSheetState(() => currentRating = index + 1),
                         );
                       }),
                     ),
-                    const SizedBox(height: 20),
-
-                    // زر التبديل للإبلاغ
-                    if (!isReporting)
-                      TextButton.icon(
-                        onPressed: () =>
-                            setSheetState(() => isReporting = true),
-                        icon: const Icon(
-                          Icons.report_problem_outlined,
-                          color: Colors.redAccent,
-                          size: 20,
-                        ),
-                        label: Text(
-                          'report_issue_btn'.tr(),
-                          style: const TextStyle(
-                            color: Colors.redAccent,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-
-                    // حقل النص للتقرير أو للـ Comment الاختياري
-                    const SizedBox(height: 10),
-                    Text(
-                      isReporting
-                          ? 'report_hint'.tr()
-                          : 'add_comment_optional'.tr(),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 12),
                     TextField(
-                      controller: reportController,
-                      maxLines: 3,
-                      style: TextStyle(color: theme.colorScheme.secondary),
+                      controller: commentController,
+                      maxLines: 4,
                       decoration: InputDecoration(
-                        hintText: isReporting
-                            ? 'report_field_hint'.tr()
-                            : 'comment_field_hint'.tr(),
-                        hintStyle: TextStyle(
-                          color: theme.colorScheme.tertiary.withOpacity(0.5),
-                          fontSize: 13,
-                        ),
+                        hintText: 'Share a comment (optional)',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: theme.colorScheme.primary,
-                          ),
+                          borderSide: BorderSide(color: theme.colorScheme.primary),
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
-
-                    // زر الإرسال المربوط بالـ Cubit
-                    Container(
+                    const SizedBox(height: 20),
+                    SizedBox(
                       width: double.infinity,
                       height: 50,
-                      decoration: BoxDecoration(
-                        color: isYellowTheme
-                            ? Colors.yellow
-                            : theme.colorScheme.primary,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          final inputText = reportController.text.trim();
-                          Navigator.pop(sheetContext);
-
-                          if (isReporting) {
-                            if (inputText.isNotEmpty) {
-                              context.read<ReportsCubit>().createReport(
-                                hotelId: hotelId,
-                                reason: inputText,
-                              );
-                              messenger.showSnackBar(
-                                SnackBar(
-                                  content: Text('report_sent_success'.tr()),
-                                ),
-                              );
-                            }
-                          } else {
-                            context.read<ReviewsCubit>().createReview(
-                              rate: currentRating,
-                              hotelId: hotelId,
-                              comment: inputText.isNotEmpty ? inputText : null,
-                            );
-                            messenger.showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'thanks_for_rating'.tr(
-                                    args: [currentRating.toString()],
-                                  ),
-                                ),
-                              ),
-                            );
-                          }
-                        },
+                      child: ElevatedButton.icon(
+                        onPressed: rating == 0
+                            ? null
+                            : () {
+                                Navigator.pop(sheetContext);
+                                context.read<ReviewsCubit>().createReview(
+                                  rate: rating,
+                                  hotelId: hotelId,
+                                  comment: commentController.text.trim().isEmpty
+                                      ? null
+                                      : commentController.text.trim(),
+                                );
+                              },
+                        icon: const Icon(Icons.star_rounded),
+                        label: const Text('Submit Review'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
+                          backgroundColor: isYellowTheme
+                              ? Colors.yellow
+                              : theme.colorScheme.primary,
+                          foregroundColor: isYellowTheme
+                              ? Colors.black
+                              : Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: Text(
-                          isReporting
-                              ? 'submit_report'.tr()
-                              : 'submit_rating'.tr(),
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: isYellowTheme ? Colors.black : Colors.white,
-                            fontSize: 15,
                           ),
                         ),
                       ),
@@ -764,50 +435,130 @@ class _BookingsScreenState extends State<BookingsScreen> {
           },
         );
       },
-    );
+    ).whenComplete(commentController.dispose);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // 1. ADD BLOC LISTENER HERE
-    return BlocListener<CancelBookingCubit, CancelBookingState>(
-      listener: (context, state) {
-        state.when(
-          initial: () {},
-          loading: () {
-            // Show a non-dismissible loading dialog
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) => const Center(child: CircularProgressIndicator()),
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ReviewsCubit, ReviewsState>(
+          listener: (context, state) {
+            state.whenOrNull(
+              loading: () => _showLoadingDialog(context),
+              success: () {
+                _hideLoadingDialog(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('thanks_for_rating'.tr()),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              },
+              error: (message) {
+                _hideLoadingDialog(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(message),
+                    backgroundColor: Colors.redAccent,
+                  ),
+                );
+              },
             );
           },
-          success: () {
-            // Close the loading dialog
-            Navigator.of(context, rootNavigator: true).pop(); 
-            
-            // Show success message
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('cancel_request_sent'.tr()), backgroundColor: Colors.green),
+        ),
+        BlocListener<ReportsCubit, ReportsState>(
+          listener: (context, state) {
+            state.whenOrNull(
+              loading: () => _showLoadingDialog(context),
+              success: () {
+                _hideLoadingDialog(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('report_sent_success'.tr()),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              },
+              error: (message) {
+                _hideLoadingDialog(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(message),
+                    backgroundColor: Colors.redAccent,
+                  ),
+                );
+              },
             );
-            
-            // Refresh the current bookings list so the cancelled booking disappears
-            context.read<BookingHistoryCubit>().fetchBookingHistory(_selectedTabStatus);
           },
-          error: (message) {
-            // Close the loading dialog
-            Navigator.of(context, rootNavigator: true).pop();
-            
-            // Show error message
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
+        ),
+        // 1. Existing Cancel Booking Listener
+        BlocListener<CancelBookingCubit, CancelBookingState>(
+          listener: (context, state) {
+            state.when(
+              initial: () {},
+              loading: () => _showLoadingDialog(context),
+              success: () {
+                _hideLoadingDialog(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('cancellation sent successfully'.tr()),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                context.read<BookingHistoryCubit>().fetchBookingHistory(
+                  _selectedTabStatus,
+                );
+              },
+              error: (message) {
+                _hideLoadingDialog(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(message),
+                    backgroundColor: Colors.redAccent,
+                  ),
+                );
+              },
             );
           },
-        );
-      },
+        ),
+
+        // 2. NEW Update Booking Listener
+        BlocListener<UpdateBookingCubit, UpdateBookingState>(
+          listener: (context, state) {
+            state.when(
+              initial: () {},
+              loading: () => _showLoadingDialog(context),
+              success: () {
+                _hideLoadingDialog(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('date_updated_success'.tr()),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                // Refresh the list to reflect the new dates globally
+                context.read<BookingHistoryCubit>().fetchBookingHistory(
+                  _selectedTabStatus,
+                );
+              },
+              error: (message) {
+                _hideLoadingDialog(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(message),
+                    backgroundColor: Colors.redAccent,
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ],
       child: Scaffold(
+        // ... Keep the rest of your Scaffold code exactly the same ...
         backgroundColor: theme.scaffoldBackgroundColor,
         body: SafeArea(
           bottom: false,
@@ -1014,11 +765,6 @@ class _BookingsScreenState extends State<BookingsScreen> {
   }) {
     final isYellowTheme = theme.colorScheme.primary == Colors.yellow;
 
-    // Only fetch the first image as requested
-    final imageUrl = booking.imageUrls.isNotEmpty
-        ? booking.imageUrls.first
-        : 'assets/images/room-placeholder.jpg';
-
     // Manageability check depending on backend status
     final canManageBooking =
         booking.status == 'confirmed' || booking.status == 'active';
@@ -1035,22 +781,32 @@ class _BookingsScreenState extends State<BookingsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            // Verify if local fallback or network image
-            child: imageUrl.startsWith('http')
-                ? Image.network(
-                    imageUrl,
-                    height: 180,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  )
-                : Image.asset(
-                    imageUrl,
-                    height: 180,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
+          SizedBox(
+            height: 180,
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
+              ),
+              child: PageView.builder(
+                itemCount: booking.imageUrls.length,
+                itemBuilder: (context, index) {
+                  final imageUrl = booking.imageUrls[index];
+                  return imageUrl.startsWith('http')
+                      ? Image.network(
+                          imageUrl,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _buildImageFallback(),
+                        )
+                      : Image.asset(
+                          imageUrl,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _buildImageFallback(),
+                        );
+                },
+              ),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(20),
@@ -1074,6 +830,54 @@ class _BookingsScreenState extends State<BookingsScreen> {
                     color: theme.colorScheme.secondary,
                   ),
                 ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildBookingDetail(
+                        theme,
+                        Icons.meeting_room_outlined,
+                        'Room',
+                        booking.roomNumber.isNotEmpty
+                            ? booking.roomNumber
+                            : 'TBD',
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildBookingDetail(
+                        theme,
+                        Icons.payments_outlined,
+                        'Total Price',
+                        '\$${booking.totalPrice.toStringAsFixed(2)}',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildBookingDetail(
+                        theme,
+                        Icons.login_rounded,
+                        'Start Date',
+                        _formatBookingDate(booking.startDate),
+                        valueFontSize: 10,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildBookingDetail(
+                        theme,
+                        Icons.logout_rounded,
+                        'End Date',
+                        _formatBookingDate(booking.endDate),
+                        valueFontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
 
                 if (canManageBooking) ...[
                   const SizedBox(height: 16),
@@ -1086,8 +890,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                         booking.hotelName,
                         theme,
                         isYellowTheme,
-                        booking.id
-
+                        booking.id,
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.colorScheme.primary,
@@ -1105,30 +908,46 @@ class _BookingsScreenState extends State<BookingsScreen> {
                     ),
                   ),
                 ] else if (booking.status == 'completed') ...[
-                  // Only allow rating for completed bookings
                   const SizedBox(height: 14),
-                  GestureDetector(
-                    onTap: () => _showReviewAndReportSheet(
-                      context,
-                      booking.hotelName,
-                      theme,
-                      isYellowTheme,
-                      booking.hotelId,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'rate_now'.tr(),
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: theme.colorScheme.primary,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        tooltip: 'rate_now'.tr(),
+                        onPressed: () => _showReviewSheet(
+                          context,
+                          theme,
+                          isYellowTheme,
+                          booking.hotelId,
+                        ),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.orange.withOpacity(0.12),
+                          foregroundColor: Colors.orange,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
                           ),
                         ),
-                        const Icon(Icons.arrow_forward_ios, size: 12),
-                      ],
-                    ),
+                        icon: const Icon(Icons.star_rounded, size: 22),
+                      ),
+                      const SizedBox(width: 10),
+                      IconButton(
+                        tooltip: 'report_issue_btn'.tr(),
+                        onPressed: () => _showReportSheet(
+                          context,
+                          theme,
+                          isYellowTheme,
+                          booking.hotelId,
+                        ),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.red.withOpacity(0.12),
+                          foregroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        icon: const Icon(Icons.flag_outlined, size: 22),
+                      ),
+                    ],
                   ),
                 ],
               ],
@@ -1136,6 +955,66 @@ class _BookingsScreenState extends State<BookingsScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildBookingDetail(
+    ThemeData theme,
+    IconData icon,
+    String label,
+    String value,
+    {double valueFontSize = 12}
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: theme.colorScheme.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.tertiary,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  value,
+                  softWrap: true,
+                  style: TextStyle(
+                    fontSize: valueFontSize,
+                    fontWeight: FontWeight.w800,
+                    color: theme.colorScheme.secondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatBookingDate(String value) {
+    final date = DateTime.tryParse(value);
+    if (date == null) return value.isNotEmpty ? value : 'N/A';
+    return DateFormat('MMM d, yyyy', 'en').format(date);
+  }
+
+  Widget _buildImageFallback() {
+    return Container(
+      color: Colors.grey.shade200,
+      child: const Center(child: Icon(Icons.image_not_supported_outlined)),
     );
   }
 }

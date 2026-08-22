@@ -7,6 +7,7 @@ import 'package:byma_app/business_logic/bookings_transactions/cubit/bookings_tra
 import 'package:byma_app/business_logic/cancel_booking/cubit/cancel_booking_cubit.dart';
 import 'package:byma_app/business_logic/cities/cubit/cities_cubit.dart';
 import 'package:byma_app/business_logic/collection/cubit/collection_cubit.dart';
+import 'package:byma_app/business_logic/create_booking/cubit/create_booking_cubit.dart';
 import 'package:byma_app/business_logic/create_collection/cubit/create_collection_cubit.dart';
 import 'package:byma_app/business_logic/create_deposit/cubit/create_deposit_cubit.dart';
 import 'package:byma_app/business_logic/create_withdraw/cubit/create_withdraw_cubit.dart';
@@ -26,13 +27,16 @@ import 'package:byma_app/business_logic/recently_viewed_hotels/recently_viewed_h
 import 'package:byma_app/business_logic/recently_viewed_rooms/cubit/recently_viewed_rooms_cubit.dart';
 import 'package:byma_app/business_logic/reports/cubit/reports_cubit.dart';
 import 'package:byma_app/business_logic/reviews/cubit/reviews_cubit.dart';
+import 'package:byma_app/business_logic/special_services/cubit/special_services_cubit.dart';
 import 'package:byma_app/business_logic/room_category/cubit/room_category_cubit.dart';
 import 'package:byma_app/business_logic/room_collection/cubit/room_collection_cubit.dart';
 import 'package:byma_app/business_logic/room_details/cubit/room_details_cubit.dart';
 import 'package:byma_app/business_logic/favorite_rooms/cubit/favorite_rooms_cubit.dart';
 import 'package:byma_app/business_logic/toggle_favorite_hotels/cubit/toggle_favorite_hotels_cubit.dart';
 import 'package:byma_app/business_logic/toggle_favorite_rooms/cubit/toggle_favorite_rooms_cubit.dart';
+import 'package:byma_app/business_logic/update_booking/cubit/update_booking_cubit.dart';
 import 'package:byma_app/business_logic/update_profile/cubit/update_profile_cubit.dart';
+import 'package:byma_app/business_logic/update_review/cubit/update_review_cubit.dart';
 import 'package:byma_app/business_logic/withdraw_history/cubit/withdraw_history_cubit.dart';
 import 'package:byma_app/data/network/dio_factory.dart';
 import 'package:byma_app/data/repositories/booking-repo.dart';
@@ -49,6 +53,7 @@ import 'package:byma_app/data/repositories/recently_viewed_hotel_repo.dart';
 import 'package:byma_app/data/repositories/recently_viewed_room_repo.dart';
 import 'package:byma_app/data/repositories/reports_repo.dart';
 import 'package:byma_app/data/repositories/reviews_repo.dart';
+import 'package:byma_app/data/repositories/special_services_repo.dart';
 import 'package:byma_app/data/repositories/room_collection_repo.dart';
 import 'package:byma_app/data/repositories/room_details_repo.dart';
 import 'package:byma_app/data/repositories/withdraw_repo.dart';
@@ -67,6 +72,7 @@ import 'package:byma_app/data/web_services/recently_viewed_hotel_api.dart';
 import 'package:byma_app/data/web_services/recently_viewed_room_api.dart';
 import 'package:byma_app/data/web_services/reports_api.dart';
 import 'package:byma_app/data/web_services/reviews_api.dart';
+import 'package:byma_app/data/web_services/special_services_api.dart';
 import 'package:byma_app/data/web_services/room_collection_api.dart';
 import 'package:byma_app/data/web_services/room_details_api.dart';
 import 'package:byma_app/data/repositories/favorite_rooms_repo.dart';
@@ -133,6 +139,9 @@ class _BymaAppState extends State<BymaApp> {
   );
   final ReportsApi reportsApi = ReportsApi(DioFactory.getDio());
   final ReviewsApi reviewsApi = ReviewsApi(DioFactory.getDio());
+  final SpecialServicesApi specialServicesApi = SpecialServicesApi(
+    DioFactory.getDio(),
+  );
   final BookingApi bookingApi = BookingApi(DioFactory.getDio());
   final CitiesApi citiesApi = CitiesApi(DioFactory.getDio());
   final PointsTransactionsApi pointsTransactionsApi = PointsTransactionsApi(
@@ -167,6 +176,9 @@ class _BymaAppState extends State<BymaApp> {
   );
   late final ReportsRepo reportsRepo = ReportsRepo(reportsApi);
   late final ReviewsRepo reviewsRepo = ReviewsRepo(reviewsApi);
+  late final SpecialServicesRepo specialServicesRepo = SpecialServicesRepo(
+    specialServicesApi,
+  );
   late final BookingRepo bookingRepo = BookingRepo(bookingApi);
   late final CitiesRepo citiesRepo = CitiesRepo(citiesApi);
   late final PointsTransactionsRepo pointsTransactionsRepo =
@@ -264,6 +276,9 @@ class _BymaAppState extends State<BymaApp> {
         RepositoryProvider<RoomCollectionRepo>.value(value: roomCollectionRepo),
         RepositoryProvider<ReportsRepo>.value(value: reportsRepo),
         RepositoryProvider<ReviewsRepo>.value(value: reviewsRepo),
+        RepositoryProvider<SpecialServicesRepo>.value(
+          value: specialServicesRepo,
+        ),
         RepositoryProvider<BookingRepo>.value(value: bookingRepo),
         RepositoryProvider<CitiesRepo>.value(value: citiesRepo),
         RepositoryProvider<PointsTransactionsRepo>.value(
@@ -391,6 +406,17 @@ class _BymaAppState extends State<BymaApp> {
             lazy: false,
             create: (context) => ReviewsCubit(context.read<ReviewsRepo>()),
           ),
+          BlocProvider<CreateBookingCubit>(
+            create: (context) =>
+                CreateBookingCubit(context.read<BookingRepo>()),
+          ),
+          BlocProvider<SpecialServicesCubit>(
+            create: (context) =>
+                SpecialServicesCubit(context.read<SpecialServicesRepo>()),
+          ),
+          BlocProvider<UpdateReviewCubit>(
+            create: (context) => UpdateReviewCubit(context.read<ReviewsRepo>()),
+          ),
           BlocProvider<CancelBookingCubit>(
             create: (context) =>
                 CancelBookingCubit(context.read<BookingRepo>()),
@@ -424,8 +450,7 @@ class _BymaAppState extends State<BymaApp> {
                 WithdrawHistoryCubit(context.read<WithdrawRepo>()),
           ),
           BlocProvider<GetProfileCubit>(
-            create: (context) =>
-                GetProfileCubit(context.read<ProfileRepo>()),
+            create: (context) => GetProfileCubit(context.read<ProfileRepo>()),
           ),
           BlocProvider<UpdateProfileCubit>(
             create: (context) =>
@@ -442,6 +467,10 @@ class _BymaAppState extends State<BymaApp> {
           BlocProvider<RoomCategoryCubit>(
             create: (context) =>
                 RoomCategoryCubit(context.read<RoomDetailsRepo>()),
+          ),
+          BlocProvider<UpdateBookingCubit>(
+            create: (context) =>
+                UpdateBookingCubit(context.read<BookingRepo>()),
           ),
         ],
 

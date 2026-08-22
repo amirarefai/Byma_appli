@@ -13,6 +13,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:byma_app/data/models/hotel_amenity_model.dart';
 import 'package:byma_app/data/models/review_model.dart';
 import 'package:byma_app/data/models/room_model.dart';
+import 'package:byma_app/data/models/special_service_model.dart';
 import 'package:byma_app/screens/room_details_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -129,14 +130,16 @@ class HotelRatingsRow extends StatelessWidget {
   final Color secondaryTeal;
   final String title;
   final num rating;
-  final String address;
+  final String city;
+  final String country;
 
   const HotelRatingsRow({
     super.key,
     required this.secondaryTeal,
     required this.title,
     required this.rating,
-    required this.address,
+    required this.city,
+    required this.country,
   });
 
   @override
@@ -166,7 +169,7 @@ class HotelRatingsRow extends StatelessWidget {
             const SizedBox(width: 6),
             Expanded(
               child: Text(
-                address,
+                '$city, $country',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -301,6 +304,83 @@ class HotelAmenitiesGrid extends StatelessWidget {
                     fontWeight: FontWeight.w900,
                     fontSize: 10,
                     letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class HotelSpecialServicesGrid extends StatelessWidget {
+  final Color teal;
+  final List<SpecialServiceModel> services;
+
+  const HotelSpecialServicesGrid({
+    super.key,
+    required this.teal,
+    required this.services,
+  });
+
+  IconData _mapServiceIcon(String name) {
+    final lowerName = name.toLowerCase();
+    if (lowerName.contains('airport') || lowerName.contains('pick')) {
+      return Icons.airport_shuttle_outlined;
+    }
+    if (lowerName.contains('spa') || lowerName.contains('massage')) {
+      return Icons.spa_outlined;
+    }
+    if (lowerName.contains('breakfast') || lowerName.contains('food')) {
+      return Icons.free_breakfast_outlined;
+    }
+    if (lowerName.contains('pet')) return Icons.pets_outlined;
+    return Icons.room_service_outlined;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    if (services.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Text(context.tr('No Special Services Available')),
+      );
+    }
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: services.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 2.2,
+      ),
+      itemBuilder: (context, index) {
+        final service = services[index];
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            color: theme.cardColor,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: theme.dividerColor),
+          ),
+          child: Row(
+            children: [
+              Icon(_mapServiceIcon(service.name), size: 22, color: teal),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  service.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12,
                   ),
                 ),
               ),
@@ -833,7 +913,7 @@ class HotelReviewCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     // Strongly-typed accesses from ReviewModel
-    final String reviewerName = 'Guest #${review.id}';
+    final String reviewerName = 'Guest';
     final double ratingValue = review.rate.toDouble();
     final String comment = review.comment ?? '';
     final String dateStr = DateFormat('yyyy-MM-dd').format(review.createdAt);

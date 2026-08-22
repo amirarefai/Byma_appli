@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:byma_app/data/models/update_review_model.dart';
 
 class ReviewsApi {
   final Dio dio;
 
   ReviewsApi(this.dio);
 
-  // إنشاء تقييم جديد (التعليق اختياري)
   Future<Response> createReview({
     required int rate,
     required int hotelId,
@@ -16,18 +16,19 @@ class ReviewsApi {
       data: {
         'rate': rate,
         'hotelId': hotelId,
-        'comment': comment,
+        if (comment != null && comment.trim().isNotEmpty)
+          'comment': comment.trim(),
       },
     );
   }
 
-  // جلب كل التقييمات
-  Future<Response> getAllReviews() async {
-    return await dio.get('reviews');
-  }
-
-  // حذف تقييم
-  Future<Response> removeReview(int reviewId) async {
-    return await dio.delete('reviews/$reviewId');
+  Future<Response> updateReview(
+    int reviewId,
+    UpdateReviewModel updateReviewModel,
+  ) async {
+    return await dio.patch(
+      'reviews/$reviewId',
+      data: updateReviewModel.toJson(),
+    );
   }
 }

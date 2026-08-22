@@ -2,6 +2,7 @@ import 'package:byma_app/constance/strings.dart';
 import 'package:byma_app/data/models/hotel_amenity_model.dart';
 import 'package:byma_app/data/models/review_model.dart';
 import 'package:byma_app/data/models/room_model.dart';
+import 'package:byma_app/data/models/special_service_model.dart';
 
 class HotelDetailsModel {
   final int id;
@@ -15,9 +16,11 @@ class HotelDetailsModel {
   final List<HotelAmenityModel> hotelAmenities;
   final List<RoomModel> rooms;
   final List<ReviewModel> reviews;
-  final String address;
+  final String city;
+  final String country;
   final num rating;
   final List<String> photos;
+  final List<SpecialServiceModel> specialServices;
 
   HotelDetailsModel({
     required this.id,
@@ -31,17 +34,17 @@ class HotelDetailsModel {
     required this.hotelAmenities,
     required this.rooms,
     required this.reviews,
-    required this.address,
+    required this.city,
+    required this.country,
     required this.rating,
     required this.photos,
+    required this.specialServices,
   });
 
   // Iterates through the raw photos list and formats the URLs correctly
   List<String> get imageUrls {
     if (photos.isEmpty) {
-      return [
-        'assets/images/hotel-placeholder.jpg'
-      ];
+      return ['assets/images/hotel-placeholder.jpg'];
     }
 
     return photos.map((photo) {
@@ -69,40 +72,58 @@ class HotelDetailsModel {
       id: json['id'] as int,
       name: json['name'] as String? ?? '',
       phone: json['phone'] as String? ?? '',
-      
+
       // Safely converts integers or doubles from JSON to double
       lng: (json['lng'] as num?)?.toDouble() ?? 0.0,
       lat: (json['lat'] as num?)?.toDouble() ?? 0.0,
-      
+
       checkIn: json['checkIn'] as String? ?? '12:00:00',
       checkOut: json['checkOut'] as String? ?? '12:00:00',
-      thingsToKnow: json['thingsToKnow'] as String?,
-      
+      thingsToKnow: json['thingsToknow'] as String?,
+
       // Nested list of amenities
-      hotelAmenities: (json['hotelAmenities'] as List<dynamic>?)
-              ?.map((item) =>
-                  HotelAmenityModel.fromJson(item as Map<String, dynamic>))
+      hotelAmenities:
+          (json['amenities'] as List<dynamic>?)
+              ?.map(
+                (item) =>
+                    HotelAmenityModel.fromJson(item as Map<String, dynamic>),
+              )
               .toList() ??
           [],
-          
+
       // Nested list of rooms
-      rooms: (json['rooms'] as List<dynamic>?)
+      rooms:
+          (json['rooms'] as List<dynamic>?)
               ?.map((item) => RoomModel.fromJson(item as Map<String, dynamic>))
               .toList() ??
           [],
-          
+
       // Nested list of reviews
-      reviews: (json['reviews'] as List<dynamic>?)
-              ?.map((item) => ReviewModel.fromJson(item as Map<String, dynamic>))
+      reviews:
+          (json['reviews'] as List<dynamic>?)
+              ?.map(
+                (item) => ReviewModel.fromJson(item as Map<String, dynamic>),
+              )
               .toList() ??
           [],
-          
-      address: json['address'] as String? ?? 'Unknown Location',
-      rating: (json['rating'] ?? 0) as num,
-      
+
+      city: json['city'] as String? ?? 'Unknown city',
+      country: json['country'] as String? ?? 'Unknown country',
+      rating: (json['star'] ?? 0) as num,
+
       // Raw photo relative paths
-      photos: (json['photos'] as List<dynamic>?)
+      photos:
+          (json['images'] as List<dynamic>?)
               ?.map((photo) => photo.toString())
+              .toList() ??
+          [],
+
+      specialServices:
+          (json['specialServices'] as List<dynamic>?)
+              ?.map(
+                (item) =>
+                    SpecialServiceModel.fromJson(item as Map<String, dynamic>),
+              )
               .toList() ??
           [],
     );

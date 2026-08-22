@@ -175,7 +175,8 @@ class _HotelDetailsScreenState extends State<HotelDetailsScreen> {
                 secondaryTeal: secondaryTeal,
                 title: hotel.name,
                 rating: hotel.rating,
-                address: hotel.address,
+                city: hotel.city,
+                country: hotel.country,
               ),
               const SizedBox(height: 24),
 
@@ -188,6 +189,17 @@ class _HotelDetailsScreenState extends State<HotelDetailsScreen> {
               HotelAmenitiesGrid(
                 teal: primaryTeal,
                 amenities: hotel.hotelAmenities,
+              ),
+              const SizedBox(height: 24),
+
+              HotelUnderlineTitle(
+                titleKey: 'Special Services',
+                color: secondaryTeal,
+              ),
+              const SizedBox(height: 12),
+              HotelSpecialServicesGrid(
+                teal: primaryTeal,
+                services: hotel.specialServices,
               ),
               const SizedBox(height: 24),
 

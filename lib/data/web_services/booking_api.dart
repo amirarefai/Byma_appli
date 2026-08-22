@@ -1,10 +1,21 @@
 import 'package:dio/dio.dart';
+import 'package:byma_app/data/models/create_booking_model.dart';
 import 'package:byma_app/data/models/update_booking_model.dart';
 
 class BookingApi {
   final Dio dio;
 
   BookingApi(this.dio);
+
+  Future<Response> createBooking(CreateBookingModel model) async {
+    return await dio.post(
+      'bookings',
+      data: {
+        ...model.toJson(),
+        'customerId': 6,
+      },
+    );
+  }
 
   Future<Response> cancelBooking(int bookingId) async {
     return await dio.patch('bookings/$bookingId/cancel', data: {'customerId': 6});
@@ -16,7 +27,10 @@ class BookingApi {
   ) async {
     return await dio.patch(
       'bookings/$bookingId/update',
-      data: updateBookingModel.toJson(),
+      data: {
+        ...updateBookingModel.toJson(),
+        'customerId': 6,
+      },
     );
   }
 
