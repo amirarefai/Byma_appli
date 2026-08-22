@@ -10,14 +10,17 @@ part 'hotel_rooms_filter_cubit.freezed.dart';
 
 class HotelRoomsFilterCubit extends Cubit<HotelRoomsFilterState> {
   final HotelsRepo hotelsRepo;
+  int _requestId = 0;
 
   HotelRoomsFilterCubit(this.hotelsRepo) : super(const HotelRoomsFilterState.initial());
 
   void resetFilter() {
+    _requestId++;
     emit(const HotelRoomsFilterState.initial());
   }
 
   Future<void> fetchFilteredRooms(int hotelId, RoomFilterModel filter) async {
+    final requestId = ++_requestId;
     emit(const HotelRoomsFilterState.loading());
     
     try {
@@ -26,15 +29,13 @@ class HotelRoomsFilterCubit extends Cubit<HotelRoomsFilterState> {
         filter: filter,
       );
       
-      if (rooms.isEmpty) {
-        // Handling empty states explicitly is much safer for the UI
-        emit(const HotelRoomsFilterState.success([])); 
-        return;
+      if (!isClosed && requestId == _requestId) {
+        emit(HotelRoomsFilterState.success(rooms));
       }
-      
-      emit(HotelRoomsFilterState.success(rooms));
     } catch (errorMessage) {
-      emit(HotelRoomsFilterState.error(errorMessage.toString()));
+      if (!isClosed && requestId == _requestId) {
+        emit(HotelRoomsFilterState.error(errorMessage.toString()));
+      }
     }
   }
 }

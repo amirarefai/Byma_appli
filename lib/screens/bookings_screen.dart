@@ -644,13 +644,13 @@ class _BookingsScreenState extends State<BookingsScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Row(
                     children: [
-                      _buildTabButton('confirmed', 'confirmed_tab'.tr(), theme),
+                      _buildTabButton('confirmed', 'confirmed'.tr(), theme),
                       const SizedBox(width: 10),
-                      _buildTabButton('active', 'active_tab'.tr(), theme),
+                      _buildTabButton('active', 'active'.tr(), theme),
                       const SizedBox(width: 10),
-                      _buildTabButton('completed', 'completed_tab'.tr(), theme),
+                      _buildTabButton('completed', 'completed'.tr(), theme),
                       const SizedBox(width: 10),
-                      _buildTabButton('cancelled', 'cancelled_tab'.tr(), theme),
+                      _buildTabButton('cancelled', 'cancelled'.tr(), theme),
                     ],
                   ),
                 ),
@@ -766,8 +766,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
     final isYellowTheme = theme.colorScheme.primary == Colors.yellow;
 
     // Manageability check depending on backend status
-    final canManageBooking =
-        booking.status == 'confirmed' || booking.status == 'active';
+    final canManageBooking = booking.status == 'confirmed';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),

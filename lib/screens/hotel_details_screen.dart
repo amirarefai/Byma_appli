@@ -23,6 +23,8 @@ class HotelDetailsScreen extends StatefulWidget {
 }
 
 class _HotelDetailsScreenState extends State<HotelDetailsScreen> {
+  RoomFilterModel? _activeRoomFilter;
+
   // 1. Add this helper method inside _HotelDetailsScreenState
   Future<void> _openExternalMap(double lat, double lng, String label) async {
     final Uri mapUri = Uri.parse(
@@ -314,7 +316,7 @@ class _HotelDetailsScreenState extends State<HotelDetailsScreen> {
                       if (isFilterApplied)
                         TextButton.icon(
                           onPressed: () {
-                            // Reset the cubit state back to initial
+                            setState(() => _activeRoomFilter = null);
                             context.read<HotelRoomsFilterCubit>().resetFilter();
                           },
                           icon: Icon(
@@ -324,7 +326,7 @@ class _HotelDetailsScreenState extends State<HotelDetailsScreen> {
                           ),
                           label: Text(
                             context.tr(
-                              'clear_filter',
+                              'clear filter',
                             ), // Add this to your localization files
                             style: TextStyle(
                               color: secondaryTeal,
@@ -487,8 +489,8 @@ class _HotelDetailsScreenState extends State<HotelDetailsScreen> {
                                   await Navigator.push<RoomFilterModel>(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) => const RoomFilterScreen(
-                                        
+                                      builder: (_) => RoomFilterScreen(
+                                        initialFilter: _activeRoomFilter,
                                       ),
                                       // Ensure this screen pops with: Navigator.pop(context, roomFilterModel);
                                     ),
@@ -496,6 +498,7 @@ class _HotelDetailsScreenState extends State<HotelDetailsScreen> {
 
                               // If the user applied a filter and didn't just swipe back
                               if (selectedFilter != null && context.mounted) {
+                                setState(() => _activeRoomFilter = selectedFilter);
                                 context
                                     .read<HotelRoomsFilterCubit>()
                                     .fetchFilteredRooms(

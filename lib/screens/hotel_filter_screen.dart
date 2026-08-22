@@ -84,7 +84,7 @@ class _HotelFilterScreenState extends State<HotelFilterScreen> {
     return DropdownButtonFormField<CityModel>(
       value: _selectedCity,
       hint: Text(
-        'CHOOSE_CITY'.tr(),
+        'choose city'.tr(),
         style: TextStyle(
             color: theme.colorScheme.tertiary.withAlpha(150),
             fontSize: 13,
@@ -258,7 +258,7 @@ class _HotelFilterScreenState extends State<HotelFilterScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'HOTEL_FILTERS'.tr(),
+                          'HOTEL FILTERS'.tr(),
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w900,
@@ -343,7 +343,7 @@ class _HotelFilterScreenState extends State<HotelFilterScreen> {
                   child: _buildPriceField(
                     context: context,
                     controller: _minPriceController,
-                    labelText: 'MIN_PRICE'.tr(),
+                    labelText: 'min price'.tr(),
                     hintText: '0',
                   ),
                 ),
@@ -352,7 +352,7 @@ class _HotelFilterScreenState extends State<HotelFilterScreen> {
                   child: _buildPriceField(
                     context: context,
                     controller: _maxPriceController,
-                    labelText: 'MAX_PRICE'.tr(),
+                    labelText: 'max price'.tr(),
                     hintText: '1000+',
                   ),
                 ),

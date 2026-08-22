@@ -34,7 +34,7 @@ class ProfileApi {
     final formData = FormData.fromMap(data);
 
     return await dio.patch(
-      'customers',
+      'customers/6',
       data: formData,
     );
   }
